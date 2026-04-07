@@ -970,7 +970,7 @@
         <option value="CP2">CP2 · Jungle Forest Area</option>
         <option value="CP3">CP3 · MJSR / GV Split</option>
       </select>
-      <button class="btn-refresh" onclick="loadLog()">↻ Refresh</button>
+      <button class="btn-refresh" onclick="loadLog(true)">↻ Refresh</button>
     </div>
   </div>
 
@@ -1020,6 +1020,7 @@
   var shiftCount = 0;
   var shiftPax   = 0;
   var shiftMJSR  = 0;
+  var lastData   = null;  // shared cache for dashboard + report
 
   // ── TAB NAVIGATION ────────────────────────────────────────
   function showTab(id) {
@@ -1138,9 +1139,11 @@
       .then(function(res){ return res.json(); })
       .then(function(d){
         lastData = d;
-        // If dashboard tab is currently visible, render it
         if (document.getElementById('tab-dashboard').classList.contains('active')) {
           renderDashboard(d);
+        }
+        if (document.getElementById('tab-report').classList.contains('active')) {
+          renderReport(d);
         }
         if (onComplete) onComplete(d);
       })
@@ -1493,8 +1496,6 @@
   }
 
   // ── REPORT ────────────────────────────────────────────────
-  var lastData = null;
-
   function buildReport() {
     if (lastData) {
       renderReport(lastData);
@@ -1681,7 +1682,13 @@
   var logCurrentPage = 1;
   var logPageSize    = 25;
 
-  function loadLog() {
+  function loadLog(forceRefresh) {
+    // Only fetch if cache is empty or a manual refresh was requested
+    if (!forceRefresh && allLogEntries.length > 0) {
+      filterLog();
+      return;
+    }
+
     document.getElementById('log-tbody').innerHTML =
       '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted);">Loading…</td></tr>';
 
