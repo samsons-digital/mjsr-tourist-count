@@ -1360,19 +1360,112 @@
       el.innerHTML = '<div class="empty-state"><div class="icon">🎫</div><p>No gate entries yet.</p></div>';
       return;
     }
-    el.innerHTML = gateEntries.slice(0, 14).map(function(e) {
-      var propColor = e.property === 'MJSR' ? 'var(--gold)' : 'var(--cp2)';
-      return '<div class="log-entry">' +
-        '<div>' +
-          '<div class="log-reg" style="color:' + propColor + '">' + e.property + '</div>' +
+    el.innerHTML = gateEntries.slice(0, 20).map(function(e, i) {
+      var propColor = e.property === 'MJSR' ? '#1a73e8' : '#059669';
+      return '<div class="log-entry" id="gate-row-' + i + '">' +
+        '<div style="flex:1">' +
+          '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:17px;font-weight:700;letter-spacing:0.04em;color:' + propColor + '">' + e.property + '</div>' +
           '<div class="log-meta">' + e.date + (e.notes ? ' · ' + e.notes : '') + '</div>' +
         '</div>' +
-        '<div style="text-align:right">' +
-          '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;color:' + propColor + '">' + e.visitors.toLocaleString() + '</div>' +
-          '<div class="log-time">visitors</div>' +
+        '<div style="display:flex;align-items:center;gap:16px;">' +
+          '<div style="text-align:right">' +
+            '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;color:' + propColor + '">' + (e.visitors || 0).toLocaleString() + '</div>' +
+            '<div class="log-time">visitors</div>' +
+          '</div>' +
+          '<button onclick="openGateEdit(' + i + ')" style="padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:\'Barlow Condensed\',sans-serif;font-weight:600;letter-spacing:0.04em;color:var(--muted);cursor:pointer;" onmouseover="this.style.borderColor=\'#1a73e8\';this.style.color=\'#1a73e8\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'">✏ EDIT</button>' +
+        '</div>' +
+      '</div>' +
+      // Inline edit form (hidden by default)
+      '<div id="gate-edit-' + i + '" style="display:none;background:#f8f9fa;border:1px solid #1a73e8;border-radius:10px;padding:16px;margin-top:8px;">' +
+        '<div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#1a73e8;font-family:\'Barlow Condensed\',sans-serif;margin-bottom:12px;">Edit Gate Entry</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">' +
+          '<div>' +
+            '<label style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-family:\'Barlow Condensed\',sans-serif;display:block;margin-bottom:4px;">Date</label>' +
+            '<input type="date" id="ge-date-' + i + '" value="' + (e.date || '') + '" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;">' +
+          '</div>' +
+          '<div>' +
+            '<label style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-family:\'Barlow Condensed\',sans-serif;display:block;margin-bottom:4px;">Property</label>' +
+            '<select id="ge-prop-' + i + '" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:#fff;">' +
+              '<option value="MJSR"' + (e.property==='MJSR'?' selected':'') + '>MJSR</option>' +
+              '<option value="GV"'   + (e.property==='GV'  ?' selected':'') + '>Green Valley</option>' +
+            '</select>' +
+          '</div>' +
+          '<div>' +
+            '<label style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-family:\'Barlow Condensed\',sans-serif;display:block;margin-bottom:4px;">Visitors</label>' +
+            '<input type="number" id="ge-vis-' + i + '" value="' + (e.visitors || 0) + '" min="0" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;">' +
+          '</div>' +
+        '</div>' +
+        '<div style="margin-bottom:12px;">' +
+          '<label style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-family:\'Barlow Condensed\',sans-serif;display:block;margin-bottom:4px;">Notes</label>' +
+          '<input type="text" id="ge-notes-' + i + '" value="' + (e.notes || '') + '" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;">' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;">' +
+          '<button onclick="saveGateEdit(' + i + ')" style="padding:8px 20px;background:#1a73e8;color:#fff;border:none;border-radius:6px;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.04em;cursor:pointer;">SAVE</button>' +
+          '<button onclick="closeGateEdit(' + i + ')" style="padding:8px 16px;background:transparent;border:1px solid var(--border);border-radius:6px;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;">CANCEL</button>' +
         '</div>' +
       '</div>';
     }).join('');
+  }
+
+  function openGateEdit(i) {
+    // Close any other open edit forms first
+    document.querySelectorAll('[id^="gate-edit-"]').forEach(function(el){ el.style.display = 'none'; });
+    document.getElementById('gate-edit-' + i).style.display = 'block';
+  }
+
+  function closeGateEdit(i) {
+    document.getElementById('gate-edit-' + i).style.display = 'none';
+  }
+
+  function saveGateEdit(i) {
+    var date     = document.getElementById('ge-date-'  + i).value;
+    var property = document.getElementById('ge-prop-'  + i).value;
+    var visitors = document.getElementById('ge-vis-'   + i).value;
+    var notes    = document.getElementById('ge-notes-' + i).value.trim();
+
+    if (!date || !property || visitors === '') {
+      showToast('Please complete all fields', '#f87171');
+      return;
+    }
+
+    var btn = document.querySelector('#gate-edit-' + i + ' button');
+    btn.textContent = 'SAVING…';
+    btn.disabled = true;
+
+    // The row number passed to backend is 1-based (row 1 = header, row 2 = first entry)
+    // gateEntries are returned in reverse order so we need the actual sheet row
+    // We pass the original index from the backend (stored as rowIndex on load)
+    var rowIndex = gateEntries[i].rowIndex;
+
+    var params = 'action=editGateEntry' +
+      '&rowIndex=' + encodeURIComponent(rowIndex) +
+      '&date='     + encodeURIComponent(date) +
+      '&property=' + encodeURIComponent(property) +
+      '&visitors=' + encodeURIComponent(visitors) +
+      '&notes='    + encodeURIComponent(notes);
+
+    fetch(BACKEND_URL + '?' + params, { redirect: 'follow' })
+      .then(function(res){ return res.json(); })
+      .then(function(d){
+        if (d.status === 'ok') {
+          // Update local cache
+          gateEntries[i].date     = date;
+          gateEntries[i].property = property;
+          gateEntries[i].visitors = parseInt(visitors);
+          gateEntries[i].notes    = notes;
+          renderGateLog();
+          showToast('✓ Gate entry updated', '#4ade80');
+        } else {
+          showToast('Error: ' + (d.error || 'Unknown'), '#f87171');
+          btn.textContent = 'SAVE';
+          btn.disabled = false;
+        }
+      })
+      .catch(function(){
+        showToast('Could not save — check connection', '#f87171');
+        btn.textContent = 'SAVE';
+        btn.disabled = false;
+      });
   }
 
   // ── REPORT ────────────────────────────────────────────────
