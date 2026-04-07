@@ -409,26 +409,29 @@ function renderDash(d) {
   var dM=dest['Malam Jabba Ski Resort (MJSR)']||0, dG=dest['Green Valley']||0;
   var dB=dest['Both / Touring the area']||0, dP=dest['Just passing through']||0;
   var dT=dM+dG+dB+dP||1;
-  // Estimate passengers per property using destination ratio applied to total passengers
-  var totalPax = d.allTime.passengers || 0;
-  var estPaxMJSR = Math.round(totalPax * dM / dT);
-  var estPaxGV   = Math.round(totalPax * dG / dT);
-  document.getElementById('conv-body').innerHTML = [
-    {n:'MJSR',         v:dM, g:gate.mjsr, ep:estPaxMJSR, c:'#1a73e8'},
-    {n:'Green Valley', v:dG, g:gate.gv,   ep:estPaxGV,   c:'#059669'},
-    {n:'Both/Touring', v:dB, g:'—',       ep:0,          c:'#6b7280'},
-    {n:'Passing',      v:dP, g:'—',       ep:0,          c:'#6b7280'}
-  ].map(function(r){
-    var conv = typeof r.g==='number' && r.ep>0 ? pct(r.g,r.ep) : '—';
-    var note = typeof r.g==='number' && r.ep>0 ? (r.g>=r.ep?'↑ More gate than est. pax':'↓ '+(r.ep-r.g)+' est. pax did not enter') : '—';
-    return '<tr><td style="font-weight:600;color:'+r.c+'">'+r.n+'</td>'+
-      '<td style="font-weight:700">'+r.v+' vehicles</td>'+
-      '<td>'+pct(r.v,dT)+'</td>'+
-      '<td style="font-weight:700;color:'+r.c+'">'+r.g+' people</td>'+
-      '<td style="color:var(--muted);font-size:12px">~'+r.ep+' est. pax</td>'+
-      '<td style="font-weight:600;color:'+r.c+'">'+conv+'</td>'+
-      '<td style="font-size:11px;color:var(--muted)">'+note+'</td></tr>';
-  }).join('');
+  var allPax = d.allTime.passengers || 0;
+  var estPaxMJSR = Math.round(allPax * dM / dT);
+  var estPaxGV   = Math.round(allPax * dG / dT);
+  var cpIncomplete = d.checkpoints.cp1.entries===0 || d.checkpoints.cp2.entries===0;
+  document.getElementById('conv-body').innerHTML =
+    (cpIncomplete ? '<tr><td colspan="7" style="background:#fff3cd;color:#856404;font-size:12px;padding:8px 14px;">⚠ CP1 and CP2 have no entries yet — conversion % will normalise once all checkpoints are recording</td></tr>' : '')+
+    [{n:'MJSR',v:dM,g:gate.mjsr,ep:estPaxMJSR,c:'#1a73e8'},
+     {n:'Green Valley',v:dG,g:gate.gv,ep:estPaxGV,c:'#059669'},
+     {n:'Both/Touring',v:dB,g:'—',ep:0,c:'#6b7280'},
+     {n:'Passing',v:dP,g:'—',ep:0,c:'#6b7280'}]
+    .map(function(r){
+      var conv = typeof r.g==='number' && r.ep>0 ? pct(r.g,r.ep) : '—';
+      var convCol = typeof r.g==='number' && r.ep>0 ? (parseInt(conv)>100?'#dc2626':r.c) : 'var(--muted)';
+      return '<tr>'+
+        '<td style="font-weight:600;color:'+r.c+'">'+r.n+'</td>'+
+        '<td style="font-weight:700">'+r.v+' vehicles</td>'+
+        '<td>'+pct(r.v,dT)+'</td>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.g+' people</td>'+
+        '<td style="color:var(--muted);font-size:12px">'+(r.ep>0?'~'+r.ep:'—')+'</td>'+
+        '<td style="font-weight:700;color:'+convCol+'">'+conv+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+(typeof r.g==='number'&&r.ep>0?(r.g>=r.ep?'↑ Above est.':'↓ Below est.'):'—')+'</td>'+
+      '</tr>';
+    }).join('');
 }
 
 // ── REPORT ────────────────────────────────────────────────
@@ -476,14 +479,17 @@ function renderReport(d) {
   var dB=dest['Both / Touring the area']||0, dP=dest['Just passing through']||0;
   var dT=dM+dG+dB+dP||1;
   var gM=gate.mjsr, gG=gate.gv;
-  // Estimate passengers per property using destination ratio applied to total passengers
-  var epM = Math.round(pax_ * dM / dT);
-  var epG = Math.round(pax_ * dG / dT);
+  // Always use all-time passengers as the denominator — avoids misleading % from partial data
+  var allPax = d.allTime.passengers || 0;
+  var epM = Math.round(allPax * dM / dT);
+  var epG = Math.round(allPax * dG / dT);
 
   var vt=d.vtypes||{}, vtp=d.vtypesPax||{};
   var pr=d.provinces||{}, prT=Object.values(pr).reduce(function(s,v){return s+v;},0)||1;
   var cp=d.checkpoints;
   var cp1b=cp.cp1.entries||1;
+  // Flag if checkpoint data is incomplete (CP1 or CP2 have no entries)
+  var cpIncomplete = cp.cp1.entries===0 || cp.cp2.entries===0;
 
   document.getElementById('r-content').innerHTML =
     '<div class="grid" style="margin-bottom:20px;">'+
@@ -493,13 +499,21 @@ function renderReport(d) {
     '</div>'+
 
     '<div class="sec-title">Site Comparison — People vs People</div>'+
-    '<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Gate entries (people who paid and entered) compared against estimated checkpoint passengers headed to each property.</p>'+
-    '<div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Vehicles Stated</th><th>% of Vehicles</th><th>Gate Entries (people)</th><th>Est. Checkpoint Pax</th><th>Conversion %</th><th>Note</th></tr></thead><tbody>'+
+    (cpIncomplete ? '<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:7px;padding:10px 14px;font-size:12px;color:#856404;margin-bottom:10px;">⚠ CP1 and CP2 have no entries yet. Conversion % will be accurate once all checkpoints are actively recording.</div>' : '')+
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Gate entries (people who paid and entered) vs estimated passengers per property based on all-time checkpoint data.</p>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Vehicles Stated</th><th>% of Vehicles</th><th>Gate Entries (people)</th><th>Est. Pax from Checkpoints</th><th>Conversion %</th></tr></thead><tbody>'+
     [{n:'MJSR',v:dM,g:gM,ep:epM,c:'#1a73e8'},{n:'Green Valley',v:dG,g:gG,ep:epG,c:'#059669'},{n:'Both/Touring',v:dB,g:'—',ep:0,c:'#6b7280'},{n:'Passing',v:dP,g:'—',ep:0,c:'#6b7280'}]
     .map(function(r){
       var conv = typeof r.g==='number' && r.ep>0 ? pct(r.g,r.ep) : '—';
-      var note = typeof r.g==='number' && r.ep>0 ? (r.g>=r.ep?'↑ More gate than est.':'↓ '+(r.ep-r.g)+' est. pax did not enter') : '—';
-      return '<tr><td style="font-weight:600;color:'+r.c+'">'+r.n+'</td><td style="font-weight:700">'+r.v+'</td><td>'+pct(r.v,dT)+'</td><td style="font-weight:700;color:'+r.c+'">'+r.g+'</td><td style="color:var(--muted)">~'+r.ep+'</td><td style="font-weight:600;color:'+r.c+'">'+conv+'</td><td style="font-size:11px;color:var(--muted)">'+note+'</td></tr>';
+      var convCol = typeof r.g==='number' && r.ep>0 ? (parseInt(conv)>100?'#dc2626':r.c) : 'var(--muted)';
+      return '<tr>'+
+        '<td style="font-weight:600;color:'+r.c+'">'+r.n+'</td>'+
+        '<td style="font-weight:700">'+r.v+'</td>'+
+        '<td>'+pct(r.v,dT)+'</td>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
+        '<td style="color:var(--muted);">'+(r.ep>0?'~'+r.ep:'—')+'</td>'+
+        '<td style="font-weight:700;color:'+convCol+'">'+conv+'</td>'+
+      '</tr>';
     }).join('')+
     '</tbody></table></div>'+
 
