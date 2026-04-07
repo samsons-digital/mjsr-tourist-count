@@ -1430,7 +1430,8 @@
 
     // ── SITE COMPARISON ──────────────────────────────────
     var dest    = d.destinations || {};
-    var gate    = d.gateToday    || { mjsr:0, gv:0 };
+    // Use today or allTime gate figures depending on range
+    var gate = (range === 'today') ? (d.gateToday || { mjsr:0, gv:0 }) : (d.gateAllTime || { mjsr:0, gv:0 });
     var dMJSR   = dest['Malam Jabba Ski Resort (MJSR)'] || 0;
     var dGV     = dest['Green Valley'] || 0;
     var dBoth   = dest['Both / Touring the area'] || 0;
