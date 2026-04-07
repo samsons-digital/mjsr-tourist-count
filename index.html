@@ -1134,11 +1134,15 @@
   // ── CENTRAL DATA FETCH ────────────────────────────────────
   // Single fetch used by dashboard, report, and auto-load.
   // Stores result in lastData so all tabs share the same data.
+  var fetchInProgress = false;
+
   function fetchLiveData(onComplete) {
+    fetchInProgress = true;
     fetch(BACKEND_URL, { redirect: 'follow' })
       .then(function(res){ return res.json(); })
       .then(function(d){
         lastData = d;
+        fetchInProgress = false;
         if (document.getElementById('tab-dashboard').classList.contains('active')) {
           renderDashboard(d);
         }
@@ -1149,6 +1153,7 @@
       })
       .catch(function(err){
         console.error(err);
+        fetchInProgress = false;
         if (onComplete) onComplete(null);
       });
   }
@@ -1498,8 +1503,25 @@
   // ── REPORT ────────────────────────────────────────────────
   function buildReport() {
     if (lastData) {
+      // Data already cached — render immediately
       renderReport(lastData);
+    } else if (fetchInProgress) {
+      // Auto-load is in progress — show loading state and wait
+      document.getElementById('r-kpis').innerHTML =
+        '<p style="color:var(--muted);font-size:13px;">Loading data…</p>';
+      // Poll every 500ms until the in-progress fetch completes
+      var wait = setInterval(function() {
+        if (lastData) {
+          clearInterval(wait);
+          renderReport(lastData);
+        } else if (!fetchInProgress) {
+          clearInterval(wait);
+          document.getElementById('r-kpis').innerHTML =
+            '<p style="color:var(--muted);">Could not load data — check connection.</p>';
+        }
+      }, 500);
     } else {
+      // No data and nothing in flight — fetch now
       document.getElementById('r-kpis').innerHTML =
         '<p style="color:var(--muted);font-size:13px;">Loading data…</p>';
       fetchLiveData(function(d){
