@@ -1543,37 +1543,6 @@
   }
 
   // ── REPORT ────────────────────────────────────────────────
-  function buildReport() {
-    if (lastData) {
-      // Data already cached — render immediately
-      renderReport(lastData);
-    } else if (fetchInProgress) {
-      // Auto-load is in progress — show loading state and wait
-      document.getElementById('r-kpis').innerHTML =
-        '<p style="color:var(--muted);font-size:13px;">Loading data…</p>';
-      // Poll every 500ms until the in-progress fetch completes
-      var wait = setInterval(function() {
-        if (lastData) {
-          clearInterval(wait);
-          renderReport(lastData);
-        } else if (!fetchInProgress) {
-          clearInterval(wait);
-          document.getElementById('r-kpis').innerHTML =
-            '<p style="color:var(--muted);">Could not load data — check connection.</p>';
-        }
-      }, 500);
-    } else {
-      // No data and nothing in flight — fetch now
-      document.getElementById('r-kpis').innerHTML =
-        '<p style="color:var(--muted);font-size:13px;">Loading data…</p>';
-      fetchLiveData(function(d){
-        if (d) renderReport(d);
-        else document.getElementById('r-kpis').innerHTML =
-          '<p style="color:var(--muted);">Could not load data — check connection.</p>';
-      });
-    }
-  }
-
   function renderReport(d) {
     var range  = document.getElementById('r-range').value;
     var now    = new Date();
