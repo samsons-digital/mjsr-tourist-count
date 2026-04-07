@@ -462,6 +462,7 @@
   <div class="nav-tab" onclick="showTab('gate')">🎫 Gate Entry</div>
   <div class="nav-tab" onclick="showTab('dashboard')">📊 Dashboard</div>
   <div class="nav-tab" onclick="showTab('report')">📈 Report</div>
+  <div class="nav-tab" onclick="showTab('log')">🗒 Log</div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -949,6 +950,67 @@
 }
 </style>
 
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB: SUBMISSION LOG                                       -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="page" id="tab-log">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+    <div>
+      <div class="section-title" style="margin-bottom:2px;">Submission Log</div>
+      <div style="font-size:12px;color:var(--muted);">All vehicle entries across all checkpoints and staff members</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="log-search" placeholder="Search reg, staff, CP..." oninput="filterLog()"
+        style="width:200px;padding:7px 12px;font-size:13px;">
+      <select id="log-cp-filter" onchange="filterLog()"
+        style="padding:7px 12px;font-size:13px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text);">
+        <option value="">All Checkpoints</option>
+        <option value="CP1">CP1 · TMA Splinobo</option>
+        <option value="CP2">CP2 · Jungle Forest Area</option>
+        <option value="CP3">CP3 · MJSR / GV Split</option>
+      </select>
+      <button class="btn-refresh" onclick="loadLog()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <!-- Summary strip -->
+  <div id="log-summary" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;"></div>
+
+  <!-- Log table -->
+  <div class="journey-table">
+    <table id="log-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Timestamp</th>
+          <th>Staff</th>
+          <th>Checkpoint</th>
+          <th>Registration</th>
+          <th>Vehicle Type</th>
+          <th>Pax</th>
+          <th>Destination</th>
+          <th>Entered MJSR?</th>
+          <th>Province</th>
+        </tr>
+      </thead>
+      <tbody id="log-tbody">
+        <tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted);">Click Refresh to load entries</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="log-pagination" style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:13px;color:var(--muted);">
+    <span id="log-count-label"></span>
+    <div style="display:flex;gap:6px;">
+      <button class="btn-refresh" id="log-prev" onclick="logPage(-1)">← Prev</button>
+      <span id="log-page-label" style="padding:6px 12px;font-size:13px;"></span>
+      <button class="btn-refresh" id="log-next" onclick="logPage(1)">Next →</button>
+    </div>
+  </div>
+
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">✓ Entry submitted successfully</div>
 
@@ -968,6 +1030,7 @@
     if (id === 'dashboard') refreshDashboard();
     if (id === 'gate') loadGateLog();
     if (id === 'report') buildReport();
+    if (id === 'log') loadLog();
   }
 
   // ── CHECKPOINT SELECTION ──────────────────────────────────
@@ -1488,6 +1551,120 @@
     a.click();
     URL.revokeObjectURL(url);
     showToast('✓ CSV exported', '#4ade80');
+  }
+
+  // ── SUBMISSION LOG ────────────────────────────────────────
+  var allLogEntries  = [];
+  var filteredLog    = [];
+  var logCurrentPage = 1;
+  var logPageSize    = 25;
+
+  function loadLog() {
+    document.getElementById('log-tbody').innerHTML =
+      '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted);">Loading…</td></tr>';
+
+    fetch(BACKEND_URL + '?action=getLog', { redirect: 'follow' })
+      .then(function(res){ return res.json(); })
+      .then(function(d){
+        allLogEntries = d.entries || [];
+        filterLog();
+      })
+      .catch(function(){
+        document.getElementById('log-tbody').innerHTML =
+          '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted);">Could not load log. Check connection.</td></tr>';
+      });
+  }
+
+  function filterLog() {
+    var search = (document.getElementById('log-search').value || '').toLowerCase();
+    var cpFilter = document.getElementById('log-cp-filter').value;
+
+    filteredLog = allLogEntries.filter(function(e) {
+      var matchSearch = !search ||
+        (e.reg    && e.reg.toLowerCase().indexOf(search)   > -1) ||
+        (e.staff  && e.staff.toLowerCase().indexOf(search) > -1) ||
+        (e.cp     && e.cp.toLowerCase().indexOf(search)    > -1) ||
+        (e.vtype  && e.vtype.toLowerCase().indexOf(search) > -1);
+      var matchCP = !cpFilter || (e.cp && e.cp.indexOf(cpFilter) > -1);
+      return matchSearch && matchCP;
+    });
+
+    logCurrentPage = 1;
+    renderLog();
+  }
+
+  function renderLog() {
+    var total = filteredLog.length;
+    var start = (logCurrentPage - 1) * logPageSize;
+    var end   = Math.min(start + logPageSize, total);
+    var page  = filteredLog.slice(start, end);
+    var totalPages = Math.ceil(total / logPageSize) || 1;
+
+    // Summary strip
+    var staffCounts = {};
+    var cpCounts    = { CP1:0, CP2:0, CP3:0 };
+    filteredLog.forEach(function(e){
+      if (e.staff) staffCounts[e.staff] = (staffCounts[e.staff]||0) + 1;
+      if (e.cp) {
+        if (e.cp.indexOf('CP1')>-1) cpCounts.CP1++;
+        else if (e.cp.indexOf('CP2')>-1) cpCounts.CP2++;
+        else if (e.cp.indexOf('CP3')>-1) cpCounts.CP3++;
+      }
+    });
+    var topStaff = Object.keys(staffCounts).sort(function(a,b){ return staffCounts[b]-staffCounts[a]; }).slice(0,3);
+    document.getElementById('log-summary').innerHTML =
+      '<div style="background:#f1f3f5;border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;">' +
+        '<span style="font-weight:600;color:var(--muted);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:0.06em;text-transform:uppercase;">Total</span> ' +
+        '<span style="font-weight:700;font-size:16px;color:#1a73e8;font-family:\'Barlow Condensed\',sans-serif;">' + total + '</span> entries' +
+      '</div>' +
+      ['CP1','CP2','CP3'].map(function(cp){
+        var col = cp==='CP1'?'#d97706':cp==='CP2'?'#059669':'#2563eb';
+        return '<div style="background:#f1f3f5;border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;">' +
+          '<span style="font-weight:600;color:'+col+';font-family:\'Barlow Condensed\',sans-serif;letter-spacing:0.04em;">' + cp + '</span> · ' +
+          '<span style="font-weight:700;font-size:16px;font-family:\'Barlow Condensed\',sans-serif;color:'+col+'">' + cpCounts[cp] + '</span>' +
+        '</div>';
+      }).join('') +
+      (topStaff.length ? '<div style="background:#f1f3f5;border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;color:var(--muted);">Top: ' +
+        topStaff.map(function(s){ return '<strong>' + s + '</strong> (' + staffCounts[s] + ')'; }).join(', ') + '</div>' : '');
+
+    // Table rows
+    if (page.length === 0) {
+      document.getElementById('log-tbody').innerHTML =
+        '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted);">No entries match your filter</td></tr>';
+    } else {
+      document.getElementById('log-tbody').innerHTML = page.map(function(e, i) {
+        var rowNum  = start + i + 1;
+        var cpColor = e.cp && e.cp.indexOf('CP1')>-1 ? '#d97706' : e.cp && e.cp.indexOf('CP2')>-1 ? '#059669' : '#2563eb';
+        var entColor = e.entered === 'Yes - entered MJSR' ? '#16a34a' :
+                       e.entered && e.entered.indexOf('Green Valley')>-1 ? '#059669' : '#6b7280';
+        var cpShort = e.cp ? e.cp.replace(' - TMA Splinobo','').replace(' - Jungle Forest Area','').replace(' - MJSR / GV Road Split','') : '—';
+        return '<tr>' +
+          '<td style="color:var(--muted);font-size:12px">' + rowNum + '</td>' +
+          '<td style="font-size:12px;white-space:nowrap">' + (e.timestamp || '—') + '</td>' +
+          '<td style="font-weight:600;font-size:13px">' + (e.staff || '—') + '</td>' +
+          '<td><span style="font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:13px;color:' + cpColor + '">' + cpShort + '</span></td>' +
+          '<td style="font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:15px;color:#1a73e8;letter-spacing:0.04em">' + (e.reg || '—') + '</td>' +
+          '<td style="font-size:12px">' + (e.vtype ? e.vtype.split(' (')[0] : '—') + '</td>' +
+          '<td style="text-align:center;font-weight:600">' + (e.pax || 0) + '</td>' +
+          '<td style="font-size:12px">' + (e.dest ? e.dest.replace('Malam Jabba Ski Resort (MJSR)','MJSR').replace('Unknown / Not stated','Unknown').replace('Both / Touring the area','Both') : '—') + '</td>' +
+          '<td style="font-size:12px;font-weight:600;color:' + entColor + '">' + (e.entered ? e.entered.replace('Yes - entered MJSR','✓ MJSR').replace('No - went to Green Valley','GV').replace('No - turned around / left area','Turned around').replace('No - passed through only','Passed') : '—') + '</td>' +
+          '<td style="font-size:12px">' + (e.province ? e.province.split(' (')[0] : '—') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // Pagination
+    document.getElementById('log-count-label').textContent =
+      'Showing ' + (total===0?0:start+1) + '–' + end + ' of ' + total + ' entries';
+    document.getElementById('log-page-label').textContent = 'Page ' + logCurrentPage + ' of ' + totalPages;
+    document.getElementById('log-prev').disabled = logCurrentPage <= 1;
+    document.getElementById('log-next').disabled = logCurrentPage >= totalPages;
+  }
+
+  function logPage(dir) {
+    var totalPages = Math.ceil(filteredLog.length / logPageSize) || 1;
+    logCurrentPage = Math.max(1, Math.min(logCurrentPage + dir, totalPages));
+    renderLog();
   }
 
   // ── TOAST ─────────────────────────────────────────────────
