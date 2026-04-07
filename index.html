@@ -461,6 +461,7 @@
   <div class="nav-tab" onclick="showTab('shift')">👤 My Shift</div>
   <div class="nav-tab" onclick="showTab('gate')">🎫 Gate Entry</div>
   <div class="nav-tab" onclick="showTab('dashboard')">📊 Dashboard</div>
+  <div class="nav-tab" onclick="showTab('report')">📈 Report</div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -825,6 +826,129 @@
 
 </div>
 
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB: REPORT                                               -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="page" id="tab-report">
+
+  <!-- Report controls -->
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+    <div>
+      <div class="section-title" style="margin-bottom:4px;">Management Summary Report</div>
+      <div style="font-size:12px;color:var(--muted);">Tourist Vehicle Count · Malam Jabba Ski Resort</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <select id="r-range" onchange="buildReport()" style="padding:8px 12px;font-size:13px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text);">
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="all" selected>All Time</option>
+      </select>
+      <button class="btn-refresh" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn-refresh" onclick="window.print()" style="border-color:#1a73e8;color:#1a73e8;">🖨 Print</button>
+    </div>
+  </div>
+
+  <!-- Printable report area -->
+  <div id="report-area">
+
+    <!-- Report header (visible on print) -->
+    <div id="report-header" style="display:none;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #1a73e8;">
+      <div style="font-size:22px;font-weight:700;color:#1558b0;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.04em;">MJSR TOURIST VEHICLE COUNT — MANAGEMENT SUMMARY</div>
+      <div style="font-size:13px;color:#6b7280;margin-top:4px;">Malam Jabba Ski Resort · Samsons Group of Companies</div>
+      <div style="font-size:13px;color:#6b7280;" id="r-period-label"></div>
+    </div>
+
+    <!-- KPI row -->
+    <div class="stats-grid" id="r-kpis" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:20px;"></div>
+
+    <!-- Site comparison -->
+    <div style="margin-bottom:20px;">
+      <div class="section-title">Site Comparison — MJSR vs Green Valley</div>
+      <div class="journey-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Vehicles Headed Here</th>
+              <th>% of Total</th>
+              <th>Gate Entries</th>
+              <th>Conversion Rate</th>
+              <th>Pax Recorded</th>
+            </tr>
+          </thead>
+          <tbody id="r-site-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Checkpoint funnel -->
+    <div style="margin-bottom:20px;">
+      <div class="section-title">Checkpoint Funnel</div>
+      <div class="journey-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Checkpoint</th>
+              <th>Entries Logged</th>
+              <th>Unique Plates</th>
+              <th>Headed to MJSR</th>
+              <th>% of CP1</th>
+            </tr>
+          </thead>
+          <tbody id="r-cp-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Two column section -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+
+      <!-- Province breakdown -->
+      <div>
+        <div class="section-title">Province of Origin</div>
+        <div class="journey-table">
+          <table>
+            <thead><tr><th>Province</th><th>Vehicles</th><th>%</th></tr></thead>
+            <tbody id="r-province-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vehicle type -->
+      <div>
+        <div class="section-title">Vehicle Types</div>
+        <div class="journey-table">
+          <table>
+            <thead><tr><th>Type</th><th>Count</th><th>Pax</th></tr></thead>
+            <tbody id="r-vtype-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div id="r-footer" style="border-top:1px solid var(--border);padding-top:12px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span>Generated: <span id="r-generated"></span></span>
+      <span>Samsons Group of Companies · Malam Jabba Ski Resort · Tourist Vehicle Count System</span>
+    </div>
+
+  </div>
+</div>
+
+<style>
+@media print {
+  .topbar, .nav, #tab-submit, #tab-shift, #tab-gate, #tab-dashboard, .toast { display: none !important; }
+  #tab-report { display: block !important; padding: 0; }
+  #report-header { display: block !important; }
+  .btn-refresh, select, .section-title { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: white; }
+  .journey-table { box-shadow: none; border: 1px solid #dee2e6; }
+  .stats-grid .stat-card { border: 1px solid #dee2e6; box-shadow: none; }
+}
+</style>
+
 <!-- TOAST -->
 <div class="toast" id="toast">✓ Entry submitted successfully</div>
 
@@ -843,6 +967,7 @@
     event.target.classList.add('active');
     if (id === 'dashboard') refreshDashboard();
     if (id === 'gate') loadGateLog();
+    if (id === 'report') buildReport();
   }
 
   // ── CHECKPOINT SELECTION ──────────────────────────────────
@@ -957,7 +1082,7 @@
 
     fetch(BACKEND_URL, { redirect: 'follow' })
       .then(function(res){ return res.json(); })
-      .then(function(d){ renderDashboard(d); })
+      .then(function(d){ lastData = d; renderDashboard(d); })
       .catch(function(err){
         showToast('Could not load live data — check connection', '#f87171');
         console.error(err);
@@ -1185,6 +1310,184 @@
         '</div>' +
       '</div>';
     }).join('');
+  }
+
+  // ── REPORT ────────────────────────────────────────────────
+  var lastData = null;
+
+  function buildReport() {
+    if (!lastData) {
+      // Fetch data first then render
+      fetch(BACKEND_URL, { redirect: 'follow' })
+        .then(function(res){ return res.json(); })
+        .then(function(d){ lastData = d; renderReport(d); })
+        .catch(function(){ document.getElementById('r-kpis').innerHTML = '<p style="color:var(--muted)">Could not load data. Refresh the Dashboard tab first.</p>'; });
+    } else {
+      renderReport(lastData);
+    }
+  }
+
+  function renderReport(d) {
+    var range  = document.getElementById('r-range').value;
+    var now    = new Date();
+    var label  = 'All Time';
+    if (range === 'today') label = 'Today — ' + now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    if (range === 'week')  label = 'This Week — w/e ' + now.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+    if (range === 'month') label = now.toLocaleDateString('en-GB', { month:'long', year:'numeric' });
+
+    document.getElementById('r-period-label').textContent = 'Period: ' + label;
+    document.getElementById('r-generated').textContent = now.toLocaleString('en-GB');
+
+    // Use today or allTime depending on range selection
+    // For week/month we use allTime as approximation (full live filtering needs backend extension)
+    var src = (range === 'today') ? d.today : d.allTime;
+    var entries   = (range === 'today') ? d.today.entries    : d.allTime.entries;
+    var pax       = (range === 'today') ? d.today.passengers : d.allTime.passengers;
+    var mjsr      = (range === 'today') ? d.today.enteredMJSR : d.allTime.enteredMJSR;
+    var gv        = (range === 'today') ? d.today.wentGV     : d.allTime.wentGV;
+    var unique    = d.allTime.uniquePlates;
+    var convRate  = d.allTime.conversionRate;
+
+    // ── KPIs ─────────────────────────────────────────────
+    var kpis = [
+      { label: 'Total Vehicles',     value: entries,   sub: 'entries logged' },
+      { label: 'Unique Plates',      value: unique,    sub: 'distinct vehicles' },
+      { label: 'Total Passengers',   value: pax,       sub: 'recorded' },
+      { label: 'Entered MJSR',       value: mjsr,      sub: entries > 0 ? pct(mjsr,entries) + ' of total' : '—', color: '#1a73e8' },
+      { label: 'Green Valley',       value: gv,        sub: entries > 0 ? pct(gv,entries)   + ' of total' : '—', color: '#059669' },
+      { label: 'MJSR Conversion',    value: convRate,  sub: 'gate vs checkpoint' }
+    ];
+    document.getElementById('r-kpis').innerHTML = kpis.map(function(k){
+      return '<div class="stat-card">' +
+        '<div class="stat-label">' + k.label + '</div>' +
+        '<div class="stat-value" style="color:' + (k.color||'#1a73e8') + ';font-size:26px">' + k.value + '</div>' +
+        '<div class="stat-sub">' + k.sub + '</div>' +
+      '</div>';
+    }).join('');
+
+    // ── SITE COMPARISON ──────────────────────────────────
+    var dest    = d.destinations || {};
+    var gate    = d.gateToday    || { mjsr:0, gv:0 };
+    var dMJSR   = dest['Malam Jabba Ski Resort (MJSR)'] || 0;
+    var dGV     = dest['Green Valley'] || 0;
+    var dBoth   = dest['Both / Touring the area'] || 0;
+    var dTotal  = dMJSR + dGV + dBoth || 1;
+    var estPaxMJSR = Math.round(pax * dMJSR / dTotal);
+    var estPaxGV   = Math.round(pax * dGV   / dTotal);
+    var gPctMJSR   = estPaxMJSR > 0 ? pct(gate.mjsr, estPaxMJSR) : '—';
+    var gPctGV     = estPaxGV   > 0 ? pct(gate.gv,   estPaxGV)   : '—';
+
+    document.getElementById('r-site-tbody').innerHTML = [
+      { name:'MJSR', dest:dMJSR, gate:gate.mjsr, conv:gPctMJSR, paxEst:estPaxMJSR, color:'#1a73e8' },
+      { name:'Green Valley', dest:dGV, gate:gate.gv, conv:gPctGV, paxEst:estPaxGV, color:'#059669' },
+      { name:'Both / Touring', dest:dBoth, gate:'—', conv:'—', paxEst:'—', color:'#6b7280' },
+      { name:'Passing Through', dest:dest['Just passing through']||0, gate:'—', conv:'—', paxEst:'—', color:'#6b7280' }
+    ].map(function(r){
+      var total = dMJSR + dGV + dBoth + (dest['Just passing through']||0) || 1;
+      return '<tr>' +
+        '<td style="font-weight:600;color:'+r.color+'">'+r.name+'</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">'+r.dest+'</td>' +
+        '<td style="font-weight:600">'+pct(r.dest,total)+'</td>' +
+        '<td>'+r.gate+'</td>' +
+        '<td style="font-weight:600;color:'+r.color+'">'+r.conv+'</td>' +
+        '<td>'+r.paxEst+'</td>' +
+      '</tr>';
+    }).join('');
+
+    // ── CHECKPOINT FUNNEL ────────────────────────────────
+    var cp  = d.checkpoints;
+    var cp1e = cp.cp1.entries, cp2e = cp.cp2.entries, cp3e = cp.cp3.entries;
+    var base = cp1e || 1;
+    document.getElementById('r-cp-tbody').innerHTML = [
+      { name:'CP1 · TMA Splinobo',       e:cp1e, p:cp.cp1.plates, m:cp.cp1.mjsr, color:'#d97706' },
+      { name:'CP2 · Jungle Forest Area', e:cp2e, p:cp.cp2.plates, m:cp.cp2.mjsr, color:'#059669' },
+      { name:'CP3 · MJSR / GV Split',    e:cp3e, p:cp.cp3.plates, m:cp.cp3.mjsr, color:'#2563eb' }
+    ].map(function(r){
+      return '<tr>' +
+        '<td style="font-weight:600;color:'+r.color+'">'+r.name+'</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">'+r.e+'</td>' +
+        '<td>'+r.p+'</td>' +
+        '<td>'+r.m+'</td>' +
+        '<td style="font-weight:600">'+(cp1e>0?pct(r.e,cp1e):'—')+'</td>' +
+      '</tr>';
+    }).join('');
+
+    // ── PROVINCE ─────────────────────────────────────────
+    var prov     = d.provinces || {};
+    var provTotal= Object.values(prov).reduce(function(s,v){ return s+v; },0) || 1;
+    var provRows = Object.keys(prov).sort(function(a,b){ return prov[b]-prov[a]; });
+    document.getElementById('r-province-tbody').innerHTML = provRows.map(function(k){
+      return '<tr><td>'+k+'</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:17px;font-weight:700">'+prov[k]+'</td>' +
+        '<td style="font-weight:600">'+pct(prov[k],provTotal)+'</td></tr>';
+    }).join('');
+
+    // ── VEHICLE TYPES ─────────────────────────────────────
+    var vt     = d.vtypes    || {};
+    var vtp    = d.vtypesPax || {};
+    var vtTotal= Object.values(vt).reduce(function(s,v){ return s+v; },0) || 1;
+    var vtRows = Object.keys(vt).sort(function(a,b){ return vt[b]-vt[a]; });
+    document.getElementById('r-vtype-tbody').innerHTML = vtRows.map(function(k){
+      var short = k.split(' (')[0];
+      return '<tr><td>'+short+'</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:17px;font-weight:700">'+vt[k]+'</td>' +
+        '<td>'+(vtp[k]||0)+'</td></tr>';
+    }).join('');
+  }
+
+  function pct(val, total) {
+    if (!total || total === 0) return '0%';
+    return Math.round(val / total * 100) + '%';
+  }
+
+  // ── EXPORT CSV ────────────────────────────────────────────
+  function exportCSV() {
+    if (!lastData) { showToast('Open the Report tab first to load data', '#f87171'); return; }
+    var d    = lastData;
+    var now  = new Date().toLocaleDateString('en-GB');
+    var rows = [];
+
+    rows.push(['MJSR Tourist Vehicle Count — Management Summary']);
+    rows.push(['Generated:', now]);
+    rows.push([]);
+    rows.push(['KPI', 'Value']);
+    rows.push(['Total Entries',      d.allTime.entries]);
+    rows.push(['Unique Vehicles',    d.allTime.uniquePlates]);
+    rows.push(['Total Passengers',   d.allTime.passengers]);
+    rows.push(['Entered MJSR',       d.allTime.enteredMJSR]);
+    rows.push(['Went to Green Valley',d.allTime.wentGV]);
+    rows.push(['Conversion Rate',    d.allTime.conversionRate]);
+    rows.push([]);
+    rows.push(['CHECKPOINT FUNNEL']);
+    rows.push(['Checkpoint','Entries','Unique Plates','To MJSR']);
+    rows.push(['CP1 - TMA Splinobo',       d.checkpoints.cp1.entries, d.checkpoints.cp1.plates, d.checkpoints.cp1.mjsr]);
+    rows.push(['CP2 - Jungle Forest Area', d.checkpoints.cp2.entries, d.checkpoints.cp2.plates, d.checkpoints.cp2.mjsr]);
+    rows.push(['CP3 - MJSR/GV Split',      d.checkpoints.cp3.entries, d.checkpoints.cp3.plates, d.checkpoints.cp3.mjsr]);
+    rows.push([]);
+    rows.push(['PROVINCE OF ORIGIN']);
+    rows.push(['Province','Vehicles']);
+    var prov = d.provinces || {};
+    Object.keys(prov).forEach(function(k){ rows.push([k, prov[k]]); });
+    rows.push([]);
+    rows.push(['VEHICLE TYPES']);
+    rows.push(['Type','Count','Passengers']);
+    var vt = d.vtypes || {}, vtp = d.vtypesPax || {};
+    Object.keys(vt).forEach(function(k){ rows.push([k, vt[k], vtp[k]||0]); });
+    rows.push([]);
+    rows.push(['DESTINATIONS']);
+    rows.push(['Destination','Count']);
+    var dest = d.destinations || {};
+    Object.keys(dest).forEach(function(k){ rows.push([k, dest[k]]); });
+
+    var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href   = url;
+    a.download = 'MJSR_Tourist_Count_Report_' + now.replace(/\//g,'-') + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✓ CSV exported', '#4ade80');
   }
 
   // ── TOAST ─────────────────────────────────────────────────
