@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MJSR Tourist Vehicle Count</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0f1318;
+    --bg2:      #161c24;
+    --bg3:      #1e2733;
+    --border:   #2a3444;
+    --gold:     #e8a020;
+    --gold2:    #f5c842;
+    --teal:     #2dd4bf;
+    --red:      #f87171;
+    --green:    #4ade80;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --cp1:      #f59e0b;
+    --cp2:      #10b981;
+    --cp3:      #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar-brand .icon {
+    width: 32px; height: 32px;
+    background: var(--gold);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .topbar-brand h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+  .topbar-brand span {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--green); font-weight: 500;
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+
+  /* ── NAV TABS ── */
+  .nav {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 20px;
+    gap: 4px;
+  }
+  .nav-tab {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* ── PAGE CONTAINER ── */
+  .page { display: none; padding: 24px 20px; max-width: 900px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ── SECTION HEADING ── */
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* ── CHECKPOINT PILLS ── */
+  .cp-row {
+    display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .cp-pill {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border: 1.5px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .cp-pill.cp1 { color: var(--cp1); border-color: var(--cp1); }
+  .cp-pill.cp2 { color: var(--cp2); border-color: var(--cp2); }
+  .cp-pill.cp3 { color: var(--cp3); border-color: var(--cp3); }
+  .cp-pill.cp1.active { background: var(--cp1); color: #000; }
+  .cp-pill.cp2.active { background: var(--cp2); color: #000; }
+  .cp-pill.cp3.active { background: var(--cp3); color: #000; }
+
+  /* ── FORM ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  label .req { color: var(--gold); margin-left: 2px; }
+  input, select, textarea {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+  }
+  select option { background: var(--bg3); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  .section-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 14px;
+  }
+
+  /* ── SUBMIT BUTTON ── */
+  .btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-submit:hover { background: var(--gold2); }
+  .btn-submit:active { transform: scale(0.99); }
+
+  /* ── SUCCESS TOAST ── */
+  .toast {
+    display: none;
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--green);
+    color: #000;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    z-index: 999;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { bottom: 0; opacity: 0; }
+    to   { bottom: 24px; opacity: 1; }
+  }
+
+  /* ── STAT CARDS ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .stat-card .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    margin-bottom: 6px;
+  }
+  .stat-card .stat-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-card .stat-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── FUNNEL ── */
+  .funnel-row {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    align-items: center;
+    gap: 16px;
+  }
+  .funnel-label {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .cp-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .funnel-label span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .funnel-bar-wrap {
+    background: var(--bg3);
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .funnel-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s ease;
+  }
+  .funnel-count {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: right;
+  }
+
+  /* ── JOURNEY TABLE ── */
+  .journey-table {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .journey-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .journey-table th {
+    background: var(--bg3);
+    padding: 10px 16px;
+    text-align: left;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .journey-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .journey-table tr:last-child td { border-bottom: none; }
+  .journey-table tr:hover td { background: var(--bg3); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* ── SHIFT PAGE ── */
+  .shift-header {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .shift-cp {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .shift-time {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .log-entry {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  .log-reg {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+  }
+  .log-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .log-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── REFRESH BTN ── */
+  .btn-refresh {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-refresh:hover { border-color: var(--gold); color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="icon">🏔</div>
+    <div>
+      <h1>TOURIST VEHICLE COUNT</h1>
+      <span>Malam Jabba Ski Resort  ·  Checkpoint System</span>
+    </div>
+  </div>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    LIVE
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-tab active" onclick="showTab('submit')">📋 Submit Entry</div>
+  <div class="nav-tab" onclick="showTab('shift')">👤 My Shift</div>
+  <div class="nav-tab" onclick="showTab('gate')">🎫 Gate Entry</div>
+  <div class="nav-tab" onclick="showTab('dashboard')">📊 Dashboard</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB: SUBMIT ENTRY                                         -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="page active" id="tab-submit">
+
+  <div class="section-title">Select Your Checkpoint</div>
+  <div class="cp-row">
+    <div class="cp-pill cp1 active" onclick="selectCP(this,'CP1 - TMA Splinobo')">CP1 · TMA Splinobo</div>
+    <div class="cp-pill cp2" onclick="selectCP(this,'CP2 - Jungle Forest Area')">CP2 · Jungle Forest Area</div>
+    <div class="cp-pill cp3" onclick="selectCP(this,'CP3 - MJSR / GV Road Split')">CP3 · MJSR / GV Road Split</div>
+  </div>
+  <input type="hidden" id="selected-cp" value="CP1 - TMA Splinobo">
+
+  <div class="section-title">Vehicle Entry</div>
+
+  <div class="form-grid">
+
+    <div class="form-group">
+      <label>Staff Name <span class="req">*</span></label>
+      <input type="text" id="f-staff" placeholder="Your full name">
+    </div>
+
+    <div class="form-group">
+      <label>Registration Number <span class="req">*</span></label>
+      <input type="text" id="f-reg" placeholder="e.g. LZB-1234" style="text-transform:uppercase">
+    </div>
+
+    <div class="form-group">
+      <label>Date <span class="req">*</span></label>
+      <input type="date" id="f-date">
+    </div>
+
+    <div class="form-group">
+      <label>Time <span class="req">*</span></label>
+      <input type="time" id="f-time">
+    </div>
+
+    <div class="form-group">
+      <label>Vehicle Type <span class="req">*</span></label>
+      <select id="f-vtype">
+        <option value="">— Select —</option>
+        <option>Car / SUV (Private)</option>
+        <option>Minivan / MPV (Private)</option>
+        <option>Coaster / Minibus (9-22 seats)</option>
+        <option>Bus (23+ seats)</option>
+        <option>Pickup / Hilux</option>
+        <option>Motorcycle / Bike</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Province (from plate) <span class="req">*</span></label>
+      <select id="f-province">
+        <option value="">— Select —</option>
+        <option>Punjab (LA, LB, LC, LZB etc.)</option>
+        <option>KPK / Khyber Pakhtunkhwa (PES, ABT etc.)</option>
+        <option>Sindh (K, KA etc.)</option>
+        <option>Islamabad / ICT (ISD etc.)</option>
+        <option>AJK / Gilgit-Baltistan</option>
+        <option>Balochistan</option>
+        <option>Other / Unreadable</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Passengers incl. driver <span class="req">*</span></label>
+      <input type="number" id="f-pax" placeholder="e.g. 4" min="1" max="80">
+    </div>
+
+    <div class="form-group">
+      <label>Children under 12 <span class="req">*</span></label>
+      <input type="number" id="f-children" placeholder="0" min="0" max="40">
+    </div>
+
+    <div class="form-group">
+      <label>Stated Destination <span class="req">*</span></label>
+      <select id="f-dest">
+        <option value="">— Select —</option>
+        <option>Malam Jabba Ski Resort (MJSR)</option>
+        <option>Green Valley</option>
+        <option>Both / Touring the area</option>
+        <option>Just passing through</option>
+        <option>Unknown / Not stated</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Entered MJSR? <span class="req">*</span></label>
+      <select id="f-entered">
+        <option value="">— Select —</option>
+        <option>Yes - entered MJSR</option>
+        <option>No - went to Green Valley</option>
+        <option>No - turned around / left area</option>
+        <option>No - passed through only</option>
+        <option>Unknown</option>
+      </select>
+    </div>
+
+  </div>
+
+  <hr class="divider">
+  <div class="section-sub">Tour Company (optional)</div>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Company Name</label>
+      <input type="text" id="f-company" placeholder="As written on vehicle">
+    </div>
+    <div class="form-group">
+      <label>Phone / WhatsApp</label>
+      <input type="text" id="f-phone" placeholder="From vehicle livery">
+    </div>
+    <div class="form-group full">
+      <label>Additional Notes</label>
+      <textarea id="f-notes" placeholder="Group type, language spoken, observations..."></textarea>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="submitEntry()">SUBMIT VEHICLE ENTRY</button>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB: GATE ENTRY                                           -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="page" id="tab-gate">
+
+  <div class="section-title">End of Day Gate Entry</div>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
+    Submit once per property at the end of each operating day. This data is cross-compared against checkpoint vehicle counts to calculate the actual visitor conversion rate.
+  </p>
+
+  <div class="form-grid">
+
+    <div class="form-group">
+      <label>Submitted By <span class="req">*</span></label>
+      <input type="text" id="g-staff" placeholder="Your full name">
+    </div>
+
+    <div class="form-group">
+      <label>Date <span class="req">*</span></label>
+      <input type="date" id="g-date">
+    </div>
+
+    <div class="form-group">
+      <label>Property <span class="req">*</span></label>
+      <select id="g-property">
+        <option value="">— Select Property —</option>
+        <option value="MJSR">Malam Jabba Ski Resort (MJSR)</option>
+        <option value="GV">Green Valley (GV)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Total Visitors Who Entered <span class="req">*</span></label>
+      <input type="number" id="g-visitors" placeholder="e.g. 342" min="0">
+    </div>
+
+    <div class="form-group full">
+      <label>Notes (optional)</label>
+      <textarea id="g-notes" placeholder="Any relevant observations e.g. event day, weather impact, early closure..."></textarea>
+    </div>
+
+  </div>
+
+  <button class="btn-submit" onclick="submitGateEntry()">SUBMIT GATE ENTRY</button>
+
+  <hr class="divider">
+  <div class="section-title">Recent Gate Entries</div>
+  <div id="gate-log">
+    <div class="empty-state">
+      <div class="icon">🎫</div>
+      <p>No gate entries yet today.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB: MY SHIFT                                             -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="page" id="tab-shift">
+
+  <div class="shift-header">
+    <div>
+      <div class="shift-cp" id="shift-cp-label" style="color: var(--cp1)">CP1 · TMA Splinobo</div>
+      <div class="shift-time" id="shift-date-label"></div>
+    </div>
+    <div class="stats-grid" style="margin:0; grid-template-columns: repeat(3, 120px);">
+      <div class="stat-card">
+        <div class="stat-label">Logged</div>
+        <div class="stat-value" id="shift-count">0</div>
+        <div class="stat-sub">this shift</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Passengers</div>
+        <div class="stat-value" id="shift-pax">0</div>
+        <div class="stat-sub">this shift</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">To MJSR</div>
+        <div class="stat-value" id="shift-mjsr" style="color:var(--green)">0</div>
+        <div class="stat-sub">this shift</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Entries This Session</div>
+  <div id="shift-log">
+    <div class="empty-state">
+      <div class="icon">🚗</div>
+      <p>No entries yet. Submit a vehicle entry to see it here.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB: DASHBOARD                                            -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="page" id="tab-dashboard">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div class="section-title" style="margin:0">Live Overview</div>
+    <button class="btn-refresh" onclick="refreshDashboard()">↻ Refresh</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Entries Today</div>
+      <div class="stat-value" id="d-total">—</div>
+      <div class="stat-sub">all checkpoints</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Unique Vehicles</div>
+      <div class="stat-value" id="d-unique">—</div>
+      <div class="stat-sub">by plate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Passengers</div>
+      <div class="stat-value" id="d-pax">—</div>
+      <div class="stat-sub">today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Entered MJSR</div>
+      <div class="stat-value" id="d-mjsr" style="color:var(--green)">—</div>
+      <div class="stat-sub">today</div>
+    </div>
+  </div>
+
+  <div class="section-title">Checkpoint Funnel</div>
+
+  <div id="funnel-cp1" class="funnel-row">
+    <div class="funnel-label">
+      <div class="cp-dot" style="background:var(--cp1)"></div>
+      <span style="color:var(--cp1)">CP1 · TMA Splinobo</span>
+    </div>
+    <div class="funnel-bar-wrap">
+      <div class="funnel-bar" id="bar-cp1" style="background:var(--cp1); width:0%"></div>
+    </div>
+    <div class="funnel-count" id="count-cp1" style="color:var(--cp1)">—</div>
+  </div>
+
+  <div id="funnel-cp2" class="funnel-row">
+    <div class="funnel-label">
+      <div class="cp-dot" style="background:var(--cp2)"></div>
+      <span style="color:var(--cp2)">CP2 · Jungle Forest Area</span>
+    </div>
+    <div class="funnel-bar-wrap">
+      <div class="funnel-bar" id="bar-cp2" style="background:var(--cp2); width:0%"></div>
+    </div>
+    <div class="funnel-count" id="count-cp2" style="color:var(--cp2)">—</div>
+  </div>
+
+  <div id="funnel-cp3" class="funnel-row">
+    <div class="funnel-label">
+      <div class="cp-dot" style="background:var(--cp3)"></div>
+      <span style="color:var(--cp3)">CP3 · MJSR / GV Split</span>
+    </div>
+    <div class="funnel-bar-wrap">
+      <div class="funnel-bar" id="bar-cp3" style="background:var(--cp3); width:0%"></div>
+    </div>
+    <div class="funnel-count" id="count-cp3" style="color:var(--cp3)">—</div>
+  </div>
+
+  <div style="margin-top: 24px;" class="section-title">Vehicle Journey Tracker</div>
+
+  <div class="journey-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Journey</th>
+          <th>Vehicles</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="journey-tbody">
+        <tr><td colspan="3" style="color:var(--muted); text-align:center; padding:24px;">Connect to Google Sheets to load journey data</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">Today by Vehicle Type</div>
+  <div id="vtype-grid" class="stats-grid"></div>
+
+  <div style="margin-top:24px;" class="section-title">Visitor Conversion — Checkpoint vs Gate</div>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">
+    Compares total passengers recorded at checkpoints against actual gate entries. Shows what percentage of people who journeyed to the area actually entered each property.
+  </p>
+
+  <div class="funnel-row" style="grid-template-columns:180px 1fr 90px 90px;">
+    <div class="funnel-label">
+      <div class="cp-dot" style="background:var(--gold)"></div>
+      <span style="color:var(--gold)">MJSR</span>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.06em;">
+        <span id="conv-mjsr-label">— gate entries vs — checkpoint pax</span>
+      </div>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar" id="conv-bar-mjsr" style="background:var(--gold);width:0%"></div>
+      </div>
+    </div>
+    <div class="funnel-count" id="conv-pct-mjsr" style="color:var(--gold)">—</div>
+  </div>
+
+  <div class="funnel-row" style="margin-top:10px;grid-template-columns:180px 1fr 90px 90px;">
+    <div class="funnel-label">
+      <div class="cp-dot" style="background:var(--cp2)"></div>
+      <span style="color:var(--cp2)">Green Valley</span>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.06em;">
+        <span id="conv-gv-label">— gate entries vs — checkpoint pax</span>
+      </div>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar" id="conv-bar-gv" style="background:var(--cp2);width:0%"></div>
+      </div>
+    </div>
+    <div class="funnel-count" id="conv-pct-gv" style="color:var(--cp2)">—</div>
+  </div>
+
+  <div style="margin-top:10px;" class="journey-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Checkpoint Pax Today</th>
+          <th>Gate Entries Today</th>
+          <th>Conversion %</th>
+          <th>Difference</th>
+        </tr>
+      </thead>
+      <tbody id="conv-tbody">
+        <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:20px;">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ Entry submitted successfully</div>
+
+<script>
+  // ── SESSION STORE ─────────────────────────────────────────
+  var sessionEntries = [];
+  var shiftCount = 0;
+  var shiftPax   = 0;
+  var shiftMJSR  = 0;
+
+  // ── TAB NAVIGATION ────────────────────────────────────────
+  function showTab(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.classList.add('active');
+    if (id === 'dashboard') refreshDashboard();
+    if (id === 'gate') loadGateLog();
+  }
+
+  // ── CHECKPOINT SELECTION ──────────────────────────────────
+  function selectCP(el, val) {
+    document.querySelectorAll('.cp-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('selected-cp').value = val;
+
+    var colors = { 'CP1 - TMA Splinobo': 'var(--cp1)', 'CP2 - Jungle Forest Area': 'var(--cp2)', 'CP3 - MJSR / GV Road Split': 'var(--cp3)' };
+    document.getElementById('shift-cp-label').style.color = colors[val];
+    document.getElementById('shift-cp-label').textContent =
+      val.replace(' - ', ' · ');
+  }
+
+  // ── SUBMIT ENTRY ──────────────────────────────────────────
+  function submitEntry() {
+    var staff    = document.getElementById('f-staff').value.trim();
+    var reg      = document.getElementById('f-reg').value.trim().toUpperCase();
+    var date     = document.getElementById('f-date').value;
+    var time     = document.getElementById('f-time').value;
+    var vtype    = document.getElementById('f-vtype').value;
+    var province = document.getElementById('f-province').value;
+    var pax      = document.getElementById('f-pax').value;
+    var children = document.getElementById('f-children').value;
+    var dest     = document.getElementById('f-dest').value;
+    var entered  = document.getElementById('f-entered').value;
+    var cp       = document.getElementById('selected-cp').value;
+
+    // Validate required fields
+    if (!staff || !reg || !date || !time || !vtype || !province || !pax || children === '' || !dest || !entered) {
+      showToast('Please complete all required fields', '#f87171');
+      return;
+    }
+
+    // Add to session log
+    var entry = { staff, reg, date, time, vtype, province, pax: parseInt(pax), children: parseInt(children), dest, entered, cp };
+    sessionEntries.unshift(entry);
+
+    // Update shift counters
+    shiftCount++;
+    shiftPax += parseInt(pax);
+    if (entered === 'Yes - entered MJSR') shiftMJSR++;
+
+    document.getElementById('shift-count').textContent = shiftCount;
+    document.getElementById('shift-pax').textContent = shiftPax;
+    document.getElementById('shift-mjsr').textContent = shiftMJSR;
+
+    renderShiftLog();
+
+    // Reset vehicle fields but keep staff name, CP, date
+    document.getElementById('f-reg').value = '';
+    document.getElementById('f-vtype').value = '';
+    document.getElementById('f-province').value = '';
+    document.getElementById('f-pax').value = '';
+    document.getElementById('f-children').value = '';
+    document.getElementById('f-dest').value = '';
+    document.getElementById('f-entered').value = '';
+    document.getElementById('f-company').value = '';
+    document.getElementById('f-phone').value = '';
+    document.getElementById('f-notes').value = '';
+
+    // Update time to now
+    var now = new Date();
+    document.getElementById('f-time').value =
+      String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+    showToast('✓ Entry submitted — ' + reg, '#4ade80');
+  }
+
+  // ── RENDER SHIFT LOG ──────────────────────────────────────
+  function renderShiftLog() {
+    var el = document.getElementById('shift-log');
+    if (sessionEntries.length === 0) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">🚗</div><p>No entries yet.</p></div>';
+      return;
+    }
+    el.innerHTML = sessionEntries.slice(0,20).map(function(e) {
+      var destShort = e.dest.replace('Malam Jabba Ski Resort (MJSR)','MJSR').replace('Unknown / Not stated','Unknown').replace('Both / Touring the area','Both').replace('Just passing through','Passing');
+      var color = e.entered === 'Yes - entered MJSR' ? 'var(--green)' : e.entered.indexOf('Green Valley') > -1 ? 'var(--cp2)' : 'var(--muted)';
+      return '<div class="log-entry">' +
+        '<div>' +
+          '<div class="log-reg">' + e.reg + '</div>' +
+          '<div class="log-meta">' + e.vtype + ' · ' + e.pax + ' pax · ' + destShort + '</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div style="font-size:13px;font-weight:600;color:' + color + '">' + e.entered.split(' - ')[0] + '</div>' +
+          '<div class="log-time">' + e.time + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── LIVE BACKEND URL ──────────────────────────────────────
+  var BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyfX-lc2h8AWDE5nDp_16SoWNpC9OxTOwa9nh7lLp8BH6U6DYTJkjCYq2NX7AdpEHrD5Q/exec';
+
+  // ── DASHBOARD LOADING STATE ───────────────────────────────
+  function setDashboardLoading() {
+    ['d-total','d-unique','d-pax','d-mjsr',
+     'count-cp1','count-cp2','count-cp3'].forEach(function(id){
+      document.getElementById(id).textContent = '…';
+    });
+    document.getElementById('bar-cp1').style.width = '0%';
+    document.getElementById('bar-cp2').style.width = '0%';
+    document.getElementById('bar-cp3').style.width = '0%';
+    document.getElementById('journey-tbody').innerHTML =
+      '<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:20px;">Loading…</td></tr>';
+    document.getElementById('vtype-grid').innerHTML = '';
+  }
+
+  function refreshDashboard() {
+    setDashboardLoading();
+
+    fetch(BACKEND_URL, { redirect: 'follow' })
+      .then(function(res){ return res.json(); })
+      .then(function(d){ renderDashboard(d); })
+      .catch(function(err){
+        showToast('Could not load live data — check connection', '#f87171');
+        console.error(err);
+        // Fall back to session-only data
+        renderDashboardFromSession();
+      });
+  }
+
+  function renderDashboard(d) {
+    // ── TODAY STATS ─────────────────────────────────────────
+    document.getElementById('d-total').textContent  = d.today.entries  || 0;
+    document.getElementById('d-unique').textContent = d.allTime.uniquePlates || 0;
+    document.getElementById('d-pax').textContent    = d.today.passengers || 0;
+    document.getElementById('d-mjsr').textContent   = d.today.enteredMJSR || 0;
+
+    // ── CHECKPOINT FUNNEL ───────────────────────────────────
+    var cp1 = d.checkpoints.cp1.entries || 0;
+    var cp2 = d.checkpoints.cp2.entries || 0;
+    var cp3 = d.checkpoints.cp3.entries || 0;
+    var maxCP = Math.max(cp1, cp2, cp3, 1);
+
+    document.getElementById('count-cp1').textContent = cp1;
+    document.getElementById('count-cp2').textContent = cp2;
+    document.getElementById('count-cp3').textContent = cp3;
+    document.getElementById('bar-cp1').style.width = (cp1 / maxCP * 100) + '%';
+    document.getElementById('bar-cp2').style.width = (cp2 / maxCP * 100) + '%';
+    document.getElementById('bar-cp3').style.width = (cp3 / maxCP * 100) + '%';
+
+    // ── JOURNEY TRACKER ─────────────────────────────────────
+    var j = d.journeys || {};
+    var journeys = [
+      { label: 'CP1 only — did not continue',    count: j.cp1Only  || 0, color: 'var(--muted)' },
+      { label: 'CP1 then CP2 — continued up',    count: j.cp1AndCp2 || 0, color: 'var(--cp2)' },
+      { label: 'CP1 then CP3 — skipped CP2',     count: j.cp1AndCp3 || 0, color: 'var(--cp3)' },
+      { label: 'All 3 checkpoints — full route', count: j.allThree  || 0, color: 'var(--gold)' },
+      { label: 'CP2 only',                       count: j.cp2Only   || 0, color: 'var(--muted)' },
+      { label: 'CP2 then CP3',                   count: j.cp2AndCp3 || 0, color: 'var(--cp3)' },
+      { label: 'CP3 only — entered near resort', count: j.cp3Only   || 0, color: 'var(--muted)' }
+    ];
+
+    document.getElementById('journey-tbody').innerHTML = journeys.map(function(jj){
+      return '<tr>' +
+        '<td>' + jj.label + '</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:' + jj.color + '">' + jj.count + '</td>' +
+        '<td>' + (jj.count > 0
+          ? '<span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text)">' + jj.count + ' vehicles</span>'
+          : '<span style="color:var(--muted);font-size:12px">none yet</span>') +
+        '</td></tr>';
+    }).join('');
+
+    // ── VEHICLE TYPES ───────────────────────────────────────
+    var vtypes = d.vtypes || {};
+    var vtypeOrder = ['Car / SUV (Private)','Minivan / MPV (Private)','Coaster / Minibus (9-22 seats)','Bus (23+ seats)','Pickup / Hilux','Motorcycle / Bike','Other'];
+    document.getElementById('vtype-grid').innerHTML = vtypeOrder.map(function(v){
+      var count = vtypes[v] || 0;
+      var label = v.split(' (')[0];
+      return '<div class="stat-card">' +
+        '<div class="stat-label">' + label + '</div>' +
+        '<div class="stat-value">' + count + '</div>' +
+        '</div>';
+    }).join('');
+
+    // ── CONVERSION COMPARISON ───────────────────────────────
+    var gate = d.gateToday || { mjsr: 0, gv: 0 };
+    var cpPaxMJSR = d.today ? (d.today.enteredMJSR || 0) : 0;
+    var cpPaxGV   = d.today ? (d.today.wentGV      || 0) : 0;
+
+    // Use total checkpoint passengers as the denominator
+    var cpTotal = d.today ? (d.today.passengers || 0) : 0;
+    // Estimate split: ratio of stated destination
+    var destMJSR = d.destinations ? (d.destinations['Malam Jabba Ski Resort (MJSR)'] || 0) : 0;
+    var destGV   = d.destinations ? (d.destinations['Green Valley'] || 0) : 0;
+    var destTotal = destMJSR + destGV || 1;
+    var estPaxMJSR = Math.round(cpTotal * destMJSR / destTotal);
+    var estPaxGV   = Math.round(cpTotal * destGV   / destTotal);
+
+    var pctMJSR = estPaxMJSR > 0 ? Math.min(Math.round(gate.mjsr / estPaxMJSR * 100), 999) : 0;
+    var pctGV   = estPaxGV   > 0 ? Math.min(Math.round(gate.gv   / estPaxGV   * 100), 999) : 0;
+
+    document.getElementById('conv-pct-mjsr').textContent = pctMJSR + '%';
+    document.getElementById('conv-pct-gv').textContent   = pctGV   + '%';
+    document.getElementById('conv-bar-mjsr').style.width = Math.min(pctMJSR, 100) + '%';
+    document.getElementById('conv-bar-gv').style.width   = Math.min(pctGV,   100) + '%';
+    document.getElementById('conv-mjsr-label').textContent =
+      gate.mjsr + ' gate entries vs ' + estPaxMJSR + ' est. checkpoint passengers';
+    document.getElementById('conv-gv-label').textContent =
+      gate.gv   + ' gate entries vs ' + estPaxGV   + ' est. checkpoint passengers';
+
+    document.getElementById('conv-tbody').innerHTML = [
+      { prop: 'MJSR',         gate: gate.mjsr, cp: estPaxMJSR, pct: pctMJSR, color: 'var(--gold)' },
+      { prop: 'Green Valley', gate: gate.gv,   cp: estPaxGV,   pct: pctGV,   color: 'var(--cp2)'  }
+    ].map(function(r) {
+      var diff    = r.gate - r.cp;
+      var diffStr = diff >= 0 ? '+' + diff : '' + diff;
+      var diffCol = diff >= 0 ? 'var(--green)' : 'var(--red)';
+      return '<tr>' +
+        '<td style="font-weight:600;color:' + r.color + '">' + r.prop + '</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">' + r.cp + '</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:' + r.color + '">' + r.gate + '</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:' + r.color + '">' + r.pct + '%</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:' + diffCol + '">' + diffStr + '</td>' +
+      '</tr>';
+    }).join('');
+    if (d.lastUpdated) {
+      var updated = new Date(d.lastUpdated);
+      var timeStr = updated.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+      document.querySelector('.live-badge').innerHTML =
+        '<div class="live-dot"></div> LIVE · Updated ' + timeStr;
+    }
+  }
+
+  // Fallback: render dashboard from session entries only
+  function renderDashboardFromSession() {
+    var cp1 = sessionEntries.filter(function(e){ return e.cp.indexOf('CP1')>-1; }).length;
+    var cp2 = sessionEntries.filter(function(e){ return e.cp.indexOf('CP2')>-1; }).length;
+    var cp3 = sessionEntries.filter(function(e){ return e.cp.indexOf('CP3')>-1; }).length;
+    var total = sessionEntries.length;
+    var pax   = sessionEntries.reduce(function(s,e){ return s+e.pax; }, 0);
+    var mjsr  = sessionEntries.filter(function(e){ return e.entered==='Yes - entered MJSR'; }).length;
+    var uniqueRegs = [...new Set(sessionEntries.map(function(e){ return e.reg; }))].length;
+    var maxCP = Math.max(cp1,cp2,cp3,1);
+
+    document.getElementById('d-total').textContent  = total + ' (session)';
+    document.getElementById('d-unique').textContent = uniqueRegs;
+    document.getElementById('d-pax').textContent    = pax;
+    document.getElementById('d-mjsr').textContent   = mjsr;
+    document.getElementById('count-cp1').textContent = cp1;
+    document.getElementById('count-cp2').textContent = cp2;
+    document.getElementById('count-cp3').textContent = cp3;
+    document.getElementById('bar-cp1').style.width = (cp1/maxCP*100)+'%';
+    document.getElementById('bar-cp2').style.width = (cp2/maxCP*100)+'%';
+    document.getElementById('bar-cp3').style.width = (cp3/maxCP*100)+'%';
+  }
+
+  // ── GATE ENTRY ────────────────────────────────────────────
+  var gateEntries = [];
+
+  window.onload = function() {
+    var now = new Date();
+    document.getElementById('f-date').value = now.toISOString().split('T')[0];
+    document.getElementById('f-time').value =
+      String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('g-date').value = now.toISOString().split('T')[0];
+    document.getElementById('shift-date-label').textContent =
+      now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  };
+
+  function submitGateEntry() {
+    var staff    = document.getElementById('g-staff').value.trim();
+    var date     = document.getElementById('g-date').value;
+    var property = document.getElementById('g-property').value;
+    var visitors = document.getElementById('g-visitors').value;
+    var notes    = document.getElementById('g-notes').value.trim();
+
+    if (!staff || !date || !property || visitors === '') {
+      showToast('Please complete all required fields', '#f87171');
+      return;
+    }
+
+    var btn = document.querySelector('#tab-gate .btn-submit');
+    btn.textContent = 'SUBMITTING…';
+    btn.disabled = true;
+
+    var params = 'action=gateEntry' +
+      '&staff='    + encodeURIComponent(staff) +
+      '&date='     + encodeURIComponent(date) +
+      '&property=' + encodeURIComponent(property) +
+      '&visitors=' + encodeURIComponent(visitors) +
+      '&notes='    + encodeURIComponent(notes);
+
+    fetch(BACKEND_URL + '?' + params, { redirect: 'follow' })
+      .then(function(res){ return res.json(); })
+      .then(function(d){
+        if (d.status === 'ok') {
+          gateEntries.unshift({ staff, date, property, visitors: parseInt(visitors), notes });
+          renderGateLog();
+          document.getElementById('g-staff').value = '';
+          document.getElementById('g-visitors').value = '';
+          document.getElementById('g-notes').value = '';
+          showToast('✓ Gate entry saved — ' + property + ': ' + visitors + ' visitors', '#4ade80');
+        } else {
+          showToast('Error: ' + (d.error || 'Unknown error'), '#f87171');
+        }
+      })
+      .catch(function(){
+        // Save locally if offline
+        gateEntries.unshift({ staff, date, property, visitors: parseInt(visitors), notes });
+        renderGateLog();
+        showToast('Saved locally — submit when back online', '#e8a020');
+      })
+      .finally(function(){
+        btn.textContent = 'SUBMIT GATE ENTRY';
+        btn.disabled = false;
+      });
+  }
+
+  function loadGateLog() {
+    fetch(BACKEND_URL + '?action=getGateEntries', { redirect: 'follow' })
+      .then(function(res){ return res.json(); })
+      .then(function(d){
+        if (d.entries) {
+          gateEntries = d.entries;
+          renderGateLog();
+        }
+      })
+      .catch(function(){ renderGateLog(); });
+  }
+
+  function renderGateLog() {
+    var el = document.getElementById('gate-log');
+    if (gateEntries.length === 0) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">🎫</div><p>No gate entries yet.</p></div>';
+      return;
+    }
+    el.innerHTML = gateEntries.slice(0, 14).map(function(e) {
+      var propColor = e.property === 'MJSR' ? 'var(--gold)' : 'var(--cp2)';
+      return '<div class="log-entry">' +
+        '<div>' +
+          '<div class="log-reg" style="color:' + propColor + '">' + e.property + '</div>' +
+          '<div class="log-meta">' + e.date + (e.notes ? ' · ' + e.notes : '') + '</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;color:' + propColor + '">' + e.visitors.toLocaleString() + '</div>' +
+          '<div class="log-time">visitors</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────
+  function showToast(msg, color) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = color || '#4ade80';
+    t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 3000);
+  }
+</script>
+</body>
+</html>
