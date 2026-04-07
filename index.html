@@ -1147,18 +1147,37 @@
 
   function refreshReport() {
     var btn = document.getElementById('btn-refresh-report');
+
+    // If dashboard already fetched data, use it immediately — no second fetch needed
+    if (lastData) {
+      renderReport(lastData);
+      showToast('✓ Report loaded', '#4ade80');
+      return;
+    }
+
     btn.textContent = '↻ Loading…';
     btn.disabled = true;
 
     fetch(BACKEND_URL, { redirect: 'follow' })
-      .then(function(res){ return res.json(); })
-      .then(function(d){
+      .then(function(res){ return res.text(); })
+      .then(function(text){
+        var d;
+        try {
+          d = JSON.parse(text);
+        } catch(e) {
+          console.error('Report parse error:', text.substring(0, 200));
+          showToast('Backend returned invalid data — check deployment', '#f87171');
+          btn.textContent = '↻ Refresh Report';
+          btn.disabled = false;
+          return;
+        }
         lastData = d;
         renderReport(d);
         btn.textContent = '↻ Refresh Report';
         btn.disabled = false;
       })
-      .catch(function(){
+      .catch(function(err){
+        console.error('Report fetch error:', err);
         showToast('Could not load data — check connection', '#f87171');
         btn.textContent = '↻ Refresh Report';
         btn.disabled = false;
@@ -1168,8 +1187,10 @@
   // ── CENTRAL DATA FETCH (dashboard only) ──────────────────
   function fetchLiveData(onComplete) {
     fetch(BACKEND_URL, { redirect: 'follow' })
-      .then(function(res){ return res.json(); })
-      .then(function(d){
+      .then(function(res){ return res.text(); })
+      .then(function(text){
+        var d;
+        try { d = JSON.parse(text); } catch(e) { if (onComplete) onComplete(null); return; }
         lastData = d;
         if (onComplete) onComplete(d);
       })
