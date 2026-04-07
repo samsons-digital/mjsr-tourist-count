@@ -256,7 +256,7 @@ textarea{resize:vertical;min-height:64px;}
     </div>
   </div>
   <div class="sec-title" style="margin-top:4px;">Visitor Conversion — Checkpoint vs Gate</div>
-  <div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Vehicles Stated Dest.</th><th>% of Total</th><th>Gate Entries</th><th>Conversion</th><th>Note</th></tr></thead><tbody id="conv-body"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:16px;">Refresh to load</td></tr></tbody></table></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Vehicles Stated</th><th>% of Total</th><th>Gate Entries (people)</th><th>Est. Checkpoint Pax</th><th>Conversion</th><th>Note</th></tr></thead><tbody id="conv-body"><tr><td colspan="7" style="color:var(--muted);text-align:center;padding:16px;">Refresh to load</td></tr></tbody></table></div>
 </div>
 
 <!-- ══ REPORT ══════════════════════════════════════════════ -->
@@ -409,15 +409,25 @@ function renderDash(d) {
   var dM=dest['Malam Jabba Ski Resort (MJSR)']||0, dG=dest['Green Valley']||0;
   var dB=dest['Both / Touring the area']||0, dP=dest['Just passing through']||0;
   var dT=dM+dG+dB+dP||1;
+  // Estimate passengers per property using destination ratio applied to total passengers
+  var totalPax = d.allTime.passengers || 0;
+  var estPaxMJSR = Math.round(totalPax * dM / dT);
+  var estPaxGV   = Math.round(totalPax * dG / dT);
   document.getElementById('conv-body').innerHTML = [
-    {n:'MJSR',         v:dM, g:gate.mjsr, c:'#1a73e8'},
-    {n:'Green Valley', v:dG, g:gate.gv,   c:'#059669'},
-    {n:'Both/Touring', v:dB, g:'—',       c:'#6b7280'},
-    {n:'Passing',      v:dP, g:'—',       c:'#6b7280'}
+    {n:'MJSR',         v:dM, g:gate.mjsr, ep:estPaxMJSR, c:'#1a73e8'},
+    {n:'Green Valley', v:dG, g:gate.gv,   ep:estPaxGV,   c:'#059669'},
+    {n:'Both/Touring', v:dB, g:'—',       ep:0,          c:'#6b7280'},
+    {n:'Passing',      v:dP, g:'—',       ep:0,          c:'#6b7280'}
   ].map(function(r){
-    var conv = typeof r.g==='number' && r.v>0 ? pct(r.g,r.v) : '—';
-    var note = typeof r.g==='number' && r.v>0 ? (r.g>=r.v?'↑ More gate than dest.':'↓ '+(r.v-r.g)+' did not enter') : '—';
-    return '<tr><td style="font-weight:600;color:'+r.c+'">'+r.n+'</td><td style="font-weight:700">'+r.v+'</td><td>'+pct(r.v,dT)+'</td><td style="font-weight:700;color:'+r.c+'">'+r.g+'</td><td style="font-weight:600;color:'+r.c+'">'+conv+'</td><td style="font-size:11px;color:var(--muted)">'+note+'</td></tr>';
+    var conv = typeof r.g==='number' && r.ep>0 ? pct(r.g,r.ep) : '—';
+    var note = typeof r.g==='number' && r.ep>0 ? (r.g>=r.ep?'↑ More gate than est. pax':'↓ '+(r.ep-r.g)+' est. pax did not enter') : '—';
+    return '<tr><td style="font-weight:600;color:'+r.c+'">'+r.n+'</td>'+
+      '<td style="font-weight:700">'+r.v+' vehicles</td>'+
+      '<td>'+pct(r.v,dT)+'</td>'+
+      '<td style="font-weight:700;color:'+r.c+'">'+r.g+' people</td>'+
+      '<td style="color:var(--muted);font-size:12px">~'+r.ep+' est. pax</td>'+
+      '<td style="font-weight:600;color:'+r.c+'">'+conv+'</td>'+
+      '<td style="font-size:11px;color:var(--muted)">'+note+'</td></tr>';
   }).join('');
 }
 
@@ -466,6 +476,9 @@ function renderReport(d) {
   var dB=dest['Both / Touring the area']||0, dP=dest['Just passing through']||0;
   var dT=dM+dG+dB+dP||1;
   var gM=gate.mjsr, gG=gate.gv;
+  // Estimate passengers per property using destination ratio applied to total passengers
+  var epM = Math.round(pax_ * dM / dT);
+  var epG = Math.round(pax_ * dG / dT);
 
   var vt=d.vtypes||{}, vtp=d.vtypesPax||{};
   var pr=d.provinces||{}, prT=Object.values(pr).reduce(function(s,v){return s+v;},0)||1;
@@ -479,13 +492,14 @@ function renderReport(d) {
       }).join('')+
     '</div>'+
 
-    '<div class="sec-title">Site Comparison</div>'+
-    '<div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Vehicles Stated</th><th>% of Total</th><th>Gate Entries</th><th>Conversion</th><th>Note</th></tr></thead><tbody>'+
-    [{n:'MJSR',v:dM,g:gM,c:'#1a73e8'},{n:'Green Valley',v:dG,g:gG,c:'#059669'},{n:'Both/Touring',v:dB,g:'—',c:'#6b7280'},{n:'Passing',v:dP,g:'—',c:'#6b7280'}]
+    '<div class="sec-title">Site Comparison — People vs People</div>'+
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Gate entries (people who paid and entered) compared against estimated checkpoint passengers headed to each property.</p>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Vehicles Stated</th><th>% of Vehicles</th><th>Gate Entries (people)</th><th>Est. Checkpoint Pax</th><th>Conversion %</th><th>Note</th></tr></thead><tbody>'+
+    [{n:'MJSR',v:dM,g:gM,ep:epM,c:'#1a73e8'},{n:'Green Valley',v:dG,g:gG,ep:epG,c:'#059669'},{n:'Both/Touring',v:dB,g:'—',ep:0,c:'#6b7280'},{n:'Passing',v:dP,g:'—',ep:0,c:'#6b7280'}]
     .map(function(r){
-      var conv=typeof r.g==='number'&&r.v>0?pct(r.g,r.v):'—';
-      var note=typeof r.g==='number'&&r.v>0?(r.g>=r.v?'↑ More gate entries':'↓ '+(r.v-r.g)+' did not enter'):'—';
-      return '<tr><td style="font-weight:600;color:'+r.c+'">'+r.n+'</td><td style="font-weight:700">'+r.v+'</td><td>'+pct(r.v,dT)+'</td><td style="font-weight:700;color:'+r.c+'">'+r.g+'</td><td style="font-weight:600;color:'+r.c+'">'+conv+'</td><td style="font-size:11px;color:var(--muted)">'+note+'</td></tr>';
+      var conv = typeof r.g==='number' && r.ep>0 ? pct(r.g,r.ep) : '—';
+      var note = typeof r.g==='number' && r.ep>0 ? (r.g>=r.ep?'↑ More gate than est.':'↓ '+(r.ep-r.g)+' est. pax did not enter') : '—';
+      return '<tr><td style="font-weight:600;color:'+r.c+'">'+r.n+'</td><td style="font-weight:700">'+r.v+'</td><td>'+pct(r.v,dT)+'</td><td style="font-weight:700;color:'+r.c+'">'+r.g+'</td><td style="color:var(--muted)">~'+r.ep+'</td><td style="font-weight:600;color:'+r.c+'">'+conv+'</td><td style="font-size:11px;color:var(--muted)">'+note+'</td></tr>';
     }).join('')+
     '</tbody></table></div>'+
 
