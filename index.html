@@ -1027,7 +1027,11 @@
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('tab-' + id).classList.add('active');
     event.target.classList.add('active');
-    if (id === 'dashboard') refreshDashboard();
+    if (id === 'dashboard') {
+      // Only fetch if no data yet — manual refresh button handles re-fetch
+      if (!lastData) refreshDashboard();
+      else renderDashboard(lastData);
+    }
     if (id === 'gate') loadGateLog();
     if (id === 'report') buildReport();
     if (id === 'log') loadLog();
@@ -1126,6 +1130,26 @@
   // ── LIVE BACKEND URL ──────────────────────────────────────
   var BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyfX-lc2h8AWDE5nDp_16SoWNpC9OxTOwa9nh7lLp8BH6U6DYTJkjCYq2NX7AdpEHrD5Q/exec';
 
+  // ── CENTRAL DATA FETCH ────────────────────────────────────
+  // Single fetch used by dashboard, report, and auto-load.
+  // Stores result in lastData so all tabs share the same data.
+  function fetchLiveData(onComplete) {
+    fetch(BACKEND_URL, { redirect: 'follow' })
+      .then(function(res){ return res.json(); })
+      .then(function(d){
+        lastData = d;
+        // If dashboard tab is currently visible, render it
+        if (document.getElementById('tab-dashboard').classList.contains('active')) {
+          renderDashboard(d);
+        }
+        if (onComplete) onComplete(d);
+      })
+      .catch(function(err){
+        console.error(err);
+        if (onComplete) onComplete(null);
+      });
+  }
+
   // ── DASHBOARD LOADING STATE ───────────────────────────────
   function setDashboardLoading() {
     ['d-total','d-unique','d-pax','d-mjsr',
@@ -1142,16 +1166,13 @@
 
   function refreshDashboard() {
     setDashboardLoading();
-
-    fetch(BACKEND_URL, { redirect: 'follow' })
-      .then(function(res){ return res.json(); })
-      .then(function(d){ lastData = d; renderDashboard(d); })
-      .catch(function(err){
+    fetchLiveData(function(d){
+      if (d) renderDashboard(d);
+      else {
         showToast('Could not load live data — check connection', '#f87171');
-        console.error(err);
-        // Fall back to session-only data
         renderDashboardFromSession();
-      });
+      }
+    });
   }
 
   function renderDashboard(d) {
@@ -1291,6 +1312,9 @@
     document.getElementById('g-date').value = now.toISOString().split('T')[0];
     document.getElementById('shift-date-label').textContent =
       now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    // Auto-fetch live data on load so dashboard and report are ready immediately
+    fetchLiveData();
   };
 
   function submitGateEntry() {
@@ -1472,14 +1496,16 @@
   var lastData = null;
 
   function buildReport() {
-    if (!lastData) {
-      // Fetch data first then render
-      fetch(BACKEND_URL, { redirect: 'follow' })
-        .then(function(res){ return res.json(); })
-        .then(function(d){ lastData = d; renderReport(d); })
-        .catch(function(){ document.getElementById('r-kpis').innerHTML = '<p style="color:var(--muted)">Could not load data. Refresh the Dashboard tab first.</p>'; });
-    } else {
+    if (lastData) {
       renderReport(lastData);
+    } else {
+      document.getElementById('r-kpis').innerHTML =
+        '<p style="color:var(--muted);font-size:13px;">Loading data…</p>';
+      fetchLiveData(function(d){
+        if (d) renderReport(d);
+        else document.getElementById('r-kpis').innerHTML =
+          '<p style="color:var(--muted);">Could not load data — check connection.</p>';
+      });
     }
   }
 
