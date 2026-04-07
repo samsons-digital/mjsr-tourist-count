@@ -845,6 +845,7 @@
         <option value="month">This Month</option>
         <option value="all" selected>All Time</option>
       </select>
+      <button id="btn-refresh-report" class="btn-refresh" onclick="refreshReport()" style="border-color:#1a73e8;color:#1a73e8;font-weight:700;">↻ Refresh Report</button>
       <button class="btn-refresh" onclick="exportCSV()">⬇ Export CSV</button>
       <button class="btn-refresh" onclick="window.print()" style="border-color:#1a73e8;color:#1a73e8;">🖨 Print</button>
     </div>
@@ -861,7 +862,13 @@
     </div>
 
     <!-- KPI row -->
-    <div class="stats-grid" id="r-kpis" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:20px;"></div>
+    <div class="stats-grid" id="r-kpis" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:20px;">
+    <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);">
+      <div style="font-size:28px;margin-bottom:8px;">📈</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Click Refresh Report to load data</div>
+      <div style="font-size:12px;">Data is fetched fresh each time you refresh</div>
+    </div>
+  </div>
 
     <!-- Site comparison -->
     <div style="margin-bottom:20px;">
@@ -1134,26 +1141,40 @@
   // ── CENTRAL DATA FETCH ────────────────────────────────────
   // Single fetch used by dashboard, report, and auto-load.
   // Stores result in lastData so all tabs share the same data.
-  var fetchInProgress = false;
+  function buildReport() {
+    // Do nothing on tab switch — user clicks Refresh manually
+  }
 
-  function fetchLiveData(onComplete) {
-    fetchInProgress = true;
+  function refreshReport() {
+    var btn = document.getElementById('btn-refresh-report');
+    btn.textContent = '↻ Loading…';
+    btn.disabled = true;
+
     fetch(BACKEND_URL, { redirect: 'follow' })
       .then(function(res){ return res.json(); })
       .then(function(d){
         lastData = d;
-        fetchInProgress = false;
-        if (document.getElementById('tab-dashboard').classList.contains('active')) {
-          renderDashboard(d);
-        }
-        if (document.getElementById('tab-report').classList.contains('active')) {
-          renderReport(d);
-        }
+        renderReport(d);
+        btn.textContent = '↻ Refresh Report';
+        btn.disabled = false;
+      })
+      .catch(function(){
+        showToast('Could not load data — check connection', '#f87171');
+        btn.textContent = '↻ Refresh Report';
+        btn.disabled = false;
+      });
+  }
+
+  // ── CENTRAL DATA FETCH (dashboard only) ──────────────────
+  function fetchLiveData(onComplete) {
+    fetch(BACKEND_URL, { redirect: 'follow' })
+      .then(function(res){ return res.json(); })
+      .then(function(d){
+        lastData = d;
         if (onComplete) onComplete(d);
       })
       .catch(function(err){
         console.error(err);
-        fetchInProgress = false;
         if (onComplete) onComplete(null);
       });
   }
