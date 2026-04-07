@@ -871,11 +871,11 @@
           <thead>
             <tr>
               <th>Property</th>
-              <th>Vehicles Headed Here</th>
+              <th>Vehicles Stated Dest.</th>
               <th>% of Total</th>
               <th>Gate Entries</th>
-              <th>Conversion Rate</th>
-              <th>Pax Recorded</th>
+              <th>Gate vs Vehicles</th>
+              <th>Note</th>
             </tr>
           </thead>
           <tbody id="r-site-tbody"></tbody>
@@ -1413,12 +1413,12 @@
 
     // ── KPIs ─────────────────────────────────────────────
     var kpis = [
-      { label: 'Total Vehicles',     value: entries,   sub: 'entries logged' },
-      { label: 'Unique Plates',      value: unique,    sub: 'distinct vehicles' },
-      { label: 'Total Passengers',   value: pax,       sub: 'recorded' },
-      { label: 'Entered MJSR',       value: mjsr,      sub: entries > 0 ? pct(mjsr,entries) + ' of total' : '—', color: '#1a73e8' },
-      { label: 'Green Valley',       value: gv,        sub: entries > 0 ? pct(gv,entries)   + ' of total' : '—', color: '#059669' },
-      { label: 'MJSR Conversion',    value: convRate,  sub: 'gate vs checkpoint' }
+      { label: 'Total Vehicles',        value: entries,   sub: 'entries logged' },
+      { label: 'Unique Plates',         value: unique,    sub: 'distinct vehicles' },
+      { label: 'Total Passengers',      value: pax,       sub: 'recorded at checkpoints' },
+      { label: 'Stated MJSR',           value: mjsr,      sub: entries > 0 ? pct(mjsr,entries) + ' of vehicles' : '—', color: '#1a73e8' },
+      { label: 'Stated Green Valley',   value: gv,        sub: entries > 0 ? pct(gv,entries)   + ' of vehicles' : '—', color: '#059669' },
+      { label: 'Gate vs Vehicles',      value: gate.mjsr + gate.gv > 0 ? gate.mjsr + gate.gv : '—', sub: gate.mjsr + gate.gv > 0 ? 'total gate entries recorded' : 'no gate entries yet' }
     ];
     document.getElementById('r-kpis').innerHTML = kpis.map(function(k){
       return '<div class="stat-card">' +
@@ -1430,31 +1430,33 @@
 
     // ── SITE COMPARISON ──────────────────────────────────
     var dest    = d.destinations || {};
-    // Use today or allTime gate figures depending on range
-    var gate = (range === 'today') ? (d.gateToday || { mjsr:0, gv:0 }) : (d.gateAllTime || { mjsr:0, gv:0 });
+    var gate    = (range === 'today') ? (d.gateToday || { mjsr:0, gv:0 }) : (d.gateAllTime || { mjsr:0, gv:0 });
     var dMJSR   = dest['Malam Jabba Ski Resort (MJSR)'] || 0;
     var dGV     = dest['Green Valley'] || 0;
     var dBoth   = dest['Both / Touring the area'] || 0;
-    var dTotal  = dMJSR + dGV + dBoth || 1;
-    var estPaxMJSR = Math.round(pax * dMJSR / dTotal);
-    var estPaxGV   = Math.round(pax * dGV   / dTotal);
-    var gPctMJSR   = estPaxMJSR > 0 ? pct(gate.mjsr, estPaxMJSR) : '—';
-    var gPctGV     = estPaxGV   > 0 ? pct(gate.gv,   estPaxGV)   : '—';
+    var dPass   = dest['Just passing through'] || 0;
+    var dTotal  = dMJSR + dGV + dBoth + dPass || 1;
+
+    // Conversion = gate entries vs vehicles that stated that destination
+    var gPctMJSR = dMJSR > 0 ? pct(gate.mjsr, dMJSR) : '—';
+    var gPctGV   = dGV   > 0 ? pct(gate.gv,   dGV)   : '—';
 
     document.getElementById('r-site-tbody').innerHTML = [
-      { name:'MJSR', dest:dMJSR, gate:gate.mjsr, conv:gPctMJSR, paxEst:estPaxMJSR, color:'#1a73e8' },
-      { name:'Green Valley', dest:dGV, gate:gate.gv, conv:gPctGV, paxEst:estPaxGV, color:'#059669' },
-      { name:'Both / Touring', dest:dBoth, gate:'—', conv:'—', paxEst:'—', color:'#6b7280' },
-      { name:'Passing Through', dest:dest['Just passing through']||0, gate:'—', conv:'—', paxEst:'—', color:'#6b7280' }
+      { name:'MJSR',            dest:dMJSR, gatev:gate.mjsr, conv:gPctMJSR, color:'#1a73e8' },
+      { name:'Green Valley',    dest:dGV,   gatev:gate.gv,   conv:gPctGV,   color:'#059669' },
+      { name:'Both / Touring',  dest:dBoth, gatev:'—',       conv:'—',      color:'#6b7280' },
+      { name:'Passing Through', dest:dPass, gatev:'—',       conv:'—',      color:'#6b7280' }
     ].map(function(r){
-      var total = dMJSR + dGV + dBoth + (dest['Just passing through']||0) || 1;
+      var note = typeof r.gatev === 'number' && r.dest > 0
+        ? (r.gatev >= r.dest ? '↑ More gate entries than stated dest.' : '↓ ' + (r.dest - r.gatev) + ' vehicles did not enter')
+        : '—';
       return '<tr>' +
         '<td style="font-weight:600;color:'+r.color+'">'+r.name+'</td>' +
         '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">'+r.dest+'</td>' +
-        '<td style="font-weight:600">'+pct(r.dest,total)+'</td>' +
-        '<td>'+r.gate+'</td>' +
+        '<td style="font-weight:600">'+pct(r.dest,dTotal)+'</td>' +
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:'+r.color+'">'+r.gatev+'</td>' +
         '<td style="font-weight:600;color:'+r.color+'">'+r.conv+'</td>' +
-        '<td>'+r.paxEst+'</td>' +
+        '<td style="font-size:11px;color:var(--muted)">'+note+'</td>' +
       '</tr>';
     }).join('');
 
