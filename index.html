@@ -402,7 +402,7 @@ function renderDash(d) {
     ['CP2 → CP3',                   j.cp2AndCp3],
     ['CP3 only',                    j.cp3Only]
   ].map(function(r){
-    return '<tr><td>'+r[0]+'</td><td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">'+r[1]+'</td></tr>';
+    return '<tr><td>'+r[0]+'</td><td style="font-size:18px;font-weight:700">'+r[1]+'</td></tr>';
   }).join('');
 
   var vt=d.vtypes||{}, vtp=d.vtypesPax||{};
@@ -437,10 +437,10 @@ function renderDash(d) {
       var cc = conv!==null ? (conv>=75?'#16a34a':conv>=40?'#d97706':'#dc2626') : 'var(--muted)';
       return '<tr>'+
         '<td style="font-weight:700;color:'+r.c+'">'+r.stage+'</td>'+
-        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">'+r.v+'</td>'+
-        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">'+r.p+'</td>'+
+        '<td style="font-size:18px;font-weight:700">'+r.v+'</td>'+
+        '<td style="font-size:18px;font-weight:700">'+r.p+'</td>'+
         '<td>'+(hasGate?'<span style="font-weight:700;color:#1a73e8">'+r.gm+' MJSR</span> &nbsp;<span style="font-weight:700;color:#059669">'+r.gg+' GV</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
-        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;color:'+cc+'">'+(conv!==null?conv+'%':'—')+'</td>'+
+        '<td style="font-size:22px;font-weight:700;color:'+cc+'">'+(conv!==null?conv+'%':'—')+'</td>'+
         '<td style="font-size:11px;color:var(--muted)">'+(hasGate?'Gate entries ÷ CP3 passengers':'No gate comparison at this stage')+'</td>'+
       '</tr>';
     }).join('');
@@ -477,10 +477,10 @@ function renderDash(d) {
       var diffCol = diff!==null ? (diff>=0?'#16a34a':'#dc2626') : 'var(--muted)';
       return '<tr>'+
         '<td style="font-weight:700;color:'+r.c+'">'+r.n+'</td>'+
-        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
-        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
-        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
-        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
+        '<td style="font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
       '</tr>';
     }).join('');
 }
@@ -569,7 +569,7 @@ function renderReport(d) {
         '<td style="font-weight:700">'+r.pIn+'</td>'+
         '<td style="font-weight:700;color:'+pc+'">'+r.cont+'</td>'+
         '<td style="font-weight:700;color:#dc2626">'+r.drop+'</td>'+
-        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:'+pc+'">'+r.pct_+'%</td>'+
+        '<td style="font-size:20px;font-weight:700;color:'+pc+'">'+r.pct_+'%</td>'+
         '<td style="font-size:11px;color:var(--muted)">'+r.note+'</td>'+
       '</tr>';
     }).join('')+
@@ -580,7 +580,7 @@ function renderReport(d) {
     '<tr><td>Total Unique Vehicles (all CPs)</td><td style="font-weight:700">'+(fo.totalUniquePlates||0)+'</td></tr>'+
     '<tr><td>Total Passengers (all CPs)</td><td style="font-weight:700">'+(fo.totalPax||0)+'</td></tr>'+
     '<tr><td>Total Gate Entries (MJSR + GV)</td><td style="font-weight:700;color:#1a73e8">'+gTotal+'</td></tr>'+
-    '<tr><td>Overall Conversion (gate ÷ total pax)</td><td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:#1a73e8">'+(fo.conversionPct||0)+'%</td></tr>'+
+    '<tr><td>Overall Conversion (gate ÷ total pax)</td><td style="font-size:20px;font-weight:700;color:#1a73e8">'+(fo.conversionPct||0)+'%</td></tr>'+
     '</tbody></table></div>'+
 
     '<div class="sec-title">Property Breakdown — Passengers vs Gate Entries</div>'+
@@ -595,10 +595,10 @@ function renderReport(d) {
       var diffCol = diff!==null?(diff>=0?'#16a34a':'#dc2626'):'var(--muted)';
       return '<tr>'+
         '<td style="font-weight:700;color:'+r.c+'">'+r.n+'</td>'+
-        '<td style="font-family:\\'Barlow Condensed\\',sans-serif;font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
-        '<td style="font-family:\\'Barlow Condensed\\',sans-serif;font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
-        '<td style="font-family:\\'Barlow Condensed\\',sans-serif;font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
-        '<td style="font-family:\\'Barlow Condensed\\',sans-serif;font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
+        '<td style="font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
       '</tr>';
     }).join('')+
     '</tbody></table></div>'+
@@ -698,13 +698,13 @@ function renderGate(entries) {
   el.innerHTML = entries.map(function(e,i){
     var col = e.property==='MJSR'?'#1a73e8':'#059669';
     return '<div class="log-row" id="gr-'+i+'">'+
-      '<div style="flex:1"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:700;color:'+col+'">'+e.property+'</div><div class="log-meta">'+e.date+(e.notes?' · '+e.notes:'')+'</div></div>'+
+      '<div style="flex:1"><div style="font-size:16px;font-weight:700;color:'+col+'">'+e.property+'</div><div class="log-meta">'+e.date+(e.notes?' · '+e.notes:'')+'</div></div>'+
       '<div style="display:flex;align-items:center;gap:12px;">'+
-        '<div style="text-align:right"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;color:'+col+'">'+e.visitors+'</div><div class="log-time">visitors</div></div>'+
+        '<div style="text-align:right"><div style="font-size:22px;font-weight:700;color:'+col+'">'+e.visitors+'</div><div class="log-time">visitors</div></div>'+
         '<button class="btn-sm" onclick="openEdit('+i+')">✏ Edit</button>'+
       '</div></div>'+
       '<div class="edit-box" id="ge-'+i+'">'+
-        '<div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:10px;">Edit Entry</div>'+
+        '<div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;">Edit Entry</div>'+
         '<div class="edit-grid">'+
           '<div><label class="edit-label">Date</label><input type="date" id="ge-d-'+i+'" value="'+e.date+'"></div>'+
           '<div><label class="edit-label">Property</label><select id="ge-p-'+i+'"><option value="MJSR"'+(e.property==='MJSR'?' selected':'')+'>MJSR</option><option value="GV"'+(e.property==='GV'?' selected':'')+'>GV</option></select></div>'+
@@ -789,7 +789,7 @@ function renderLog() {
     var editRow =
       '<tr id="log-edit-row-'+idx+'" style="display:none;background:#f0f7ff;">'+
         '<td colspan="11" style="padding:14px 16px;">'+
-          '<div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:10px;">Edit Entry — '+e.reg+'</div>'+
+          '<div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;">Edit Entry — '+e.reg+'</div>'+
           '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px;">'+
             '<div><label class="edit-label">Date</label><input type="date" id="le-date-'+idx+'" value="'+(e.date||'')+'"></div>'+
             '<div><label class="edit-label">Registration</label><input type="text" id="le-reg-'+idx+'" value="'+e.reg+'" style="text-transform:uppercase"></div>'+
@@ -830,8 +830,8 @@ function renderLog() {
       '<td style="color:var(--muted);font-size:11px">'+(idx+1)+'</td>'+
       '<td style="font-size:12px;white-space:nowrap">'+e.timestamp+'</td>'+
       '<td style="font-weight:600;font-size:13px">'+e.staff+'</td>'+
-      '<td><span style="font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:13px;color:'+cpCol+'">'+cpShort+'</span></td>'+
-      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:15px;color:var(--blue);letter-spacing:.04em">'+e.reg+'</td>'+
+      '<td><span style="font-weight:700;font-size:13px;color:'+cpCol+'">'+cpShort+'</span></td>'+
+      '<td style="font-weight:700;font-size:15px;color:var(--blue);letter-spacing:.04em">'+e.reg+'</td>'+
       '<td style="font-size:12px">'+e.vtype.split(' (')[0]+'</td>'+
       '<td style="text-align:center;font-weight:600">'+e.pax+'</td>'+
       '<td style="font-size:12px">'+e.dest.replace('Malam Jabba Ski Resort (MJSR)','MJSR').replace('Unknown / Not stated','Unknown').replace('Both / Touring the area','Both')+'</td>'+
