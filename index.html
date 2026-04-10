@@ -266,7 +266,7 @@ textarea{resize:vertical;min-height:64px;}
   <div class="grid" id="overall-conv-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:20px;"></div>
 
   <div class="sec-title">Visitor Conversion — Property Breakdown</div>
-  <div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Vehicles Stated</th><th>% of Total</th><th>Gate Entries (people)</th><th>Est. CP3 Pax</th><th>Conversion %</th></tr></thead><tbody id="conv-body"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:16px;">Refresh to load</td></tr></tbody></table></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Passengers in Cars (stated dest.)</th><th>Gate Entries (people)</th><th>Conversion %</th><th>Difference</th></tr></thead><tbody id="conv-body"><tr><td colspan="5" style="color:var(--muted);text-align:center;padding:16px;">Refresh to load</td></tr></tbody></table></div>
 </div>
 
 <!-- ══ REPORT ══════════════════════════════════════════════ -->
@@ -463,24 +463,24 @@ function renderDash(d) {
   }).join('');
 
   // ── PROPERTY BREAKDOWN TABLE ────────────────────────────
-  var cp3Pax = cp.cp3.pax||0;
-  var epM = cp3Pax>0 ? Math.round(cp3Pax*dM/dT) : 0;
-  var epG = cp3Pax>0 ? Math.round(cp3Pax*dG/dT) : 0;
+  var paxStatedMJSR = d.allTime.paxStatedMJSR || 0;
+  var paxStatedGV   = d.allTime.paxStatedGV   || 0;
   document.getElementById('conv-body').innerHTML =
-    [{n:'MJSR',v:dM,g:gate.mjsr,ep:epM,c:'#1a73e8'},
-     {n:'Green Valley',v:dG,g:gate.gv,ep:epG,c:'#059669'},
-     {n:'Both/Touring',v:dB,g:'—',ep:0,c:'#6b7280'},
-     {n:'Passing',v:dP,g:'—',ep:0,c:'#6b7280'}]
+    (paxStatedMJSR===0 && paxStatedGV===0 ? '<tr><td colspan="5" style="background:#fff3cd;color:#856404;font-size:12px;padding:8px 14px;">⚠ No passenger data yet — will populate as entries are submitted</td></tr>' : '')+
+    [{n:'MJSR',        g:gate.mjsr||0, basePax:paxStatedMJSR, c:'#1a73e8'},
+     {n:'Green Valley',g:gate.gv||0,   basePax:paxStatedGV,   c:'#059669'}]
     .map(function(r){
-      var conv=typeof r.g==='number'&&r.ep>0?pct(r.g,r.ep):'—';
-      var cc=typeof r.g==='number'&&r.ep>0?(parseInt(conv)>110?'#dc2626':r.c):'var(--muted)';
+      var conv    = r.basePax>0 ? pct(r.g, r.basePax) : '—';
+      var cc      = r.basePax>0 ? (parseInt(conv)>100?'#dc2626':r.c) : 'var(--muted)';
+      var diff    = r.basePax>0 ? (r.g - r.basePax) : null;
+      var diffStr = diff!==null ? (diff>=0?'+'+diff:String(diff)) : '—';
+      var diffCol = diff!==null ? (diff>=0?'#16a34a':'#dc2626') : 'var(--muted)';
       return '<tr>'+
-        '<td style="font-weight:600;color:'+r.c+'">'+r.n+'</td>'+
-        '<td style="font-weight:700">'+r.v+'</td>'+
-        '<td>'+pct(r.v,dT)+'</td>'+
-        '<td style="font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
-        '<td style="color:var(--muted);font-size:12px">'+(r.ep>0?'~'+r.ep+' est. from CP3':'—')+'</td>'+
-        '<td style="font-weight:700;color:'+cc+'">'+conv+'</td>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.n+'</td>'+
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
+        '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
       '</tr>';
     }).join('');
 }
@@ -583,13 +583,23 @@ function renderReport(d) {
     '<tr><td>Overall Conversion (gate ÷ total pax)</td><td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:#1a73e8">'+(fo.conversionPct||0)+'%</td></tr>'+
     '</tbody></table></div>'+
 
-    '<div class="sec-title">Property Breakdown — Gate vs CP3 Passengers</div>'+
-    '<div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Vehicles Stated</th><th>% of Vehicles</th><th>Gate Entries</th><th>Est. CP3 Pax</th><th>Conversion %</th></tr></thead><tbody>'+
-    [{n:'MJSR',v:dM,g:gM,ep:epM,c:'#1a73e8'},{n:'Green Valley',v:dG,g:gG,ep:epG,c:'#059669'},{n:'Both/Touring',v:dB,g:'—',ep:0,c:'#6b7280'},{n:'Passing',v:dP,g:'—',ep:0,c:'#6b7280'}]
+    '<div class="sec-title">Property Breakdown — Passengers vs Gate Entries</div>'+
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Total passengers in vehicles that stated each destination vs actual gate entries per site.</p>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Passengers in Cars (stated dest.)</th><th>Gate Entries (people)</th><th>Conversion %</th><th>Difference</th></tr></thead><tbody>'+
+    [{n:'MJSR',g:gM,basePax:d.allTime.paxStatedMJSR||0,c:'#1a73e8'},{n:'Green Valley',g:gG,basePax:d.allTime.paxStatedGV||0,c:'#059669'}]
     .map(function(r){
-      var conv=typeof r.g==='number'&&r.ep>0?pct(r.g,r.ep):'—';
-      var cc=typeof r.g==='number'&&r.ep>0?(parseInt(conv)>110?'#dc2626':r.c):'var(--muted)';
-      return '<tr><td style="font-weight:600;color:'+r.c+'">'+r.n+'</td><td style="font-weight:700">'+r.v+'</td><td>'+pct(r.v,dT)+'</td><td style="font-weight:700;color:'+r.c+'">'+r.g+'</td><td style="color:var(--muted);font-size:12px">'+(r.ep>0?'~'+r.ep:'—')+'</td><td style="font-weight:700;color:'+cc+'">'+conv+'</td></tr>';
+      var conv    = r.basePax>0 ? pct(r.g,r.basePax) : '—';
+      var cc      = r.basePax>0 ? (parseInt(conv)>100?'#dc2626':r.c) : 'var(--muted)';
+      var diff    = r.basePax>0 ? (r.g-r.basePax) : null;
+      var diffStr = diff!==null?(diff>=0?'+'+diff:String(diff)):'—';
+      var diffCol = diff!==null?(diff>=0?'#16a34a':'#dc2626'):'var(--muted)';
+      return '<tr>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.n+'</td>'+
+        '<td style="font-family:\\'Barlow Condensed\\',sans-serif;font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
+        '<td style="font-family:\\'Barlow Condensed\\',sans-serif;font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
+        '<td style="font-family:\\'Barlow Condensed\\',sans-serif;font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
+        '<td style="font-family:\\'Barlow Condensed\\',sans-serif;font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
+      '</tr>';
     }).join('')+
     '</tbody></table></div>'+
 
