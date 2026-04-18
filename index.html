@@ -3,1818 +3,951 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GV Adventure Park — Daily Check System</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>MJSR Tourist Vehicle Count</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; }
+:root {
+  --bg:#f8f9fa; --bg2:#ffffff; --bg3:#f1f3f5; --border:#dee2e6;
+  --blue:#1a73e8; --blue2:#1558b0; --green:#16a34a; --red:#dc2626;
+  --text:#1a1f2e; --muted:#6b7280;
+  --cp1:#d97706; --cp2:#059669; --cp3:#2563eb;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;min-height:100vh;}
 
-  /* HEADER */
-  .app-header { background: #1a2e45; padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
-  .header-logo { width: 44px; height: 44px; background: #2a9d5c; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-  .header-text h1 { font-size: 17px; font-weight: 700; color: #ffffff; line-height: 1.2; }
-  .header-text p  { font-size: 12px; color: #94a3b8; margin-top: 2px; }
-  .header-date { margin-left: auto; text-align: right; font-size: 12px; color: #94a3b8; line-height: 1.5; }
-  .header-date strong { color: #f59e0b; display: block; font-size: 13px; }
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-icon{width:32px;height:32px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.brand h1{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.04em;color:var(--text);}
+.brand small{font-size:11px;color:var(--muted);display:block;}
+.live{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:500;}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-  /* TABS */
-  .tab-bar { background: #1a2e45; border-bottom: 3px solid #2a9d5c; display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 8px; }
-  .tab-bar::-webkit-scrollbar { display: none; }
-  .tab-btn { background: none; border: none; color: #94a3b8; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; padding: 13px 18px; cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-  .tab-btn:hover { color: #e2e8f0; }
-  .tab-btn.active { color: #ffffff; border-bottom-color: #2a9d5c; background: rgba(42,157,92,0.1); }
+/* NAV */
+.nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 16px;overflow-x:auto;}
+.tab{padding:12px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;text-transform:uppercase;transition:color .2s;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
 
-  /* MAIN */
-  .main { max-width: 720px; margin: 0 auto; padding: 20px 16px 60px; }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+/* PAGES */
+.page{display:none;padding:20px;max-width:960px;margin:0 auto;}
+.page.active{display:block;}
 
-  /* CARDS */
-  .card { background: #ffffff; border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .section-header { padding: 14px 18px; border-bottom: 2px solid #f0f2f5; display: flex; align-items: center; gap: 10px; }
-  .section-header h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #1a2e45; }
-  .section-tag { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; background: #e8f5e9; color: #2a9d5c; flex-shrink: 0; }
-  .card-body { padding: 18px; }
+/* COMPONENTS */
+.sec-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-bottom:10px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;}
+.kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--blue);line-height:1;}
+.kpi-lbl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-bottom:4px;}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px;}
 
-  /* FIELDS */
-  .field { margin-bottom: 14px; }
-  .field:last-child { margin-bottom: 0; }
-  .field label { display: block; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
-  .field input, .field select, .field textarea { width: 100%; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; color: #1a1a2e; font-family: 'Inter', sans-serif; font-size: 14px; padding: 10px 13px; transition: border-color 0.2s; -webkit-appearance: none; }
-  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #2a9d5c; background: #fff; }
-  .field textarea { resize: vertical; min-height: 90px; background: #fffde7; border-color: #f0e68c; font-size: 14px; line-height: 1.5; }
-  .field textarea:focus { border-color: #2a9d5c; background: #fff; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  @media (max-width: 520px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+.full{grid-column:1/-1;}
+.f-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-family:'Barlow Condensed',sans-serif;display:block;margin-bottom:5px;}
+.req{color:var(--blue);}
+input,select,textarea{width:100%;background:#fff;border:1px solid var(--border);border-radius:7px;color:var(--text);padding:9px 12px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.1);}
+select option{background:#fff;}
+textarea{resize:vertical;min-height:64px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.sub-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--cp3);margin-bottom:12px;}
 
-  /* DIVIDER */
-  .divider { display: flex; align-items: center; gap: 10px; margin: 18px 0 12px; }
-  .divider span { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #64748b; white-space: nowrap; }
-  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+/* BUTTONS */
+.btn-primary{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .2s;}
+.btn-primary:hover{background:var(--blue2);}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+.btn-sm{padding:7px 14px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .2s;}
+.btn-sm:hover{border-color:var(--blue);color:var(--blue);}
+.btn-sm.blue{border-color:var(--blue);color:var(--blue);}
 
-  /* CHECK ROWS */
-  .check-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid #f0f2f5; }
-  .check-row:last-child { border-bottom: none; }
-  .check-code { font-size: 11px; font-weight: 700; color: #2a9d5c; min-width: 52px; font-family: 'Inter', monospace; flex-shrink: 0; }
-  .check-label { font-size: 13px; color: #334155; flex: 1; line-height: 1.4; }
+/* CP PILLS */
+.cp-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.cp-pill{padding:7px 14px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.04em;border:2px solid;cursor:pointer;background:transparent;transition:all .2s;}
+.cp-pill.cp1{color:var(--cp1);border-color:var(--cp1);}
+.cp-pill.cp2{color:var(--cp2);border-color:var(--cp2);}
+.cp-pill.cp3{color:var(--cp3);border-color:var(--cp3);}
+.cp-pill.cp1.sel{background:var(--cp1);color:#fff;}
+.cp-pill.cp2.sel{background:var(--cp2);color:#fff;}
+.cp-pill.cp3.sel{background:var(--cp3);color:#fff;}
 
-  /* YES/NO BUTTONS */
-  .yn-wrap { display: flex; border-radius: 8px; overflow: hidden; border: 1.5px solid #e2e8f0; flex-shrink: 0; }
-  .yn-wrap input[type="radio"] { display: none; }
-  .yn-wrap label { padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; background: #f8fafc; color: #94a3b8; transition: all 0.18s; user-select: none; letter-spacing: 0.3px; }
-  .yn-wrap label:first-of-type { border-right: 1.5px solid #e2e8f0; }
-  .yn-wrap input[value="YES"]:checked + label { background: #2a9d5c; color: #ffffff; }
-  .yn-wrap input[value="NO"]:checked  + label { background: #f8fafc; color: #334155; }
+/* TABLE */
+.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tbl-wrap table{width:100%;border-collapse:collapse;}
+.tbl-wrap th{background:var(--bg3);padding:9px 14px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.tbl-wrap td{padding:9px 14px;border-bottom:1px solid var(--border);font-size:13px;}
+.tbl-wrap tr:last-child td{border-bottom:none;}
+.tbl-wrap tr:hover td{background:var(--bg3);}
 
-  /* NUMBER INPUT */
-  .num-input { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; color: #1a1a2e; font-family: 'Inter', sans-serif; font-size: 14px; padding: 7px 10px; width: 80px; text-align: center; flex-shrink: 0; transition: border-color 0.2s; }
-  .num-input:focus { outline: none; border-color: #2a9d5c; }
+/* FUNNEL BAR */
+.f-row{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:grid;grid-template-columns:190px 1fr 60px;align-items:center;gap:14px;}
+.f-lbl{display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;}
+.f-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.f-bar-bg{background:var(--bg3);border-radius:4px;height:7px;overflow:hidden;border:1px solid var(--border);}
+.f-bar{height:100%;border-radius:4px;transition:width .8s ease;}
+.f-num{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;text-align:right;}
 
-  /* SIGN-OFF */
-  .signoff-row { padding: 12px 0; border-bottom: 1px solid #f0f2f5; }
-  .signoff-row:last-child { border-bottom: none; }
-  .signoff-label { font-size: 13px; color: #475569; font-weight: 500; margin-bottom: 8px; }
-  .signoff-yn { display: flex; border-radius: 8px; overflow: hidden; border: 1.5px solid #e2e8f0; }
-  .signoff-yn input[type="radio"] { display: none; }
-  .signoff-yn label { flex: 1; text-align: center; padding: 11px; font-size: 14px; font-weight: 700; cursor: pointer; background: #f8fafc; color: #94a3b8; transition: all 0.18s; letter-spacing: 0.5px; }
-  .signoff-yn label:first-of-type { border-right: 1.5px solid #e2e8f0; }
-  .signoff-yn input[value="YES"]:checked + label { background: #2a9d5c; color: #ffffff; }
-  .signoff-yn input[value="NO"]:checked  + label { background: #f1f5f9; color: #334155; }
+/* LOG ENTRY */
+.log-row{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;animation:fi .3s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.log-reg{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.05em;color:var(--blue);}
+.log-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.log-time{font-size:12px;color:var(--muted);}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
 
-  /* SUBMIT */
-  .submit-btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; background: #2563eb; color: #ffffff; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
-  .submit-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
-  .submit-btn:active { transform: translateY(0); }
-  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+/* INLINE EDIT */
+.edit-box{background:#f0f7ff;border:1px solid var(--blue);border-radius:8px;padding:14px;margin-top:6px;display:none;}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.edit-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-family:'Barlow Condensed',sans-serif;display:block;margin-bottom:3px;}
 
-  /* STATUS */
-  .status-msg { display: none; align-items: flex-start; gap: 10px; padding: 13px 15px; border-radius: 10px; font-size: 14px; line-height: 1.5; margin-top: 10px; }
-  .status-msg.show { display: flex; }
-  .status-msg.success { background: #f0fdf4; border: 1.5px solid #86efac; color: #166534; }
-  .status-msg.error   { background: #fef2f2; border: 1.5px solid #fca5a5; color: #991b1b; }
+/* TOAST */
+.toast{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:7px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;z-index:999;animation:su .3s ease;}
+@keyframes su{from{bottom:0;opacity:0}to{bottom:20px;opacity:1}}
 
-  /* SPINNER */
-  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
-  .loading .spinner { display: inline-block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* INFO BOX */
-  .info-box { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px 15px; font-size: 13px; color: #1e40af; margin-bottom: 16px; line-height: 1.5; display: flex; gap: 8px; }
-
-  /* ── DASHBOARD SPECIFIC ── */
-
-  /* Today's date banner */
-  .today-banner {
-    background: #1a2e45;
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .today-banner-left { font-size: 13px; color: #94a3b8; }
-  .today-banner-left strong { color: #ffffff; display: block; font-size: 16px; margin-bottom: 2px; }
-  .today-banner-right { font-size: 11px; color: #64748b; text-align: right; }
-  .today-banner-right span { color: #f59e0b; font-size: 12px; font-weight: 600; }
-
-  /* TODAY ACTIVITY TILES */
-  .today-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
-  @media (max-width: 460px) { .today-tiles { grid-template-columns: 1fr; } }
-
-  .activity-tile {
-    background: #ffffff;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    border-top: 4px solid #e2e8f0;
-    transition: box-shadow 0.2s;
-  }
-  .activity-tile.status-ok      { border-top-color: #2a9d5c; }
-  .activity-tile.status-anomaly { border-top-color: #f59e0b; }
-  .activity-tile.status-pending { border-top-color: #cbd5e1; }
-
-  .tile-header {
-    padding: 14px 16px 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .tile-icon-name { display: flex; align-items: center; gap: 8px; }
-  .tile-icon { font-size: 22px; }
-  .tile-name { font-size: 14px; font-weight: 700; color: #1a2e45; }
-
-  .tile-status-badge {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.8px; text-transform: uppercase;
-    padding: 3px 10px; border-radius: 20px;
-    white-space: nowrap;
-  }
-  .badge-ok      { background: #dcfce7; color: #166534; }
-  .badge-anomaly { background: #fef3c7; color: #92400e; }
-  .badge-pending { background: #f1f5f9; color: #64748b; }
-
-  .tile-body { padding: 0 16px 16px; }
-
-  .tile-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 7px 0;
-    border-bottom: 1px solid #f0f2f5;
-    font-size: 13px;
-  }
-  .tile-row:last-child { border-bottom: none; }
-  .tile-row-label { color: #64748b; font-size: 12px; font-weight: 500; }
-  .tile-row-value { color: #1a2e45; font-weight: 600; font-size: 13px; }
-  .tile-row-value.ok      { color: #2a9d5c; }
-  .tile-row-value.warn    { color: #d97706; }
-  .tile-row-value.pending { color: #94a3b8; }
-
-  .tile-anomaly-box {
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 12px;
-    color: #92400e;
-    line-height: 1.4;
-    margin-top: 10px;
-  }
-  .tile-anomaly-box strong { display: block; margin-bottom: 2px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-  .tile-pending-msg {
-    padding: 16px 0 8px;
-    text-align: center;
-    color: #94a3b8;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-  .tile-pending-msg strong { display: block; font-size: 14px; color: #cbd5e1; margin-bottom: 4px; }
-
-  /* SUMMARY STATS ROW */
-  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  @media (max-width: 460px) { .stats-row { grid-template-columns: 1fr 1fr; } }
-
-  .stat-box {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 14px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    text-align: center;
-    border-bottom: 3px solid #e2e8f0;
-  }
-  .stat-box.green { border-bottom-color: #2a9d5c; }
-  .stat-box.blue  { border-bottom-color: #3b82f6; }
-  .stat-box.amber { border-bottom-color: #f59e0b; }
-  .stat-box.red   { border-bottom-color: #ef4444; }
-
-  .stat-box-value { font-size: 28px; font-weight: 700; color: #1a2e45; line-height: 1; }
-  .stat-box-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px; }
-
-  /* 7-DAY COMPLIANCE BAR */
-  .week-card { background: #fff; border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .week-card-header { padding: 13px 16px; border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; justify-content: space-between; }
-  .week-card-header h3 { font-size: 13px; font-weight: 700; color: #1a2e45; text-transform: uppercase; letter-spacing: 0.6px; }
-  .week-card-body { padding: 16px; }
-  .week-days { display: flex; gap: 6px; justify-content: space-between; }
-  .week-day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-  .week-day-label { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; }
-  .week-day-dot {
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 700;
-  }
-  .dot-both    { background: #dcfce7; color: #166534; }
-  .dot-partial { background: #fef3c7; color: #92400e; }
-  .dot-none    { background: #f1f5f9; color: #cbd5e1; }
-  .dot-today   { background: #1a2e45; color: #ffffff; ring: 2px; outline: 2px solid #2a9d5c; }
-  .week-legend { display: flex; gap: 14px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f0f2f5; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #64748b; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-
-  /* ACTIVITY BREAKDOWN TABLE */
-  .breakdown-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .breakdown-table th { padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-  .breakdown-table td { padding: 11px 12px; border-bottom: 1px solid #f0f2f5; color: #334155; vertical-align: middle; }
-  .breakdown-table tr:last-child td { border-bottom: none; }
-
-  /* PROGRESS BAR */
-  .progress-wrap { background: #f0f2f5; border-radius: 20px; height: 8px; overflow: hidden; }
-  .progress-bar  { height: 100%; border-radius: 20px; background: #2a9d5c; transition: width 0.5s ease; }
-  .progress-bar.amber { background: #f59e0b; }
-  .progress-bar.red   { background: #ef4444; }
-
-  /* RECENT LOG */
-  .log-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .log-card-header { padding: 13px 16px; border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; justify-content: space-between; }
-  .log-card-header h3 { font-size: 13px; font-weight: 700; color: #1a2e45; text-transform: uppercase; letter-spacing: 0.6px; }
-  .refresh-btn { background: #f8fafc; border: 1.5px solid #e2e8f0; color: #64748b; padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; }
-  .refresh-btn:hover { background: #e2e8f0; }
-
-  .log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .log-table th { padding: 9px 14px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-  .log-table td { padding: 10px 14px; border-bottom: 1px solid #f0f2f5; color: #334155; vertical-align: middle; }
-  .log-table tr:last-child td { border-bottom: none; }
-  .log-table tr:hover td { background: #f8fafc; }
-
-  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .pill-ok      { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
-  .pill-action  { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
-  .pill-pending { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
-
-  .empty-state { padding: 36px; text-align: center; color: #94a3b8; font-size: 14px; }
-
-  /* MIDNIGHT NOTICE */
-  .midnight-note { font-size: 11px; color: #94a3b8; text-align: center; padding: 10px; }
-  .midnight-note strong { color: #64748b; }
-
-  /* ── MAINTENANCE TAB ── */
-  .maint-lock { background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:40px 24px;text-align:center;margin-bottom:16px; }
-  .maint-lock-icon { font-size:40px;margin-bottom:14px; }
-  .maint-lock h2 { font-size:16px;font-weight:700;color:#1a2e45;margin-bottom:6px; }
-  .maint-lock p  { font-size:13px;color:#64748b;margin-bottom:20px; }
-  .pin-row { display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap; }
-  .pin-input { width:130px;padding:11px 14px;font-size:18px;letter-spacing:6px;text-align:center;border:1.5px solid #e2e8f0;border-radius:10px;font-family:'Inter',monospace;background:#f8fafc;color:#1a2e45;transition:border-color 0.2s; }
-  .pin-input:focus { outline:none;border-color:#2a9d5c;background:#fff; }
-  .pin-btn { padding:11px 22px;background:#1a2e45;color:#fff;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s; }
-  .pin-btn:hover { background:#2a9d5c; }
-  .pin-error { font-size:12px;color:#ef4444;margin-top:8px;display:none; }
-  .maint-panel { display:none; }
-  .maint-panel.unlocked { display:block; }
-  .maint-header-bar { background:#1a2e45;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px; }
-  .maint-header-bar h2 { font-size:15px;font-weight:700;color:#fff; }
-  .maint-header-bar span { font-size:12px;color:#94a3b8; }
-  .lock-btn { background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif; }
-  .lock-btn:hover { background:rgba(255,255,255,0.18);color:#fff; }
-  .maint-activity-tabs { display:flex;gap:0;margin-bottom:16px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08); }
-  .maint-act-btn { flex:1;background:none;border:none;padding:12px 8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;text-align:center; }
-  .maint-act-btn.active { color:#1a2e45;border-bottom-color:#2a9d5c;background:#f0fdf4; }
-  .maint-task-row { display:flex;align-items:flex-start;gap:12px;padding:13px 18px;border-bottom:1px solid #f0f2f5;transition:background 0.15s; }
-  .maint-task-row:last-child { border-bottom:none; }
-  .maint-task-row:hover { background:#f8fafc; }
-  .maint-freq-badge { font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:2px; }
-  .freq-daily { background:#dbeafe;color:#1e40af; }
-  .freq-weekly { background:#dcfce7;color:#166534; }
-  .freq-monthly { background:#fef3c7;color:#92400e; }
-  .freq-annual { background:#fce7f3;color:#9d174d; }
-  .maint-task-info { flex:1; }
-  .maint-task-title { font-size:13px;font-weight:600;color:#1a2e45;margin-bottom:3px; }
-  .maint-task-desc  { font-size:12px;color:#64748b;line-height:1.4; }
-  .maint-task-controls { display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;min-width:140px; }
-  .maint-date-label { font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px; }
-  .maint-date-input { font-size:12px;padding:5px 9px;border:1.5px solid #e2e8f0;border-radius:7px;background:#f8fafc;color:#1a2e45;font-family:'Inter',sans-serif;width:138px;transition:border-color 0.2s; }
-  .maint-date-input:focus { outline:none;border-color:#2a9d5c;background:#fff; }
-  .maint-status-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px; }
-  .dot-green { background:#2a9d5c; } .dot-amber { background:#f59e0b; } .dot-red { background:#ef4444; } .dot-grey { background:#cbd5e1; }
-  .maint-overdue-tag { font-size:10px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:0.5px; }
-  .maint-due-tag { font-size:10px;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:0.5px; }
-  .maint-save-bar { position:sticky;bottom:0;background:#fff;border-top:1px solid #e2e8f0;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:0 0 12px 12px;box-shadow:0 -2px 8px rgba(0,0,0,0.06); }
-  .maint-save-btn { padding:10px 24px;background:#2a9d5c;color:#fff;border:none;border-radius:9px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background 0.2s; }
-  .maint-save-btn:hover { background:#238a50; }
-  .maint-save-btn:disabled { opacity:0.5;cursor:not-allowed; }
-  .maint-save-status { font-size:13px;color:#64748b; }
-  .maint-save-status.saved { color:#2a9d5c;font-weight:600; }
-  .maint-save-status.error { color:#ef4444;font-weight:600; }
-
-  /* ── EDIT TAB ── */
-  .edit-record-card { background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);margin-bottom:16px; }
-  .edit-record-row { display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid #f0f2f5;cursor:pointer;transition:background 0.15s; }
-  .edit-record-row:last-child { border-bottom:none; }
-  .edit-record-row:hover { background:#f8fafc; }
-  .edit-record-row.selected { background:#f0fdf4;border-left:3px solid #2a9d5c; }
-  .edit-rec-icon { font-size:20px;flex-shrink:0; }
-  .edit-rec-info { flex:1; }
-  .edit-rec-title { font-size:13px;font-weight:600;color:#1a2e45; }
-  .edit-rec-sub   { font-size:11px;color:#94a3b8;margin-top:2px; }
-  .edit-rec-badge { font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0; }
-
-  .edit-form-wrap { display:none; }
-  .edit-form-wrap.show { display:block; }
-
-  .edit-field-group { margin-bottom:14px; }
-  .edit-field-group label { display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px; }
-  .edit-field-group input, .edit-field-group select, .edit-field-group textarea {
-    width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;
-    color:#1a1a2e;font-family:'Inter',sans-serif;font-size:14px;padding:9px 13px;
-    transition:border-color 0.2s;
-  }
-  .edit-field-group input:focus, .edit-field-group select:focus, .edit-field-group textarea:focus {
-    outline:none;border-color:#2a9d5c;background:#fff;
-  }
-  .edit-field-group textarea { resize:vertical;min-height:70px; }
-
-  .edit-reason-box { background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:16px; }
-  .edit-reason-box label { display:block;font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px; }
-  .edit-reason-box input { width:100%;background:#fff;border:1.5px solid #fde68a;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;padding:9px 13px;color:#1a1a2e; }
-  .edit-reason-box input:focus { outline:none;border-color:#f59e0b;background:#fff; }
-
-  .edit-editor-box { background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:14px;margin-bottom:16px; }
-  .edit-editor-box label { display:block;font-size:12px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px; }
-  .edit-editor-box input { width:100%;background:#fff;border:1.5px solid #bfdbfe;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;padding:9px 13px;color:#1a1a2e; }
-  .edit-editor-box input:focus { outline:none;border-color:#3b82f6; }
-
-  .edit-checks-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px; }
-  @media(max-width:480px){ .edit-checks-grid { grid-template-columns:1fr; } }
-  .edit-check-item { display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0; }
-  .edit-check-code { font-size:10px;font-weight:700;color:#2a9d5c;min-width:38px;font-family:monospace; }
-  .edit-check-sel { flex:1;background:#fff;border:1px solid #e2e8f0;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;padding:4px 6px;color:#1a1a2e; }
-
-  .edit-save-btn { width:100%;padding:14px;border:none;border-radius:10px;background:#1a2e45;color:#fff;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:background 0.2s;margin-top:6px; }
-  .edit-save-btn:hover { background:#2a9d5c; }
-  .edit-save-btn:disabled { opacity:0.5;cursor:not-allowed; }
-  .edit-cancel-btn { width:100%;padding:11px;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;color:#64748b;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:background 0.2s; }
-  .edit-cancel-btn:hover { background:#f8fafc; }
-
-  .audit-table { width:100%;border-collapse:collapse;font-size:12px; }
-  .audit-table th { padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:#64748b;background:#f8fafc;border-bottom:1px solid #e2e8f0; }
-  .audit-table td { padding:9px 12px;border-bottom:1px solid #f0f2f5;color:#334155;vertical-align:top; }
-  .audit-table tr:last-child td { border-bottom:none; }
-  .audit-table tr:hover td { background:#f8fafc; }
-
+/* PRINT */
+@media print{
+  .topbar,.nav,.toast{display:none!important;}
+  .page{display:none!important;}
+  #tab-report{display:block!important;padding:0;}
+  #rpt-header{display:block!important;}
+  body{background:#fff;}
+}
 </style>
 </head>
 <body>
 
-<header class="app-header">
-  <div class="header-logo">🎡</div>
-  <div class="header-text">
-    <h1>Green Valley Adventure Park</h1>
-    <p>Ferris Wheel | Kids Zipline | Daily Checks</p>
-  </div>
-  <div class="header-date">
-    <strong id="hdr-date">—</strong>
-    <span id="hdr-time">—</span>
-  </div>
-</header>
-
-<nav class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('dash')">📊 Dashboard</button>
-  <button class="tab-btn"        onclick="switchTab('fw')">🎡 Ferris Wheel</button>
-  <button class="tab-btn"        onclick="switchTab('zl')">🪂 Kids Zipline</button>
-  <button class="tab-btn"        onclick="switchTab('maint')">🔧 Maintenance</button>
-  <button class="tab-btn"        onclick="switchTab('edit')">✏️ Edit Record</button>
-</nav>
-
-<main class="main">
-
-<!-- ═══════════════════════════════
-     DASHBOARD TAB
-═══════════════════════════════ -->
-<div id="tab-dash" class="tab-panel active">
-
-  <!-- Today banner -->
-  <div class="today-banner">
-    <div class="today-banner-left">
-      <strong id="dash-today-label">Today</strong>
-      Tiles reset automatically at midnight
-    </div>
-    <div class="today-banner-right">
-      Last refreshed: <span id="dash-refreshed">—</span><br>
-      <button onclick="loadDashboard()" style="margin-top:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:Inter,sans-serif;">↺ Refresh</button>
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🏔</div>
+    <div>
+      <h1>TOURIST VEHICLE COUNT</h1>
+      <small>Malam Jabba Ski Resort · Checkpoint System</small>
     </div>
   </div>
-
-  <!-- Today's activity tiles -->
-  <div class="today-tiles">
-    <div class="activity-tile status-pending" id="tile-fw">
-      <div class="tile-header">
-        <div class="tile-icon-name">
-          <span class="tile-icon">🎡</span>
-          <span class="tile-name">Ferris Wheel</span>
-        </div>
-        <span class="tile-status-badge badge-pending" id="tile-fw-badge">LOADING</span>
-      </div>
-      <div class="tile-body" id="tile-fw-body">
-        <div class="tile-pending-msg"><strong>—</strong>Loading…</div>
-      </div>
-    </div>
-    <div class="activity-tile status-pending" id="tile-zl">
-      <div class="tile-header">
-        <div class="tile-icon-name">
-          <span class="tile-icon">🪂</span>
-          <span class="tile-name">Kids Zipline</span>
-        </div>
-        <span class="tile-status-badge badge-pending" id="tile-zl-badge">LOADING</span>
-      </div>
-      <div class="tile-body" id="tile-zl-body">
-        <div class="tile-pending-msg"><strong>—</strong>Loading…</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Summary stats -->
-  <div class="stats-row" id="dash-stats-row">
-    <div class="stat-box green"><div class="stat-box-value" id="stat-fw-total">—</div><div class="stat-box-label">FW Checks Total</div></div>
-    <div class="stat-box green"><div class="stat-box-value" id="stat-zl-total">—</div><div class="stat-box-label">ZL Checks Total</div></div>
-    <div class="stat-box amber"><div class="stat-box-value" id="stat-anomalies">—</div><div class="stat-box-label">Anomalies Logged</div></div>
-    <div class="stat-box blue"><div class="stat-box-value" id="stat-days-both">—</div><div class="stat-box-label">Days Both Checked</div></div>
-    <div class="stat-box blue"><div class="stat-box-value" id="stat-days-op">—</div><div class="stat-box-label">Operational Days</div></div>
-    <div class="stat-box red"><div class="stat-box-value" id="stat-days-missed">—</div><div class="stat-box-label">Days Missed</div></div>
-  </div>
-
-  <!-- 7-day compliance bar -->
-  <div class="week-card">
-    <div class="week-card-header">
-      <h3>Last 7 Days — Check Compliance</h3>
-    </div>
-    <div class="week-card-body">
-      <div class="week-days" id="week-days-row"></div>
-      <div class="week-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #86efac"></div> Both checked</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fef3c7;border:1px solid #fde68a"></div> Partial</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f1f5f9;border:1px solid #e2e8f0"></div> Not checked</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Activity breakdown -->
-  <div class="card">
-    <div class="section-header"><span class="section-tag">Summary</span><h2>Activity Compliance Breakdown</h2></div>
-    <div class="card-body">
-      <table class="breakdown-table">
-        <thead><tr>
-          <th>Activity</th>
-          <th>Checks Done</th>
-          <th>Compliance</th>
-          <th>Last Anomaly</th>
-        </tr></thead>
-        <tbody id="breakdown-body">
-          <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Recent submissions -->
-  <div class="log-card">
-    <div class="log-card-header">
-      <h3>Recent Submissions</h3>
-      <button class="refresh-btn" onclick="loadDashboard()">↺ Refresh</button>
-    </div>
-    <div id="dash-recent-body"><div class="empty-state">Loading…</div></div>
-  </div>
-
-  <div class="midnight-note">Tiles and today's status reset daily at <strong>midnight</strong>. Summary stats reflect all-time records.</div>
-
+  <div class="live"><div class="live-dot"></div><span id="live-label">LIVE</span></div>
 </div>
 
-<!-- ═══════════════════════════════
-     FERRIS WHEEL TAB
-═══════════════════════════════ -->
-<div id="tab-fw" class="tab-panel">
-  <div class="info-box"><span>ℹ️</span> Complete all checks before the Ferris Wheel opens to guests. Select YES for pass, NO for any failure. Any NO must be explained in the Anomalies section.</div>
-  <form id="fw-form">
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Session</span><h2>Daily Session Details</h2></div>
-      <div class="card-body">
-        <div class="grid-3">
-          <div class="field"><label>Check Date</label><input type="date" id="fw-date" required></div>
-          <div class="field"><label>Operation Start</label><input type="time" id="fw-opStart"></div>
-          <div class="field"><label>Open to Guests</label><input type="time" id="fw-guestStart"></div>
-        </div>
-        <div class="grid-3" style="margin-top:12px">
-          <div class="field"><label>Operation End</label><input type="time" id="fw-opEnd"></div>
-          <div class="field"><label>Avg Speed (m/s)</label><input type="number" step="0.1" id="fw-avgSpeed" placeholder="e.g. 0.8"></div>
-          <div class="field"><label>System Voltage (V)</label><input type="number" id="fw-voltage" placeholder="e.g. 380"></div>
-        </div>
-        <div class="field" style="margin-top:12px"><label>Operator Name</label><input type="text" id="fw-operatorName" placeholder="Full name"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">FW1.0–FW1.4</span><h2>Weather Conditions</h2></div>
-      <div class="card-body">
-        <div class="grid-2">
-          <div class="field"><label>Weather Code (FW1.0)</label>
-            <select id="fw-weather"><option value="">— Select —</option><option>1 – Cloudless</option><option>2 – Partly Cloudy</option><option>3 – Cloudy</option><option>4 – Fog</option><option>5 – Snow</option><option>6 – Rain</option><option>7 – Wind</option></select>
-          </div>
-          <div class="field"><label>Temperature °C (FW1.1)</label><input type="number" step="0.1" id="fw-temp" placeholder="e.g. 18"></div>
-          <div class="field"><label>Wind Speed m/s (FW1.2)</label><input type="number" step="0.1" id="fw-windSpeed" placeholder="e.g. 3.5"></div>
-          <div class="field"><label>Wind Direction (FW1.3)</label>
-            <select id="fw-windDir"><option value="">— Select —</option><option>A – Axis</option><option>T – Transversal</option><option>D – Diagonal</option><option>V – Variable</option></select>
-          </div>
-        </div>
-        <div class="field" style="margin-top:12px"><label>Daily Rain mm/hr (FW1.4)</label><input type="number" step="0.1" id="fw-rain" placeholder="0 if none"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">FW5–FW18</span><h2>Daily Checks &amp; Testing</h2></div>
-      <div class="card-body" id="fw-checks-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">OI</span><h2>Operation Interruptions</h2></div>
-      <div class="card-body" id="fw-oi-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Sign-Off</span><h2>Signatures</h2></div>
-      <div class="card-body" id="fw-signoffs"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Notes</span><h2>Anomalies / Comments</h2></div>
-      <div class="card-body">
-        <div class="field"><textarea id="fw-comments" placeholder="None — or describe any issues, failed checks, or maintenance carried out."></textarea></div>
-      </div>
-    </div>
-
-    <button type="submit" class="submit-btn" id="fw-btn">
-      <span class="spinner" id="fw-spinner"></span>🎡 Submit Ferris Wheel Daily Check
-    </button>
-    <div class="status-msg" id="fw-status"></div>
-  </form>
+<div class="nav">
+  <div class="tab active" onclick="showTab('submit',this)">📋 Submit</div>
+  <div class="tab" onclick="showTab('shift',this)">👤 My Shift</div>
+  <div class="tab" onclick="showTab('gate',this)">🎫 Gate Entry</div>
+  <div class="tab" onclick="showTab('dashboard',this)">📊 Dashboard</div>
+  <div class="tab" onclick="showTab('report',this)">📈 Report</div>
+  <div class="tab" onclick="showTab('log',this)">🗒 Log</div>
 </div>
 
-<!-- ═══════════════════════════════
-     KIDS ZIPLINE TAB
-═══════════════════════════════ -->
-<div id="tab-zl" class="tab-panel">
-  <div class="info-box"><span>ℹ️</span> Complete all checks before the Kids Zipline opens to guests. Enter equipment counts and select YES for pass, NO for any failure.</div>
-  <form id="zl-form">
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Session</span><h2>Daily Session Details</h2></div>
-      <div class="card-body">
-        <div class="grid-3">
-          <div class="field"><label>Check Date</label><input type="date" id="zl-date" required></div>
-          <div class="field"><label>Operations Start</label><input type="time" id="zl-opStart"></div>
-          <div class="field"><label>Operations End</label><input type="time" id="zl-opEnd"></div>
-        </div>
-        <div class="grid-2" style="margin-top:12px">
-          <div class="field"><label>Supervisor Name</label><input type="text" id="zl-operatorName" placeholder="Full name"></div>
-          <div class="field"><label>Total Customers (ZL6)</label><input type="number" min="0" id="zl-customers" placeholder="0"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">ZL1–ZL4</span><h2>Weather Conditions — Top Station</h2></div>
-      <div class="card-body">
-        <div class="grid-2">
-          <div class="field"><label>Weather Code (ZL1)</label>
-            <select id="zl-weather"><option value="">— Select —</option><option>1 – Cloudless</option><option>2 – Partly Cloudy</option><option>3 – Cloudy</option><option>4 – Fog</option><option>5 – Snow</option><option>6 – Rain</option><option>7 – Wind</option></select>
-          </div>
-          <div class="field"><label>Temperature °C (ZL2)</label><input type="number" step="0.1" id="zl-temp" placeholder="e.g. 15"></div>
-          <div class="field"><label>Wind Speed m/s (ZL3)</label><input type="number" step="0.1" id="zl-windSpeed" placeholder="e.g. 2.0"></div>
-          <div class="field"><label>Wind Direction (ZL4)</label>
-            <select id="zl-windDir"><option value="">— Select —</option><option>A – Axis</option><option>T – Transversal</option><option>D – Diagonal</option><option>V – Variable</option></select>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">ZL7–ZL10</span><h2>Equipment Counts</h2></div>
-      <div class="card-body" id="zl-eqp-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">ZL11–ZL23</span><h2>Daily Safety Checks</h2></div>
-      <div class="card-body" id="zl-checks-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">ZL24–ZL25</span><h2>Rescue Training Records</h2></div>
-      <div class="card-body">
-        <div class="grid-2">
-          <div class="field"><label>Last Rescue Training</label><input type="date" id="zl-lastRescue"></div>
-          <div class="field"><label>Next Rescue Training</label><input type="date" id="zl-nextRescue"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">OI</span><h2>Operation Interruptions</h2></div>
-      <div class="card-body" id="zl-oi-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Sign-Off</span><h2>Signatures</h2></div>
-      <div class="card-body" id="zl-signoffs"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Notes</span><h2>Anomalies / Comments</h2></div>
-      <div class="card-body">
-        <div class="field"><textarea id="zl-comments" placeholder="None — or describe any issues, failed checks, or maintenance carried out."></textarea></div>
-      </div>
-    </div>
-
-    <button type="submit" class="submit-btn" id="zl-btn">
-      <span class="spinner" id="zl-spinner"></span>🪂 Submit Zipline Daily Check
-    </button>
-    <div class="status-msg" id="zl-status"></div>
-  </form>
-</div>
-YPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GV Adventure Park — Daily Check System</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<main class="main">
-
-<!-- ═══════════════════════════════
-     DASHBOARD TAB
-═══════════════════════════════ -->
-<div id="tab-dash" class="tab-panel active">
-
-  <!-- Today banner -->
-  <div class="today-banner">
-    <div class="today-banner-left">
-      <strong id="dash-today-label">Today</strong>
-      Tiles reset automatically at midnight
-    </div>
-    <div class="today-banner-right">
-      Last refreshed: <span id="dash-refreshed">—</span><br>
-      <button onclick="loadDashboard()" style="margin-top:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:Inter,sans-serif;">↺ Refresh</button>
-    </div>
+<!-- ══ SUBMIT ══════════════════════════════════════════════ -->
+<div class="page active" id="tab-submit">
+  <div class="sec-title">Select Checkpoint</div>
+  <div class="cp-row">
+    <div class="cp-pill cp1 sel" onclick="selCP(this,'CP1 - TMA Splinobo')">CP1 · TMA Splinobo</div>
+    <div class="cp-pill cp2"     onclick="selCP(this,'CP2 - Jungle Forest Area')">CP2 · Jungle Forest Area</div>
+    <div class="cp-pill cp3"     onclick="selCP(this,'CP3 - MJSR / GV Road Split')">CP3 · MJSR / GV Split</div>
   </div>
-
-  <!-- Today's activity tiles -->
-  <div class="today-tiles">
-    <div class="activity-tile status-pending" id="tile-fw">
-      <div class="tile-header">
-        <div class="tile-icon-name">
-          <span class="tile-icon">🎡</span>
-          <span class="tile-name">Ferris Wheel</span>
-        </div>
-        <span class="tile-status-badge badge-pending" id="tile-fw-badge">LOADING</span>
-      </div>
-      <div class="tile-body" id="tile-fw-body">
-        <div class="tile-pending-msg"><strong>—</strong>Loading…</div>
-      </div>
-    </div>
-    <div class="activity-tile status-pending" id="tile-zl">
-      <div class="tile-header">
-        <div class="tile-icon-name">
-          <span class="tile-icon">🪂</span>
-          <span class="tile-name">Kids Zipline</span>
-        </div>
-        <span class="tile-status-badge badge-pending" id="tile-zl-badge">LOADING</span>
-      </div>
-      <div class="tile-body" id="tile-zl-body">
-        <div class="tile-pending-msg"><strong>—</strong>Loading…</div>
-      </div>
-    </div>
+  <input type="hidden" id="f-cp" value="CP1 - TMA Splinobo">
+  <div class="sec-title">Vehicle Details</div>
+  <div class="form-grid">
+    <div><label class="f-label">Staff Name <span class="req">*</span></label><input id="f-staff" type="text" placeholder="Your full name"></div>
+    <div><label class="f-label">Registration <span class="req">*</span></label><input id="f-reg" type="text" placeholder="e.g. LZB-1234" style="text-transform:uppercase"></div>
+    <div><label class="f-label">Date <span class="req">*</span></label><input id="f-date" type="date"></div>
+    <div><label class="f-label">Time <span class="req">*</span></label><input id="f-time" type="time"></div>
+    <div><label class="f-label">Vehicle Type <span class="req">*</span></label>
+      <select id="f-vtype"><option value="">— Select —</option>
+        <option>Car / SUV (Private)</option><option>Minivan / MPV (Private)</option>
+        <option>Coaster / Minibus (9-22 seats)</option><option>Bus (23+ seats)</option>
+        <option>Pickup / Hilux</option><option>Motorcycle / Bike</option><option>Other</option>
+      </select></div>
+    <div><label class="f-label">Province (plate) <span class="req">*</span></label>
+      <select id="f-prov"><option value="">— Select —</option>
+        <option>Punjab (LA, LB, LC, LZB etc.)</option><option>KPK / Khyber Pakhtunkhwa (PES, ABT etc.)</option>
+        <option>Sindh (K, KA etc.)</option><option>Islamabad / ICT (ISD etc.)</option>
+        <option>AJK / Gilgit-Baltistan</option><option>Balochistan</option><option>Other / Unreadable</option>
+      </select></div>
+    <div><label class="f-label">Passengers incl. driver <span class="req">*</span></label><input id="f-pax" type="number" min="1" max="80" placeholder="e.g. 4"></div>
+    <div><label class="f-label">Children under 12 <span class="req">*</span></label><input id="f-children" type="number" min="0" placeholder="0"></div>
+    <div><label class="f-label">Stated Destination <span class="req">*</span></label>
+      <select id="f-dest"><option value="">— Select —</option>
+        <option>Malam Jabba Ski Resort (MJSR)</option><option>Green Valley</option>
+        <option>Both / Touring the area</option><option>Just passing through</option><option>Unknown / Not stated</option>
+      </select></div>
+    <div><label class="f-label">Entered MJSR? <span class="req">*</span></label>
+      <select id="f-entered"><option value="">— Select —</option>
+        <option>Yes - entered MJSR</option><option>No - went to Green Valley</option>
+        <option>No - turned around / left area</option><option>No - passed through only</option><option>Unknown</option>
+      </select></div>
   </div>
-
-  <!-- Summary stats -->
-  <div class="stats-row" id="dash-stats-row">
-    <div class="stat-box green"><div class="stat-box-value" id="stat-fw-total">—</div><div class="stat-box-label">FW Checks Total</div></div>
-    <div class="stat-box green"><div class="stat-box-value" id="stat-zl-total">—</div><div class="stat-box-label">ZL Checks Total</div></div>
-    <div class="stat-box amber"><div class="stat-box-value" id="stat-anomalies">—</div><div class="stat-box-label">Anomalies Logged</div></div>
-    <div class="stat-box blue"><div class="stat-box-value" id="stat-days-both">—</div><div class="stat-box-label">Days Both Checked</div></div>
-    <div class="stat-box blue"><div class="stat-box-value" id="stat-days-op">—</div><div class="stat-box-label">Operational Days</div></div>
-    <div class="stat-box red"><div class="stat-box-value" id="stat-days-missed">—</div><div class="stat-box-label">Days Missed</div></div>
+  <hr class="divider"><div class="sub-title">Tour Company (optional)</div>
+  <div class="form-grid">
+    <div><label class="f-label">Company Name</label><input id="f-company" type="text" placeholder="As written on vehicle"></div>
+    <div><label class="f-label">Phone / WhatsApp</label><input id="f-phone" type="text"></div>
+    <div class="full"><label class="f-label">Notes</label><textarea id="f-notes" placeholder="Group type, language, observations..."></textarea></div>
   </div>
-
-  <!-- 7-day compliance bar -->
-  <div class="week-card">
-    <div class="week-card-header">
-      <h3>Last 7 Days — Check Compliance</h3>
-    </div>
-    <div class="week-card-body">
-      <div class="week-days" id="week-days-row"></div>
-      <div class="week-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #86efac"></div> Both checked</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fef3c7;border:1px solid #fde68a"></div> Partial</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f1f5f9;border:1px solid #e2e8f0"></div> Not checked</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Activity breakdown -->
-  <div class="card">
-    <div class="section-header"><span class="section-tag">Summary</span><h2>Activity Compliance Breakdown</h2></div>
-    <div class="card-body">
-      <table class="breakdown-table">
-        <thead><tr>
-          <th>Activity</th>
-          <th>Checks Done</th>
-          <th>Compliance</th>
-          <th>Last Anomaly</th>
-        </tr></thead>
-        <tbody id="breakdown-body">
-          <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Recent submissions -->
-  <div class="log-card">
-    <div class="log-card-header">
-      <h3>Recent Submissions</h3>
-      <button class="refresh-btn" onclick="loadDashboard()">↺ Refresh</button>
-    </div>
-    <div id="dash-recent-body"><div class="empty-state">Loading…</div></div>
-  </div>
-
-  <div class="midnight-note">Tiles and today's status reset daily at <strong>midnight</strong>. Summary stats reflect all-time records.</div>
-
+  <button class="btn-primary" id="submit-btn" onclick="submitEntry()">SUBMIT VEHICLE ENTRY</button>
 </div>
 
-<!-- ═══════════════════════════════
-     FERRIS WHEEL TAB
-═══════════════════════════════ -->
-<div id="tab-fw" class="tab-panel">
-  <div class="info-box"><span>ℹ️</span> Complete all checks before the Ferris Wheel opens to guests. Select YES for pass, NO for any failure. Any NO must be explained in the Anomalies section.</div>
-  <form id="fw-form">
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Session</span><h2>Daily Session Details</h2></div>
-      <div class="card-body">
-        <div class="grid-3">
-          <div class="field"><label>Check Date</label><input type="date" id="fw-date" required></div>
-          <div class="field"><label>Operation Start</label><input type="time" id="fw-opStart"></div>
-          <div class="field"><label>Open to Guests</label><input type="time" id="fw-guestStart"></div>
-        </div>
-        <div class="grid-3" style="margin-top:12px">
-          <div class="field"><label>Operation End</label><input type="time" id="fw-opEnd"></div>
-          <div class="field"><label>Avg Speed (m/s)</label><input type="number" step="0.1" id="fw-avgSpeed" placeholder="e.g. 0.8"></div>
-          <div class="field"><label>System Voltage (V)</label><input type="number" id="fw-voltage" placeholder="e.g. 380"></div>
-        </div>
-        <div class="field" style="margin-top:12px"><label>Operator Name</label><input type="text" id="fw-operatorName" placeholder="Full name"></div>
-      </div>
+<!-- ══ MY SHIFT ════════════════════════════════════════════ -->
+<div class="page" id="tab-shift">
+  <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div id="shift-cp-label" style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--cp1);">CP1 · TMA Splinobo</div>
+      <div id="shift-date" style="font-size:12px;color:var(--muted);margin-top:2px;"></div>
     </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">FW1.0–FW1.4</span><h2>Weather Conditions</h2></div>
-      <div class="card-body">
-        <div class="grid-2">
-          <div class="field"><label>Weather Code (FW1.0)</label>
-            <select id="fw-weather"><option value="">— Select —</option><option>1 – Cloudless</option><option>2 – Partly Cloudy</option><option>3 – Cloudy</option><option>4 – Fog</option><option>5 – Snow</option><option>6 – Rain</option><option>7 – Wind</option></select>
-          </div>
-          <div class="field"><label>Temperature °C (FW1.1)</label><input type="number" step="0.1" id="fw-temp" placeholder="e.g. 18"></div>
-          <div class="field"><label>Wind Speed m/s (FW1.2)</label><input type="number" step="0.1" id="fw-windSpeed" placeholder="e.g. 3.5"></div>
-          <div class="field"><label>Wind Direction (FW1.3)</label>
-            <select id="fw-windDir"><option value="">— Select —</option><option>A – Axis</option><option>T – Transversal</option><option>D – Diagonal</option><option>V – Variable</option></select>
-          </div>
-        </div>
-        <div class="field" style="margin-top:12px"><label>Daily Rain mm/hr (FW1.4)</label><input type="number" step="0.1" id="fw-rain" placeholder="0 if none"></div>
-      </div>
+    <div style="display:flex;gap:10px;">
+      <div class="card" style="text-align:center;padding:10px 16px;"><div class="kpi-lbl">Logged</div><div class="kpi-val" id="s-count">0</div></div>
+      <div class="card" style="text-align:center;padding:10px 16px;"><div class="kpi-lbl">Passengers</div><div class="kpi-val" id="s-pax">0</div></div>
+      <div class="card" style="text-align:center;padding:10px 16px;"><div class="kpi-lbl">To MJSR</div><div class="kpi-val" id="s-mjsr" style="color:var(--green);">0</div></div>
     </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">FW5–FW18</span><h2>Daily Checks &amp; Testing</h2></div>
-      <div class="card-body" id="fw-checks-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">OI</span><h2>Operation Interruptions</h2></div>
-      <div class="card-body" id="fw-oi-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Sign-Off</span><h2>Signatures</h2></div>
-      <div class="card-body" id="fw-signoffs"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Notes</span><h2>Anomalies / Comments</h2></div>
-      <div class="card-body">
-        <div class="field"><textarea id="fw-comments" placeholder="None — or describe any issues, failed checks, or maintenance carried out."></textarea></div>
-      </div>
-    </div>
-
-    <button type="submit" class="submit-btn" id="fw-btn">
-      <span class="spinner" id="fw-spinner"></span>🎡 Submit Ferris Wheel Daily Check
-    </button>
-    <div class="status-msg" id="fw-status"></div>
-  </form>
+  </div>
+  <div class="sec-title">Entries This Session</div>
+  <div id="shift-log"><div class="empty"><div class="empty-icon">🚗</div><p>No entries yet.</p></div></div>
 </div>
 
-<!-- ═══════════════════════════════
-     KIDS ZIPLINE TAB
-═══════════════════════════════ -->
-<div id="tab-zl" class="tab-panel">
-  <div class="info-box"><span>ℹ️</span> Complete all checks before the Kids Zipline opens to guests. Enter equipment counts and select YES for pass, NO for any failure.</div>
-  <form id="zl-form">
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Session</span><h2>Daily Session Details</h2></div>
-      <div class="card-body">
-        <div class="grid-3">
-          <div class="field"><label>Check Date</label><input type="date" id="zl-date" required></div>
-          <div class="field"><label>Operations Start</label><input type="time" id="zl-opStart"></div>
-          <div class="field"><label>Operations End</label><input type="time" id="zl-opEnd"></div>
-        </div>
-        <div class="grid-2" style="margin-top:12px">
-          <div class="field"><label>Supervisor Name</label><input type="text" id="zl-operatorName" placeholder="Full name"></div>
-          <div class="field"><label>Total Customers (ZL6)</label><input type="number" min="0" id="zl-customers" placeholder="0"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">ZL1–ZL4</span><h2>Weather Conditions — Top Station</h2></div>
-      <div class="card-body">
-        <div class="grid-2">
-          <div class="field"><label>Weather Code (ZL1)</label>
-            <select id="zl-weather"><option value="">— Select —</option><option>1 – Cloudless</option><option>2 – Partly Cloudy</option><option>3 – Cloudy</option><option>4 – Fog</option><option>5 – Snow</option><option>6 – Rain</option><option>7 – Wind</option></select>
-          </div>
-          <div class="field"><label>Temperature °C (ZL2)</label><input type="number" step="0.1" id="zl-temp" placeholder="e.g. 15"></div>
-          <div class="field"><label>Wind Speed m/s (ZL3)</label><input type="number" step="0.1" id="zl-windSpeed" placeholder="e.g. 2.0"></div>
-          <div class="field"><label>Wind Direction (ZL4)</label>
-            <select id="zl-windDir"><option value="">— Select —</option><option>A – Axis</option><option>T – Transversal</option><option>D – Diagonal</option><option>V – Variable</option></select>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">ZL7–ZL10</span><h2>Equipment Counts</h2></div>
-      <div class="card-body" id="zl-eqp-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">ZL11–ZL23</span><h2>Daily Safety Checks</h2></div>
-      <div class="card-body" id="zl-checks-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">ZL24–ZL25</span><h2>Rescue Training Records</h2></div>
-      <div class="card-body">
-        <div class="grid-2">
-          <div class="field"><label>Last Rescue Training</label><input type="date" id="zl-lastRescue"></div>
-          <div class="field"><label>Next Rescue Training</label><input type="date" id="zl-nextRescue"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">OI</span><h2>Operation Interruptions</h2></div>
-      <div class="card-body" id="zl-oi-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Sign-Off</span><h2>Signatures</h2></div>
-      <div class="card-body" id="zl-signoffs"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-header"><span class="section-tag">Notes</span><h2>Anomalies / Comments</h2></div>
-      <div class="card-body">
-        <div class="field"><textarea id="zl-comments" placeholder="None — or describe any issues, failed checks, or maintenance carried out."></textarea></div>
-      </div>
-    </div>
-
-    <button type="submit" class="submit-btn" id="zl-btn">
-      <span class="spinner" id="zl-spinner"></span>🪂 Submit Zipline Daily Check
-    </button>
-    <div class="status-msg" id="zl-status"></div>
-  </form>
+<!-- ══ GATE ENTRY ══════════════════════════════════════════ -->
+<div class="page" id="tab-gate">
+  <div class="sec-title">End of Day Gate Entry</div>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Submit once per property at end of day. Used to calculate visitor conversion rate.</p>
+  <div class="form-grid">
+    <div><label class="f-label">Submitted By <span class="req">*</span></label><input id="g-staff" type="text" placeholder="Your full name"></div>
+    <div><label class="f-label">Date <span class="req">*</span></label><input id="g-date" type="date"></div>
+    <div><label class="f-label">Property <span class="req">*</span></label>
+      <select id="g-prop"><option value="">— Select —</option><option value="MJSR">MJSR</option><option value="GV">Green Valley</option></select></div>
+    <div><label class="f-label">Total Visitors <span class="req">*</span></label><input id="g-vis" type="number" min="0" placeholder="e.g. 342"></div>
+    <div class="full"><label class="f-label">Notes</label><textarea id="g-notes" placeholder="Weather, events, early closure..."></textarea></div>
+  </div>
+  <button class="btn-primary" id="gate-btn" onclick="submitGate()">SUBMIT GATE ENTRY</button>
+  <hr class="divider">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div class="sec-title" style="margin:0;">Recent Gate Entries</div>
+    <button class="btn-sm" onclick="loadGate(true)">↻ Refresh</button>
+  </div>
+  <div id="gate-log"><div class="empty"><div class="empty-icon">🎫</div><p>No entries yet.</p></div></div>
 </div>
 
-
-<!-- ═══════════════════════════════
-     MAINTENANCE TAB
-═══════════════════════════════ -->
-<div id="tab-maint" class="tab-panel">
-
-  <!-- LOCK SCREEN -->
-  <div class="maint-lock" id="maint-lock-screen">
-    <div class="maint-lock-icon">🔒</div>
-    <h2>SNR Tech Manager Access</h2>
-    <p>Enter your PIN to access the Maintenance Schedule.</p>
-    <div class="pin-row">
-      <input type="password" class="pin-input" id="maint-pin" maxlength="4" placeholder="••••" inputmode="numeric">
-      <button class="pin-btn" onclick="checkPin()">Unlock</button>
-    </div>
-    <div class="pin-error" id="pin-error">Incorrect PIN. Please try again.</div>
+<!-- ══ DASHBOARD ═══════════════════════════════════════════ -->
+<div class="page" id="tab-dashboard">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div class="sec-title" style="margin:0;">Live Overview</div>
+    <button class="btn-sm blue" onclick="loadData(true)">↻ Refresh</button>
   </div>
 
-  <!-- MAINTENANCE PANEL (shown after PIN) -->
-  <div class="maint-panel" id="maint-panel">
+  <!-- CONVERSION TILES -->
+  <div class="sec-title">MJSR Conversion — Passengers Stated vs Gate Entries</div>
+  <div id="conv-tiles" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Today</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last Weekend</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last 7 Days</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last 14 Days</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last 4 Weeks</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last 2 Months</div><div class="kpi-val">—</div></div>
+  </div>
 
-    <div class="maint-header-bar">
-      <div>
-        <h2>🔧 Maintenance Schedule Manager</h2>
-        <span>Green Valley Adventure Park — Ferris Wheel &amp; Kids Zipline</span>
-      </div>
-      <button class="lock-btn" onclick="lockMaint()">🔒 Lock</button>
+  <!-- GENERAL STATS -->
+  <div class="grid">
+    <div class="card"><div class="kpi-lbl">Entries Today</div><div class="kpi-val" id="d-entries">—</div><div class="kpi-sub">all checkpoints</div></div>
+    <div class="card"><div class="kpi-lbl">Unique Vehicles</div><div class="kpi-val" id="d-unique">—</div><div class="kpi-sub">by plate, all time</div></div>
+    <div class="card"><div class="kpi-lbl">Passengers Today</div><div class="kpi-val" id="d-pax">—</div></div>
+    <div class="card"><div class="kpi-lbl">Entered MJSR</div><div class="kpi-val" id="d-mjsr" style="color:var(--green);">—</div><div class="kpi-sub">today</div></div>
+  </div>
+  <div class="sec-title">Checkpoint Funnel</div>
+  <div class="f-row"><div class="f-lbl"><div class="f-dot" style="background:var(--cp1)"></div><span style="color:var(--cp1)">CP1 · TMA Splinobo</span></div><div class="f-bar-bg"><div class="f-bar" id="bar-cp1" style="background:var(--cp1);width:0%"></div></div><div class="f-num" id="cnt-cp1" style="color:var(--cp1)">—</div></div>
+  <div class="f-row"><div class="f-lbl"><div class="f-dot" style="background:var(--cp2)"></div><span style="color:var(--cp2)">CP2 · Jungle Forest</span></div><div class="f-bar-bg"><div class="f-bar" id="bar-cp2" style="background:var(--cp2);width:0%"></div></div><div class="f-num" id="cnt-cp2" style="color:var(--cp2)">—</div></div>
+  <div class="f-row"><div class="f-lbl"><div class="f-dot" style="background:var(--cp3)"></div><span style="color:var(--cp3)">CP3 · MJSR/GV Split</span></div><div class="f-bar-bg"><div class="f-bar" id="bar-cp3" style="background:var(--cp3);width:0%"></div></div><div class="f-num" id="cnt-cp3" style="color:var(--cp3)">—</div></div>
+  <div class="sec-title" style="margin-top:20px;">Vehicle Journey Tracker</div>
+  <div class="tbl-wrap"><table><thead><tr><th>Journey</th><th>Vehicles</th></tr></thead><tbody id="journey-body"><tr><td colspan="2" style="color:var(--muted);text-align:center;padding:20px;">Click Refresh to load</td></tr></tbody></table></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div>
+      <div class="sec-title">Vehicle Types</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Type</th><th>Count</th><th>Pax</th></tr></thead><tbody id="vtype-body"></tbody></table></div>
     </div>
-
-    <!-- Activity sub-tabs -->
-    <div class="maint-activity-tabs">
-      <button class="maint-act-btn active" onclick="switchMaintAct('fw')">🎡 Ferris Wheel</button>
-      <button class="maint-act-btn"        onclick="switchMaintAct('zl')">🪂 Kids Zipline</button>
+    <div>
+      <div class="sec-title">Province of Origin</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Province</th><th>Vehicles</th></tr></thead><tbody id="prov-body"></tbody></table></div>
     </div>
+  </div>
+  <div class="sec-title" style="margin-top:4px;">Stage-by-Stage Funnel Analysis</div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tracks vehicle and passenger flow through each checkpoint stage. Drop-off identified by plate matching between stages. Gate conversion uses CP3 passenger count as denominator.</p>
+  <div class="tbl-wrap" style="margin-bottom:20px;"><table>
+    <thead><tr><th>Checkpoint</th><th>Vehicles</th><th>Passengers</th><th>Gate Entries</th><th>Conversion %</th><th>Note</th></tr></thead>
+    <tbody id="funnel-body"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:16px;">Refresh to load</td></tr></tbody>
+  </table></div>
 
-    <!-- FW Maintenance -->
-    <div id="maint-fw" class="maint-section">
-      <div class="card">
-        <div class="section-header"><span class="section-tag">Daily</span><h2>Daily Pre-Operation Checks</h2></div>
-        <div id="maint-fw-daily"></div>
-        <div class="maint-save-bar">
-          <span class="maint-save-status" id="fw-save-daily-status"></span>
-          <button class="maint-save-btn" onclick="saveMaint('fw','daily')">Save Daily</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="section-header"><span class="section-tag">Weekly</span><h2>Weekly Maintenance Tasks</h2></div>
-        <div id="maint-fw-weekly"></div>
-        <div class="maint-save-bar">
-          <span class="maint-save-status" id="fw-save-weekly-status"></span>
-          <button class="maint-save-btn" onclick="saveMaint('fw','weekly')">Save Weekly</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="section-header"><span class="section-tag">Monthly</span><h2>Monthly Maintenance Tasks</h2></div>
-        <div id="maint-fw-monthly"></div>
-        <div class="maint-save-bar">
-          <span class="maint-save-status" id="fw-save-monthly-status"></span>
-          <button class="maint-save-btn" onclick="saveMaint('fw','monthly')">Save Monthly</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="section-header"><span class="section-tag">Annual</span><h2>Annual Inspections &amp; Overhauls</h2></div>
-        <div id="maint-fw-annual"></div>
-        <div class="maint-save-bar">
-          <span class="maint-save-status" id="fw-save-annual-status"></span>
-          <button class="maint-save-btn" onclick="saveMaint('fw','annual')">Save Annual</button>
-        </div>
-      </div>
+  <div class="sec-title">Overall Conversion Summary</div>
+  <div class="grid" id="overall-conv-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:20px;"></div>
+
+  <div class="sec-title">Visitor Conversion — Property Breakdown</div>
+  <div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Passengers in Cars (stated dest.)</th><th>Gate Entries (people)</th><th>Conversion %</th><th>Difference</th></tr></thead><tbody id="conv-body"><tr><td colspan="5" style="color:var(--muted);text-align:center;padding:16px;">Refresh to load</td></tr></tbody></table></div>
+</div>
+
+<!-- ══ REPORT ══════════════════════════════════════════════ -->
+<div class="page" id="tab-report">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+    <div>
+      <div class="sec-title" style="margin:0;">Management Summary Report</div>
+      <div style="font-size:12px;color:var(--muted);">Tourist Vehicle Count · Malam Jabba Ski Resort</div>
     </div>
-
-    <!-- ZL Maintenance -->
-    <div id="maint-zl" class="maint-section" style="display:none">
-      <div class="card">
-        <div class="section-header"><span class="section-tag">Daily</span><h2>Daily Pre-Operation Checks</h2></div>
-        <div id="maint-zl-daily"></div>
-        <div class="maint-save-bar">
-          <span class="maint-save-status" id="zl-save-daily-status"></span>
-          <button class="maint-save-btn" onclick="saveMaint('zl','daily')">Save Daily</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="section-header"><span class="section-tag">Weekly</span><h2>Weekly Maintenance Tasks</h2></div>
-        <div id="maint-zl-weekly"></div>
-        <div class="maint-save-bar">
-          <span class="maint-save-status" id="zl-save-weekly-status"></span>
-          <button class="maint-save-btn" onclick="saveMaint('zl','weekly')">Save Weekly</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="section-header"><span class="section-tag">Monthly</span><h2>Monthly Maintenance Tasks</h2></div>
-        <div id="maint-zl-monthly"></div>
-        <div class="maint-save-bar">
-          <span class="maint-save-status" id="zl-save-monthly-status"></span>
-          <button class="maint-save-btn" onclick="saveMaint('zl','monthly')">Save Monthly</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="section-header"><span class="section-tag">Annual</span><h2>Annual Inspections &amp; Overhauls</h2></div>
-        <div id="maint-zl-annual"></div>
-        <div class="maint-save-bar">
-          <span class="maint-save-status" id="zl-save-annual-status"></span>
-          <button class="maint-save-btn" onclick="saveMaint('zl','annual')">Save Annual</button>
-        </div>
-      </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <select id="r-range" style="padding:7px 12px;font-size:13px;border-radius:6px;border:1px solid var(--border);background:#fff;">
+        <option value="today">Today</option><option value="all" selected>All Time</option>
+      </select>
+      <button class="btn-sm blue" id="r-refresh-btn" onclick="loadReport()">↻ Refresh Report</button>
+      <button class="btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn-sm" onclick="window.print()">🖨 Print</button>
     </div>
-
+  </div>
+  <div id="rpt-header" style="display:none;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--blue);">
+    <div style="font-size:20px;font-weight:700;color:var(--blue2);font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;">MJSR TOURIST VEHICLE COUNT — MANAGEMENT SUMMARY</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="r-period"></div>
+  </div>
+  <div id="r-content">
+    <div class="empty"><div class="empty-icon">📈</div><p>Click <strong>↻ Refresh Report</strong> to load data.</p></div>
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════
-     EDIT RECORD TAB
-═══════════════════════════════ -->
-<div id="tab-edit" class="tab-panel">
-
-  <!-- LOCK SCREEN -->
-  <div class="maint-lock" id="edit-lock-screen">
-    <div class="maint-lock-icon">✏️</div>
-    <h2>Edit Record Access</h2>
-    <p>This area allows correction of submission errors. All edits are permanently logged with the editor name, reason, and original values.</p>
-    <div class="pin-row">
-      <input type="password" class="pin-input" id="edit-pin" maxlength="4" placeholder="••••" inputmode="numeric">
-      <button class="pin-btn" onclick="checkEditPin()">Unlock</button>
+<!-- ══ LOG ═════════════════════════════════════════════════ -->
+<div class="page" id="tab-log">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+    <div class="sec-title" style="margin:0;">Submission Log</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <input type="text" id="log-search" placeholder="Search reg, staff, CP..." oninput="filterLog()" style="width:180px;padding:7px 10px;font-size:13px;">
+      <select id="log-cp" onchange="filterLog()" style="padding:7px 10px;font-size:13px;border-radius:6px;border:1px solid var(--border);background:#fff;">
+        <option value="">All CPs</option><option value="CP1">CP1</option><option value="CP2">CP2</option><option value="CP3">CP3</option>
+      </select>
+      <button class="btn-sm" onclick="loadLog(true)">↻ Refresh</button>
     </div>
-    <div class="pin-error" id="edit-pin-error">Incorrect PIN. Please try again.</div>
   </div>
-
-  <!-- EDIT PANEL -->
-  <div class="maint-panel" id="edit-panel">
-
-    <div class="maint-header-bar">
-      <div>
-        <h2>✏️ Edit Submission Record</h2>
-        <span>All edits are logged to the audit trail — this cannot be disabled</span>
-      </div>
-      <button class="lock-btn" onclick="lockEdit()">🔒 Lock</button>
+  <div id="log-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>Time</th><th>Staff</th><th>CP</th><th>Reg</th><th>Type</th><th>Pax</th><th>Destination</th><th>Entered</th><th>Province</th><th></th></tr></thead>
+    <tbody id="log-body"><tr><td colspan="11" style="text-align:center;padding:28px;color:var(--muted);">Click Refresh to load</td></tr></tbody>
+  </table></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;color:var(--muted);">
+    <span id="log-info"></span>
+    <div style="display:flex;gap:6px;">
+      <button class="btn-sm" id="log-prev" onclick="logPage(-1)">← Prev</button>
+      <span id="log-page" style="padding:6px 12px;font-size:13px;"></span>
+      <button class="btn-sm" id="log-next" onclick="logPage(1)">Next →</button>
     </div>
-
-    <!-- RECORD LIST -->
-    <div class="card" id="edit-record-list-card">
-      <div class="section-header">
-        <span class="section-tag">Select</span>
-        <h2>Last 10 Submissions</h2>
-        <button class="refresh-btn" onclick="loadEditRecords()" style="margin-left:auto">↺ Refresh</button>
-      </div>
-      <div id="edit-record-list">
-        <div class="empty-state">Loading submissions…</div>
-      </div>
-    </div>
-
-    <!-- EDIT FORM (hidden until record selected) -->
-    <div class="edit-form-wrap" id="edit-form-wrap">
-
-      <div class="card">
-        <div class="section-header"><span class="section-tag">Editing</span><h2 id="edit-form-title">Record</h2></div>
-        <div class="card-body">
-
-          <!-- MANDATORY: Editor name -->
-          <div class="edit-editor-box">
-            <label>Your Name (required)</label>
-            <input type="text" id="edit-editor-name" placeholder="Enter your full name">
-          </div>
-
-          <!-- MANDATORY: Reason -->
-          <div class="edit-reason-box">
-            <label>⚠ Reason for Edit (required)</label>
-            <input type="text" id="edit-reason" placeholder="e.g. Wrong date entered, incorrect operator name, check item toggled in error…">
-          </div>
-
-          <!-- SESSION FIELDS -->
-          <div class="divider"><span>Session Details</span></div>
-          <div class="grid-2">
-            <div class="edit-field-group"><label>Check Date</label><input type="date" id="edit-date"></div>
-            <div class="edit-field-group"><label>Operator / Supervisor Name</label><input type="text" id="edit-operator"></div>
-          </div>
-          <div class="grid-2">
-            <div class="edit-field-group"><label>Operation Start</label><input type="time" id="edit-op-start"></div>
-            <div class="edit-field-group"><label>Operation End</label><input type="time" id="edit-op-end"></div>
-          </div>
-
-          <!-- CHECK ITEMS -->
-          <div class="divider"><span>Check Items</span></div>
-          <div class="edit-checks-grid" id="edit-checks-grid"></div>
-
-          <!-- ANOMALIES -->
-          <div class="divider"><span>Anomalies / Comments</span></div>
-          <div class="edit-field-group">
-            <textarea id="edit-comments" placeholder="Anomalies / Comments"></textarea>
-          </div>
-
-          <button class="edit-save-btn" id="edit-save-btn" onclick="saveEdit()">
-            💾 Save Correction
-          </button>
-          <button class="edit-cancel-btn" onclick="cancelEdit()">Cancel</button>
-          <div class="status-msg" id="edit-status"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- AUDIT LOG -->
-    <div class="card" id="edit-audit-card">
-      <div class="section-header"><span class="section-tag">Audit</span><h2>Edit Audit Trail</h2></div>
-      <div id="edit-audit-body">
-        <div class="empty-state">No edits recorded yet.</div>
-      </div>
-    </div>
-
   </div>
 </div>
 
-
-</main>
+<div class="toast" id="toast"></div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoygc-fuNqIoO1F3AYSrNKici6H57yn_JeLK5sZKIn3Kkqoe_7M-Ja6SCm3fV3ODJaOg/exec';
+var API = 'https://script.google.com/macros/s/AKfycbzUgPzfPKbg5f4spw2L0ahGZvXHBXO1OMwhWD8zk2paf1MX5rW8_PSyg0BJQwo_ZENUTg/exec';
+var cache = null;
+var sessionE = [], sCount=0, sPax=0, sMJSR=0;
+var gateCache = null;
+var logCache = null, logFiltered = [], logPage_ = 1, logSize = 25;
 
-// ═══════════════════════════════════════════════════
-// CHECK DATA
-// ═══════════════════════════════════════════════════
-const FW_CHECKS = [
-  { code:'FW5',  label:'Drive machinery / Motor #1 — Check and testing' },
-  { code:'FW6',  label:'Drive machinery / Motor #2 — Check and testing' },
-  { code:'FW7',  label:'Pneumatic Brake System #1 — Checks and testing' },
-  { code:'FW8',  label:'Pneumatic Brake System #2 — Checks and testing' },
-  { code:'FW9',  label:'Stop and slow-down buttons — Testing' },
-  { code:'FW10', label:'Smooth passage of chairs — Visual check' },
-  { code:'FW11', label:'Check of all chairs — condition and security' },
-  { code:'FW12', label:'Any maintenance done — record in comments if yes' },
-  { code:'FW13', label:'Air compressor — Checking and testing' },
-  { code:'FW14', label:'Main control panel — Checking and starting' },
-  { code:'FW15', label:'Two-way radios — Check and battery charge' },
-  { code:'FW16', label:'Access lanes for customers — Clear and safe' },
-  { code:'FW17', label:'Boarding and disembarking platforms — Check' },
-  { code:'FW18', label:'Test run — Correct execution confirmed' },
-];
+// ── INIT ──────────────────────────────────────────────────
+window.onload = function() {
+  var n = new Date();
+  document.getElementById('f-date').value = n.toISOString().split('T')[0];
+  document.getElementById('g-date').value = n.toISOString().split('T')[0];
+  document.getElementById('f-time').value = pad(n.getHours())+':'+pad(n.getMinutes());
+  document.getElementById('shift-date').textContent = n.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+};
+function pad(n){ return String(n).padStart(2,'0'); }
 
-const ZL_EQUIPMENT = [
-  { code:'ZL7',    label:'Pulleys — Total count' },
-  { code:'ZL7.1',  label:'Pulleys in good working condition' },
-  { code:'ZL8',    label:'Harnesses — Total count' },
-  { code:'ZL8.1',  label:'Harnesses in good working condition' },
-  { code:'ZL9a',   label:'Helmets — Total count' },
-  { code:'ZL9a.1', label:'Helmets in good working condition' },
-  { code:'ZL9b',   label:'Carabiners — Total count' },
-  { code:'ZL9b.1', label:'Carabiners in good working condition' },
-  { code:'ZL10',   label:'Lanyards 120cm — Total count' },
-  { code:'ZL10.1', label:'Lanyards 120cm in good working condition' },
-];
-
-const ZL_CHECKS = [
-  { code:'ZL11', label:'Two-way radios — Check and battery charge' },
-  { code:'ZL12', label:'Zipline wires, terminations and backup — at Landing' },
-  { code:'ZL13', label:'Zipline wires, terminations and backup — at Start' },
-  { code:'ZL14', label:'No extraordinary occurrences since last use' },
-  { code:'ZL15', label:'Access ways and platforms — Safe and not slippery' },
-  { code:'ZL16', label:'Zip Stop function — Checked per operating manual' },
-  { code:'ZL17', label:'Black Dyneema rope of Zip Stop — No white inlay parts visible' },
-  { code:'ZL18', label:'Connection of Dyneema rope to Zip Stop lanyard' },
-  { code:'ZL19', label:'Redirection pulleys and lanyard of Zip Stop' },
-  { code:'ZL20', label:'EAD (Emergency Arrest Device) in position — No obstacles in EAD corridor' },
-  { code:'ZL21', label:'Sag of ziplines — Visual check from landing' },
-  { code:'ZL22', label:'Zipline wire — Dry and free of ice' },
-  { code:'ZL23', label:'Test run ziplines — Completed' },
-];
-
-const FW_SIGNOFFS = [
-  { id:'fw-sigOperator', label:'Operator Signed' },
-  { id:'fw-sigEngineer', label:'Electrical Engineer Signed' },
-  { id:'fw-sigSTM',      label:'SNR Tech Manager Signed' },
-];
-
-const ZL_SIGNOFFS = [
-  { id:'zl-sigSupervisor', label:'Supervisor Signed' },
-  { id:'zl-sigTM',         label:'Technical Manager Signed' },
-];
-
-// ═══════════════════════════════════════════════════
-// BUILDERS
-// ═══════════════════════════════════════════════════
-function buildCheckRows(id, items) {
-  document.getElementById(id).innerHTML = items.map(item => `
-    <div class="check-row">
-      <span class="check-code">${item.code}</span>
-      <span class="check-label">${item.label}</span>
-      <div class="yn-wrap">
-        <input type="radio" name="chk-${item.code}" id="chk-${item.code}-yes" value="YES">
-        <label for="chk-${item.code}-yes">YES</label>
-        <input type="radio" name="chk-${item.code}" id="chk-${item.code}-no" value="NO" checked>
-        <label for="chk-${item.code}-no">NO</label>
-      </div>
-    </div>`).join('');
+// ── TAB ───────────────────────────────────────────────────
+function showTab(id, el) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'dashboard') { if (cache) renderDash(cache); else loadData(false); }
+  if (id === 'gate')      { if (!gateCache) loadGate(false); }
+  if (id === 'log')       { if (!logCache)  loadLog(false);  }
+  // Report tab: do nothing — user clicks Refresh
 }
 
-function buildEqpRows(id, items) {
-  document.getElementById(id).innerHTML = items.map(item => `
-    <div class="check-row">
-      <span class="check-code">${item.code}</span>
-      <span class="check-label">${item.label}</span>
-      <input type="number" min="0" class="num-input" id="eqp-${item.code.replace(/\./g,'_')}" placeholder="0">
-    </div>`).join('');
+// ── CORE FETCH ────────────────────────────────────────────
+function apiFetch(url, cb) {
+  fetch(url, { redirect: 'follow' })
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      try { cb(null, JSON.parse(t)); }
+      catch(e){ cb('Parse error: ' + t.substring(0,100)); }
+    })
+    .catch(function(e){ cb(e.toString()); });
 }
 
-function buildOI(id, prefix, count) {
-  let html = '';
-  for (let i = 1; i <= count; i++) {
-    html += `<div class="divider"><span>Interruption ${i}</span></div>
-    <div class="grid-2">
-      <div class="field"><label>Time</label><input type="time" id="${prefix}-oi${i}-time"></div>
-      <div class="field"><label>Department / Reason</label><input type="text" id="${prefix}-oi${i}-dept" placeholder="e.g. Mechanical, Weather"></div>
-    </div>`;
-  }
-  document.getElementById(id).innerHTML = html;
-}
-
-function buildSignoffs(id, items) {
-  document.getElementById(id).innerHTML = items.map(item => `
-    <div class="signoff-row">
-      <div class="signoff-label">${item.label}</div>
-      <div class="signoff-yn">
-        <input type="radio" name="${item.id}" id="${item.id}-yes" value="YES">
-        <label for="${item.id}-yes">YES</label>
-        <input type="radio" name="${item.id}" id="${item.id}-no" value="NO" checked>
-        <label for="${item.id}-no">NO</label>
-      </div>
-    </div>`).join('');
-}
-
-// ═══════════════════════════════════════════════════
-// COLLECT
-// ═══════════════════════════════════════════════════
-function getYN(name)  { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : 'NO'; }
-function getVal(id)   { const el = document.getElementById(id); return el ? (el.value || '') : ''; }
-function getNum(id)   { const el = document.getElementById(id); return el ? Number(el.value || 0) : 0; }
-
-function collectFW() {
-  const checks = {}, interruptions = [];
-  FW_CHECKS.forEach(c => { checks[c.code] = getYN('chk-' + c.code); });
-  for (let i = 1; i <= 3; i++) { const t = getVal(`fw-oi${i}-time`), d = getVal(`fw-oi${i}-dept`); if (t||d) interruptions.push({num:i,time:t,dept:d}); }
-  return { action:'submitFerrisWheel', type:'FERRIS_WHEEL', date:getVal('fw-date'), operatorName:getVal('fw-operatorName'), opStart:getVal('fw-opStart'), guestStart:getVal('fw-guestStart'), opEnd:getVal('fw-opEnd'), avgSpeed:getVal('fw-avgSpeed'), voltage:getVal('fw-voltage'), weather:getVal('fw-weather'), temp:getVal('fw-temp'), windSpeed:getVal('fw-windSpeed'), windDir:getVal('fw-windDir'), rain:getVal('fw-rain'), checks, interruptions, sigOperator:getYN('fw-sigOperator'), sigEngineer:getYN('fw-sigEngineer'), sigSTM:getYN('fw-sigSTM'), comments:getVal('fw-comments'), submittedAt:new Date().toISOString() };
-}
-
-function collectZL() {
-  const checks = {}, equipment = {}, interruptions = [];
-  ZL_CHECKS.forEach(c => { checks[c.code] = getYN('chk-' + c.code); });
-  ZL_EQUIPMENT.forEach(c => { equipment[c.code] = getNum('eqp-' + c.code.replace(/\./g,'_')); });
-  for (let i = 1; i <= 3; i++) { const t = getVal(`zl-oi${i}-time`), d = getVal(`zl-oi${i}-dept`); if (t||d) interruptions.push({num:i,time:t,dept:d}); }
-  return { action:'submitZipline', type:'KIDS_ZIPLINE', date:getVal('zl-date'), operatorName:getVal('zl-operatorName'), opStart:getVal('zl-opStart'), opEnd:getVal('zl-opEnd'), customers:getVal('zl-customers'), weather:getVal('zl-weather'), temp:getVal('zl-temp'), windSpeed:getVal('zl-windSpeed'), windDir:getVal('zl-windDir'), lastRescue:getVal('zl-lastRescue'), nextRescue:getVal('zl-nextRescue'), equipment, checks, interruptions, sigSupervisor:getYN('zl-sigSupervisor'), sigTM:getYN('zl-sigTM'), comments:getVal('zl-comments'), submittedAt:new Date().toISOString() };
-}
-
-// ═══════════════════════════════════════════════════
-// SUBMIT
-// ═══════════════════════════════════════════════════
-async function submitForm(data, btnId, spinnerId, statusId) {
-  const btn = document.getElementById(btnId), spinner = document.getElementById(spinnerId), statusEl = document.getElementById(statusId);
-  btn.disabled = true; btn.classList.add('loading'); spinner.style.display = 'inline-block'; statusEl.className = 'status-msg';
-  try {
-    const res  = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(data) });
-    const json = await res.json();
-    if (json.status === 'success' || json.success) {
-      statusEl.className = 'status-msg success show';
-      statusEl.innerHTML = '✅ Daily check submitted successfully. Record saved to Google Sheets.';
-      // Refresh dashboard tiles after successful submission
-      setTimeout(() => loadDashboard(), 1500);
-    } else { throw new Error(json.message || json.error || 'Unknown error'); }
-  } catch (err) {
-    statusEl.className = 'status-msg error show';
-    statusEl.innerHTML = `❌ Network error. Check connection and try again. (${err.message})`;
-  } finally {
-    btn.disabled = false; btn.classList.remove('loading'); spinner.style.display = 'none';
-  }
-}
-
-document.getElementById('fw-form').addEventListener('submit', e => { e.preventDefault(); if (!getVal('fw-date')) { alert('Please select a check date.'); return; } submitForm(collectFW(), 'fw-btn', 'fw-spinner', 'fw-status'); });
-document.getElementById('zl-form').addEventListener('submit', e => { e.preventDefault(); if (!getVal('zl-date')) { alert('Please select a check date.'); return; } submitForm(collectZL(), 'zl-btn', 'zl-spinner', 'zl-status'); });
-
-// ═══════════════════════════════════════════════════
-// DASHBOARD — today's date key
-// ═══════════════════════════════════════════════════
-function todayKey() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-}
-
-function dateKey(d) {
-  // d can be a Date object or ISO string from submittedAt
-  const dt = d instanceof Date ? d : new Date(d);
-  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-}
-
-function fmtTime(iso) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-}
-
-function renderTile(tileId, badgeId, bodyId, todayRecord) {
-  const tile  = document.getElementById(tileId);
-  const badge = document.getElementById(badgeId);
-  const body  = document.getElementById(bodyId);
-
-  if (!todayRecord) {
-    tile.className  = 'activity-tile status-pending';
-    badge.className = 'tile-status-badge badge-pending';
-    badge.textContent = 'NOT YET';
-    body.innerHTML  = `<div class="tile-pending-msg"><strong>Awaiting Check</strong>No submission recorded for today yet.</div>`;
-    return;
-  }
-
-  const hasAnomaly = todayRecord.anomalies && todayRecord.anomalies.trim().length > 0;
-  const isOk       = todayRecord.overallStatus && todayRecord.overallStatus.includes('ALL CLEAR');
-
-  if (hasAnomaly || !isOk) {
-    tile.className  = 'activity-tile status-anomaly';
-    badge.className = 'tile-status-badge badge-anomaly';
-    badge.textContent = 'ANOMALY';
-  } else {
-    tile.className  = 'activity-tile status-ok';
-    badge.className = 'tile-status-badge badge-ok';
-    badge.textContent = 'ALL CLEAR';
-  }
-
-  const statusColor = (hasAnomaly || !isOk) ? 'warn' : 'ok';
-  const statusText  = todayRecord.overallStatus || (hasAnomaly ? 'Anomaly Reported' : 'Clear');
-
-  body.innerHTML = `
-    <div class="tile-row"><span class="tile-row-label">Checked at</span><span class="tile-row-value">${fmtTime(todayRecord.submittedAt)}</span></div>
-    <div class="tile-row"><span class="tile-row-label">Operator / Supervisor</span><span class="tile-row-value">${todayRecord.operator || '—'}</span></div>
-    <div class="tile-row"><span class="tile-row-label">Status</span><span class="tile-row-value ${statusColor}">${statusText}</span></div>
-    ${todayRecord.missed && todayRecord.missed.trim() ? `<div class="tile-row"><span class="tile-row-label">Missed Items</span><span class="tile-row-value warn" style="font-size:11px">${todayRecord.missed}</span></div>` : ''}
-    ${hasAnomaly ? `<div class="tile-anomaly-box"><strong>⚠ Anomaly Reported</strong>${todayRecord.anomalies}</div>` : ''}`;
-}
-
-// ═══════════════════════════════════════════════════
-// LOAD DASHBOARD
-// ═══════════════════════════════════════════════════
-async function loadDashboard() {
-  // Mark tiles as loading
-  ['fw','zl'].forEach(act => {
-    document.getElementById('tile-' + act).className = 'activity-tile status-pending';
-    document.getElementById('tile-' + act + '-badge').className = 'tile-status-badge badge-pending';
-    document.getElementById('tile-' + act + '-badge').textContent = 'LOADING';
-    document.getElementById('tile-' + act + '-body').innerHTML = '<div class="tile-pending-msg"><strong>—</strong>Loading…</div>';
+// ── DATA LOAD ─────────────────────────────────────────────
+function loadData(force) {
+  if (!force && cache) { renderDash(cache); return; }
+  document.getElementById('d-entries').textContent = '…';
+  apiFetch(API, function(err, d) {
+    if (err) { toast('Could not load data', '#dc2626'); return; }
+    cache = d;
+    renderDash(d);
+    var t = new Date(d.lastUpdated);
+    document.getElementById('live-label').textContent = 'Updated ' + pad(t.getHours())+':'+pad(t.getMinutes());
   });
+}
 
-  try {
-    // Single reliable call — getLog is already deployed and working
-    const res  = await fetch(SCRIPT_URL + '?action=getLog');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-
-    const rows  = json.data || [];
-    const today = todayKey();
-
-    const allFW = rows.filter(r => r.type === 'FERRIS_WHEEL');
-    const allZL = rows.filter(r => r.type === 'KIDS_ZIPLINE');
-
-    // ── TODAY TILES ────────────────────────────────────────────────
-    const fwToday = allFW.filter(r => r.submittedAt && dateKey(r.submittedAt) === today);
-    const zlToday = allZL.filter(r => r.submittedAt && dateKey(r.submittedAt) === today);
-
-    renderTile('tile-fw', 'tile-fw-badge', 'tile-fw-body',
-      fwToday.length ? fwToday[fwToday.length - 1] : null);
-    renderTile('tile-zl', 'tile-zl-badge', 'tile-zl-body',
-      zlToday.length ? zlToday[zlToday.length - 1] : null);
-
-    // ── SUMMARY STATS ──────────────────────────────────────────────
-    const fwDays = new Set(allFW.map(r => r.submittedAt ? dateKey(r.submittedAt) : r.date).filter(Boolean));
-    const zlDays = new Set(allZL.map(r => r.submittedAt ? dateKey(r.submittedAt) : r.date).filter(Boolean));
-
-    const daysBoth = [...fwDays].filter(d => zlDays.has(d)).length;
-    const allDays  = new Set([...fwDays, ...zlDays]);
-    const opDays   = allDays.size;
-    const missed   = opDays - daysBoth;
-
-    const fwAnomalies = allFW.filter(r => r.anomalies && r.anomalies.trim()).length;
-    const zlAnomalies = allZL.filter(r => r.anomalies && r.anomalies.trim()).length;
-
-    document.getElementById('stat-fw-total').textContent    = allFW.length;
-    document.getElementById('stat-zl-total').textContent    = allZL.length;
-    document.getElementById('stat-anomalies').textContent   = fwAnomalies + zlAnomalies;
-    document.getElementById('stat-days-both').textContent   = daysBoth;
-    document.getElementById('stat-days-op').textContent     = opDays;
-    document.getElementById('stat-days-missed').textContent = missed;
-
-    // ── 7-DAY BAR ──────────────────────────────────────────────────
-    const weekRow  = document.getElementById('week-days-row');
-    const dayNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-    const days7    = [];
-    for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate()-i); days7.push(d); }
-
-    weekRow.innerHTML = days7.map(d => {
-      const k       = dateKey(d);
-      const hasFW   = fwDays.has(k);
-      const hasZL   = zlDays.has(k);
-      const isToday = k === today;
-      let dotClass, symbol;
-      if (isToday && !hasFW && !hasZL) { dotClass = 'week-day-dot dot-today'; symbol = '?'; }
-      else if (hasFW && hasZL)  { dotClass = 'week-day-dot dot-both';    symbol = '✓'; }
-      else if (hasFW || hasZL)  { dotClass = 'week-day-dot dot-partial'; symbol = '~'; }
-      else                       { dotClass = 'week-day-dot dot-none';    symbol = '—'; }
-      if (isToday) dotClass += ' dot-today';
-      return '<div class="week-day">' +
-        '<div class="week-day-label">' + dayNames[d.getDay()] + '</div>' +
-        '<div class="' + dotClass + '">' + symbol + '</div>' +
-        '<div style="font-size:9px;color:#94a3b8;margin-top:2px">' + d.getDate() + '</div>' +
+// ── RENDER DASHBOARD ──────────────────────────────────────
+function renderDash(d) {
+  // ── CONVERSION TILES ────────────────────────────────────
+  var wins = d.conversionWindows || [];
+  document.getElementById('conv-tiles').innerHTML = wins.length === 0
+    ? '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;">Refresh to load conversion data</div>'
+    : wins.map(function(w){
+        var conv  = w.convMJSR;
+        var noData = conv === null;
+        var col   = noData ? 'var(--muted)' : conv >= 75 ? '#16a34a' : conv >= 50 ? '#d97706' : '#dc2626';
+        var valStr = noData ? '—' : conv + '%';
+        var diff  = noData ? '' : (w.gateMJSR - w.paxMJSR);
+        var diffStr = noData ? '' : (diff >= 0 ? '+'+diff : String(diff));
+        var diffCol = diff >= 0 ? '#16a34a' : '#dc2626';
+        return '<div class="card" style="text-align:center;border-top:3px solid '+col+';">'+
+          '<div class="kpi-lbl" style="margin-bottom:6px;">'+w.label+'</div>'+
+          '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:32px;font-weight:700;color:'+col+';line-height:1;">'+valStr+'</div>'+
+          '<div style="font-size:11px;color:var(--muted);margin-top:5px;">'+
+            (noData ? 'No data' : w.gateMJSR+' gate &nbsp;/&nbsp; '+w.paxMJSR+' pax stated')+
+          '</div>'+
+          (noData ? '' : '<div style="font-size:12px;font-weight:600;color:'+diffCol+';margin-top:3px;">'+diffStr+' pax</div>')+
         '</div>';
-    }).join('');
-
-    // ── BREAKDOWN TABLE ────────────────────────────────────────────
-    const fwRate = opDays > 0 ? Math.round((fwDays.size / opDays) * 100) : 0;
-    const zlRate = opDays > 0 ? Math.round((zlDays.size / opDays) * 100) : 0;
-
-    const lastFWAnomaly = [...allFW].reverse().find(r => r.anomalies && r.anomalies.trim());
-    const lastZLAnomaly = [...allZL].reverse().find(r => r.anomalies && r.anomalies.trim());
-
-    const fwBar = fwRate >= 90 ? '' : fwRate >= 70 ? 'amber' : 'red';
-    const zlBar = zlRate >= 90 ? '' : zlRate >= 70 ? 'amber' : 'red';
-
-    document.getElementById('breakdown-body').innerHTML =
-      '<tr>' +
-        '<td><strong>🎡 Ferris Wheel</strong></td>' +
-        '<td style="font-size:13px">' + allFW.length + ' checks / ' + fwDays.size + ' days</td>' +
-        '<td style="min-width:100px"><div style="display:flex;align-items:center;gap:8px">' +
-          '<div class="progress-wrap" style="flex:1"><div class="progress-bar ' + fwBar + '" style="width:' + fwRate + '%"></div></div>' +
-          '<span style="font-size:12px;font-weight:700;color:#1a2e45;min-width:32px">' + fwRate + '%</span>' +
-        '</div></td>' +
-        '<td style="font-size:12px;color:#64748b">' +
-          (lastFWAnomaly ? (lastFWAnomaly.date || '—') + ': ' + lastFWAnomaly.anomalies.substring(0,40) + '…' : 'None recorded') +
-        '</td>' +
-      '</tr>' +
-      '<tr>' +
-        '<td><strong>🪂 Kids Zipline</strong></td>' +
-        '<td style="font-size:13px">' + allZL.length + ' checks / ' + zlDays.size + ' days</td>' +
-        '<td style="min-width:100px"><div style="display:flex;align-items:center;gap:8px">' +
-          '<div class="progress-wrap" style="flex:1"><div class="progress-bar ' + zlBar + '" style="width:' + zlRate + '%"></div></div>' +
-          '<span style="font-size:12px;font-weight:700;color:#1a2e45;min-width:32px">' + zlRate + '%</span>' +
-        '</div></td>' +
-        '<td style="font-size:12px;color:#64748b">' +
-          (lastZLAnomaly ? (lastZLAnomaly.date || '—') + ': ' + lastZLAnomaly.anomalies.substring(0,40) + '…' : 'None recorded') +
-        '</td>' +
-      '</tr>';
-
-    // ── RECENT SUBMISSIONS ─────────────────────────────────────────
-    const combined = rows
-      .slice()
-      .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
-      .slice(0, 10);
-
-    if (!combined.length) {
-      document.getElementById('dash-recent-body').innerHTML =
-        '<div class="empty-state">No submissions yet. Submit a daily check to see records here.</div>';
-    } else {
-      const tableRows = combined.map(r => {
-        const hasAnomaly = r.anomalies && r.anomalies.trim().length > 0;
-        const pill = hasAnomaly
-          ? '<span class="pill pill-action">⚠ Anomaly</span>'
-          : '<span class="pill pill-ok">✓ Clear</span>';
-        const icon   = r.type === 'FERRIS_WHEEL' ? '🎡 Ferris Wheel' : '🪂 Kids Zipline';
-        const signer = r.type === 'FERRIS_WHEEL'
-          ? (r.sigSTM || r.sigOperator || '—')
-          : (r.sigTM  || r.sigSupervisor || '—');
-        const isRed  = r.submittedAt && dateKey(r.submittedAt) === today;
-        return '<tr style="' + (isRed ? 'background:#f0fdf4;' : '') + '">' +
-          '<td style="font-size:11px;color:#64748b;font-family:monospace">' + (r.date || '—') + '</td>' +
-          '<td style="font-size:13px">' + icon + '</td>' +
-          '<td>' + pill + '</td>' +
-          '<td style="font-size:12px;color:#64748b">' + signer + '</td>' +
-          '<td style="font-size:11px;color:#94a3b8">' + (r.submittedAt ? fmtTime(r.submittedAt) : '—') + '</td>' +
-          '</tr>';
       }).join('');
 
-      document.getElementById('dash-recent-body').innerHTML =
-        '<table class="log-table"><thead><tr>' +
-        '<th>Date</th><th>Activity</th><th>Status</th><th>Signed By</th><th>Time</th>' +
-        '</tr></thead><tbody>' + tableRows + '</tbody></table>';
-    }
+  document.getElementById('d-entries').textContent = d.today.entries;
+  document.getElementById('d-unique').textContent  = d.allTime.uniquePlates;
+  document.getElementById('d-pax').textContent     = d.today.passengers;
+  document.getElementById('d-mjsr').textContent    = d.today.enteredMJSR;
 
-    document.getElementById('dash-refreshed').textContent =
-      new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  var c1=d.checkpoints.cp1.entries, c2=d.checkpoints.cp2.entries, c3=d.checkpoints.cp3.entries;
+  var mx=Math.max(c1,c2,c3,1);
+  document.getElementById('cnt-cp1').textContent = c1;
+  document.getElementById('cnt-cp2').textContent = c2;
+  document.getElementById('cnt-cp3').textContent = c3;
+  document.getElementById('bar-cp1').style.width = (c1/mx*100)+'%';
+  document.getElementById('bar-cp2').style.width = (c2/mx*100)+'%';
+  document.getElementById('bar-cp3').style.width = (c3/mx*100)+'%';
 
-  } catch (err) {
-    // Show error in tiles but keep rest of page functional
-    ['fw','zl'].forEach(act => {
-      document.getElementById('tile-' + act).className = 'activity-tile status-pending';
-      document.getElementById('tile-' + act + '-badge').textContent = 'ERROR';
-      document.getElementById('tile-' + act + '-body').innerHTML =
-        '<div class="tile-pending-msg"><strong>⚠ Could not load</strong>' + err.message + '</div>';
-    });
-    document.getElementById('breakdown-body').innerHTML =
-      '<tr><td colspan="4" style="text-align:center;color:#ef4444;padding:16px">⚠ ' + err.message + '</td></tr>';
-    document.getElementById('dash-recent-body').innerHTML =
-      '<div class="empty-state">⚠ Could not load data. Check your connection and try refreshing.</div>';
-  }
-}
-// ═══════════════════════════════════════════════════
-// MIDNIGHT RESET — schedules a page reload at midnight
-// so the tiles clear and await fresh submissions
-// ═══════════════════════════════════════════════════
-function scheduleMidnightReset() {
-  const now        = new Date();
-  const midnight   = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  const msUntil    = midnight - now;
-  setTimeout(() => {
-    loadDashboard();          // tiles reset naturally since today = new date
-    scheduleMidnightReset();  // re-schedule for next midnight
-  }, msUntil);
-}
+  var j=d.journeys;
+  document.getElementById('journey-body').innerHTML = [
+    ['CP1 only — did not continue', j.cp1Only],
+    ['CP1 → CP2 — continued up',    j.cp1AndCp2],
+    ['CP1 → CP3 — skipped CP2',     j.cp1AndCp3],
+    ['All 3 checkpoints',           j.allThree],
+    ['CP2 only',                    j.cp2Only],
+    ['CP2 → CP3',                   j.cp2AndCp3],
+    ['CP3 only',                    j.cp3Only]
+  ].map(function(r){
+    return '<tr><td>'+r[0]+'</td><td style="font-size:18px;font-weight:700">'+r[1]+'</td></tr>';
+  }).join('');
 
+  var vt=d.vtypes||{}, vtp=d.vtypesPax||{};
+  document.getElementById('vtype-body').innerHTML = Object.keys(vt).sort(function(a,b){return vt[b]-vt[a];}).map(function(k){
+    return '<tr><td>'+k.split(' (')[0]+'</td><td style="font-weight:600">'+vt[k]+'</td><td>'+( vtp[k]||0)+'</td></tr>';
+  }).join('');
 
-// ═══════════════════════════════════════════════════
-// EDIT RECORD SYSTEM
-// ═══════════════════════════════════════════════════
+  var pr=d.provinces||{}, prT=Object.values(pr).reduce(function(s,v){return s+v;},0)||1;
+  document.getElementById('prov-body').innerHTML = Object.keys(pr).sort(function(a,b){return pr[b]-pr[a];}).map(function(k){
+    return '<tr><td>'+k+'</td><td style="font-weight:600">'+pr[k]+' <span style="color:var(--muted);font-size:11px;">('+pct(pr[k],prT)+')</span></td></tr>';
+  }).join('');
 
-const EDIT_PIN = '1234';
-let editUnlocked  = false;
-let editRecords   = [];   // last 10 submissions loaded from getLog
-let selectedRecord = null; // the record currently being edited
+  var cp = d.checkpoints;
+  var gate = d.gateAllTime||{mjsr:0,gv:0};
+  var gTotal = (gate.mjsr||0)+(gate.gv||0);
+  var dest = d.destinations||{};
+  var dM=dest['Malam Jabba Ski Resort (MJSR)']||0, dG=dest['Green Valley']||0;
+  var dB=dest['Both / Touring the area']||0, dP=dest['Just passing through']||0;
+  var dT=dM+dG+dB+dP||1;
+  var cpIncomplete = cp.cp1.entries===0 || cp.cp2.entries===0;
 
-// PIN
-function checkEditPin() {
-  if (document.getElementById('edit-pin').value === EDIT_PIN) {
-    editUnlocked = true;
-    document.getElementById('edit-lock-screen').style.display  = 'none';
-    document.getElementById('edit-panel').classList.add('unlocked');
-    document.getElementById('edit-pin-error').style.display    = 'none';
-    loadEditRecords();
-    loadAuditLog();
-  } else {
-    document.getElementById('edit-pin-error').style.display = 'block';
-    document.getElementById('edit-pin').value = '';
-    document.getElementById('edit-pin').focus();
-  }
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'edit-pin') checkEditPin();
-});
-
-function lockEdit() {
-  editUnlocked  = false;
-  selectedRecord = null;
-  document.getElementById('edit-lock-screen').style.display = '';
-  document.getElementById('edit-panel').classList.remove('unlocked');
-  document.getElementById('edit-pin').value = '';
-  document.getElementById('edit-form-wrap').classList.remove('show');
-}
-
-// LOAD LAST 10 RECORDS
-async function loadEditRecords() {
-  const listEl = document.getElementById('edit-record-list');
-  listEl.innerHTML = '<div class="empty-state">Loading…</div>';
-  try {
-    const res  = await fetch(SCRIPT_URL + '?action=getLog');
-    const json = await res.json();
-    editRecords = (json.data || []).slice(0, 10);
-
-    if (!editRecords.length) {
-      listEl.innerHTML = '<div class="empty-state">No submissions found.</div>';
-      return;
-    }
-
-    listEl.innerHTML = editRecords.map((r, idx) => {
-      const icon  = r.type === 'FERRIS_WHEEL' ? '🎡' : '🪂';
-      const name  = r.type === 'FERRIS_WHEEL' ? 'Ferris Wheel' : 'Kids Zipline';
-      const time  = r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-GB') : '—';
-      const hasA  = r.anomalies && r.anomalies.trim();
-      const badge = hasA
-        ? '<span class="edit-rec-badge pill-action" style="background:#fef3c7;color:#92400e">Anomaly</span>'
-        : '<span class="edit-rec-badge pill-ok"    style="background:#dcfce7;color:#166534">Clear</span>';
-      return `<div class="edit-record-row" id="edit-row-${idx}" onclick="selectRecord(${idx})">
-        <span class="edit-rec-icon">${icon}</span>
-        <div class="edit-rec-info">
-          <div class="edit-rec-title">${name} — ${r.date || '—'}</div>
-          <div class="edit-rec-sub">Submitted: ${time} &nbsp;|&nbsp; Operator: ${r.operator || '—'}</div>
-        </div>
-        ${badge}
-      </div>`;
+  // ── STAGE FUNNEL TABLE ──────────────────────────────────
+  document.getElementById('funnel-body').innerHTML =
+    (cpIncomplete ? '<tr><td colspan="6" style="background:#fff3cd;color:#856404;font-size:12px;padding:8px 14px;">⚠ CP1 and/or CP2 have no entries yet — funnel will populate once all checkpoints are recording</td></tr>' : '')+
+    [
+      {stage:'CP1 · TMA Splinobo',  c:'var(--cp1)', v:cp.cp1.entries, p:cp.cp1.pax, gm:'—', gg:'—'},
+      {stage:'CP2 · Jungle Forest', c:'var(--cp2)', v:cp.cp2.entries, p:cp.cp2.pax, gm:'—', gg:'—'},
+      {stage:'CP3 · MJSR/GV Split', c:'var(--cp3)', v:cp.cp3.entries, p:cp.cp3.pax, gm:gate.mjsr||0, gg:gate.gv||0}
+    ].map(function(r){
+      var hasGate = typeof r.gm === 'number';
+      var conv = hasGate && r.p>0 ? Math.round((r.gm+r.gg)/r.p*100) : null;
+      var cc = conv!==null ? (conv>=75?'#16a34a':conv>=40?'#d97706':'#dc2626') : 'var(--muted)';
+      return '<tr>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.stage+'</td>'+
+        '<td style="font-size:18px;font-weight:700">'+r.v+'</td>'+
+        '<td style="font-size:18px;font-weight:700">'+r.p+'</td>'+
+        '<td>'+(hasGate?'<span style="font-weight:700;color:#1a73e8">'+r.gm+' MJSR</span> &nbsp;<span style="font-weight:700;color:#059669">'+r.gg+' GV</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
+        '<td style="font-size:22px;font-weight:700;color:'+cc+'">'+(conv!==null?conv+'%':'—')+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+(hasGate?'Gate entries ÷ CP3 passengers':'No gate comparison at this stage')+'</td>'+
+      '</tr>';
     }).join('');
-  } catch (err) {
-    listEl.innerHTML = `<div class="empty-state">⚠ Could not load records. ${err.message}</div>`;
-  }
+
+  // ── OVERALL CONVERSION KPIs ──────────────────────────────
+  var overallPct = cp.cp3.pax>0 ? Math.round(gTotal/cp.cp3.pax*100) : 0;
+  document.getElementById('overall-conv-grid').innerHTML = [
+    {l:'CP1 Vehicles',      v:cp.cp1.entries, s:'entries logged',     c:'var(--cp1)'},
+    {l:'CP1 Passengers',    v:cp.cp1.pax,     s:'total recorded',     c:'var(--cp1)'},
+    {l:'CP2 Vehicles',      v:cp.cp2.entries, s:'entries logged',     c:'var(--cp2)'},
+    {l:'CP2 Passengers',    v:cp.cp2.pax,     s:'total recorded',     c:'var(--cp2)'},
+    {l:'CP3 Vehicles',      v:cp.cp3.entries, s:'entries logged',     c:'var(--cp3)'},
+    {l:'CP3 Passengers',    v:cp.cp3.pax,     s:'total recorded',     c:'var(--cp3)'},
+    {l:'Gate MJSR',         v:gate.mjsr||0,   s:'actual entries',     c:'#1a73e8'},
+    {l:'Gate Green Valley', v:gate.gv||0,     s:'actual entries',     c:'#059669'},
+    {l:'Total Gate Entries',v:gTotal,         s:'MJSR + GV combined', c:'#1a73e8'},
+    {l:'CP3 → Gate Conv.',  v:overallPct+'%', s:'gate ÷ CP3 pax',    c:overallPct>110?'#dc2626':'#1a73e8'}
+  ].map(function(k){
+    return '<div class="card"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-sub">'+k.s+'</div></div>';
+  }).join('');
+
+  // ── PROPERTY BREAKDOWN TABLE ────────────────────────────
+  var paxStatedMJSR = d.allTime.paxStatedMJSR || 0;
+  var paxStatedGV   = d.allTime.paxStatedGV   || 0;
+  document.getElementById('conv-body').innerHTML =
+    (paxStatedMJSR===0 && paxStatedGV===0 ? '<tr><td colspan="5" style="background:#fff3cd;color:#856404;font-size:12px;padding:8px 14px;">⚠ No passenger data yet — will populate as entries are submitted</td></tr>' : '')+
+    [{n:'MJSR',        g:gate.mjsr||0, basePax:paxStatedMJSR, c:'#1a73e8'},
+     {n:'Green Valley',g:gate.gv||0,   basePax:paxStatedGV,   c:'#059669'}]
+    .map(function(r){
+      var conv    = r.basePax>0 ? pct(r.g, r.basePax) : '—';
+      var cc      = r.basePax>0 ? (parseInt(conv)>100?'#dc2626':r.c) : 'var(--muted)';
+      var diff    = r.basePax>0 ? (r.g - r.basePax) : null;
+      var diffStr = diff!==null ? (diff>=0?'+'+diff:String(diff)) : '—';
+      var diffCol = diff!==null ? (diff>=0?'#16a34a':'#dc2626') : 'var(--muted)';
+      return '<tr>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.n+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
+        '<td style="font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
+      '</tr>';
+    }).join('');
 }
 
-// SELECT A RECORD TO EDIT
-function selectRecord(idx) {
-  // Highlight selected row
-  document.querySelectorAll('.edit-record-row').forEach(r => r.classList.remove('selected'));
-  const rowEl = document.getElementById('edit-row-' + idx);
-  if (rowEl) rowEl.classList.add('selected');
+// ── REPORT ────────────────────────────────────────────────
+function loadReport() {
+  var btn = document.getElementById('r-refresh-btn');
+  btn.textContent = '↻ Loading…';
+  btn.disabled = true;
 
-  selectedRecord = editRecords[idx];
-  const r = selectedRecord;
-
-  // Set form title
-  const name = r.type === 'FERRIS_WHEEL' ? '🎡 Ferris Wheel' : '🪂 Kids Zipline';
-  document.getElementById('edit-form-title').textContent = name + ' — ' + (r.date || '—');
-
-  // Populate session fields
-  document.getElementById('edit-date').value      = r.date || '';
-  document.getElementById('edit-operator').value  = r.operator || '';
-  document.getElementById('edit-op-start').value  = r.opStart  || '';
-  document.getElementById('edit-op-end').value    = r.opEnd    || '';
-  document.getElementById('edit-comments').value  = r.anomalies || '';
-
-  // Build check items grid
-  const checks = r.type === 'FERRIS_WHEEL'
-    ? ['FW5','FW6','FW7','FW8','FW9','FW10','FW11','FW12','FW13','FW14','FW15','FW16','FW17','FW18']
-    : ['ZL11','ZL12','ZL13','ZL14','ZL15','ZL16','ZL17','ZL18','ZL19','ZL20','ZL21','ZL22','ZL23'];
-
-  const checksData = r.checks || {};
-  document.getElementById('edit-checks-grid').innerHTML = checks.map(code => `
-    <div class="edit-check-item">
-      <span class="edit-check-code">${code}</span>
-      <select class="edit-check-sel" id="echk-${code}">
-        <option value="YES" ${(checksData[code]||'NO')==='YES'?'selected':''}>YES</option>
-        <option value="NO"  ${(checksData[code]||'NO')==='NO' ?'selected':''}>NO</option>
-      </select>
-    </div>`).join('');
-
-  // Clear mandatory fields
-  document.getElementById('edit-editor-name').value = '';
-  document.getElementById('edit-reason').value      = '';
-  document.getElementById('edit-status').className  = 'status-msg';
-
-  // Show form
-  document.getElementById('edit-form-wrap').classList.add('show');
-
-  // Scroll to form
-  document.getElementById('edit-form-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function cancelEdit() {
-  document.getElementById('edit-form-wrap').classList.remove('show');
-  document.querySelectorAll('.edit-record-row').forEach(r => r.classList.remove('selected'));
-  selectedRecord = null;
-}
-
-// SAVE EDIT
-async function saveEdit() {
-  if (!selectedRecord) return;
-
-  const editorName = document.getElementById('edit-editor-name').value.trim();
-  const reason     = document.getElementById('edit-reason').value.trim();
-
-  if (!editorName) {
-    alert('Please enter your name before saving.');
-    document.getElementById('edit-editor-name').focus();
-    return;
-  }
-  if (!reason) {
-    alert('A reason for the edit is required before saving.');
-    document.getElementById('edit-reason').focus();
-    return;
-  }
-
-  const btn      = document.getElementById('edit-save-btn');
-  const statusEl = document.getElementById('edit-status');
-  btn.disabled   = true;
-  statusEl.className = 'status-msg';
-
-  // Collect updated check values
-  const r = selectedRecord;
-  const checkCodes = r.type === 'FERRIS_WHEEL'
-    ? ['FW5','FW6','FW7','FW8','FW9','FW10','FW11','FW12','FW13','FW14','FW15','FW16','FW17','FW18']
-    : ['ZL11','ZL12','ZL13','ZL14','ZL15','ZL16','ZL17','ZL18','ZL19','ZL20','ZL21','ZL22','ZL23'];
-
-  const newChecks = {};
-  checkCodes.forEach(code => {
-    const el = document.getElementById('echk-' + code);
-    newChecks[code] = el ? el.value : (r.checks||{})[code] || 'NO';
-  });
-
-  const payload = {
-    action       : 'editRecord',
-    type         : r.type,
-    submittedAt  : r.submittedAt,       // used to identify the row
-    date         : r.date,             // original date for row lookup
-    editorName,
-    reason,
-    newDate      : document.getElementById('edit-date').value,
-    newOperator  : document.getElementById('edit-operator').value,
-    newOpStart   : document.getElementById('edit-op-start').value,
-    newOpEnd     : document.getElementById('edit-op-end').value,
-    newComments  : document.getElementById('edit-comments').value,
-    newChecks,
-    originalValues: {
-      date     : r.date,
-      operator : r.operator,
-      anomalies: r.anomalies,
-      checks   : r.checks || {},
-    },
-  };
-
-  try {
-    const res  = await fetch(SCRIPT_URL, {
-      method : 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body   : JSON.stringify(payload),
-    });
-    const json = await res.json();
-    if (json.status === 'success' || json.success) {
-      statusEl.className = 'status-msg success show';
-      statusEl.innerHTML = '✅ Record updated and edit logged to audit trail.';
-      // Refresh records and audit log
-      setTimeout(() => {
-        loadEditRecords();
-        loadAuditLog();
-        cancelEdit();
-      }, 1800);
-    } else {
-      throw new Error(json.message || json.error || 'Unknown error');
-    }
-  } catch (err) {
-    statusEl.className = 'status-msg error show';
-    statusEl.innerHTML = '❌ Save failed: ' + err.message;
-  } finally {
+  apiFetch(API, function(err, d) {
+    btn.textContent = '↻ Refresh Report';
     btn.disabled = false;
-  }
-}
-
-// LOAD AUDIT LOG
-async function loadAuditLog() {
-  const auditEl = document.getElementById('edit-audit-body');
-  try {
-    const res  = await fetch(SCRIPT_URL + '?action=getAuditLog');
-    const json = await res.json();
-    const rows = json.data || [];
-    if (!rows.length) {
-      auditEl.innerHTML = '<div class="empty-state">No edits recorded yet.</div>';
-      return;
-    }
-    const tableRows = rows.map(a => `<tr>
-      <td style="white-space:nowrap;font-family:monospace;font-size:11px">${a.editedAt||'—'}</td>
-      <td>${a.editorName||'—'}</td>
-      <td>${a.activity||'—'}</td>
-      <td>${a.recordDate||'—'}</td>
-      <td style="color:#92400e;font-weight:600">${a.reason||'—'}</td>
-      <td style="font-size:11px;color:#64748b">${a.changesSummary||'—'}</td>
-    </tr>`).join('');
-    auditEl.innerHTML = `<div style="overflow-x:auto"><table class="audit-table">
-      <thead><tr>
-        <th>Edited At</th><th>Editor</th><th>Activity</th>
-        <th>Record Date</th><th>Reason</th><th>Changes</th>
-      </tr></thead>
-      <tbody>${tableRows}</tbody>
-    </table></div>`;
-  } catch (err) {
-    auditEl.innerHTML = '<div class="empty-state">Audit log will appear here after first edit.</div>';
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// TAB SWITCHER
-// ═══════════════════════════════════════════════════
-function switchTab(id) {
-  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-    btn.classList.toggle('active', ['dash','fw','zl','maint','edit'][i] === id);
+    if (err) { toast('Could not load data', '#dc2626'); return; }
+    cache = d;
+    renderReport(d);
   });
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  if (id === 'maint' && !maintUnlocked) { document.getElementById('maint-pin').focus(); }
-  if (id === 'edit') { if (!editUnlocked) { setTimeout(()=>document.getElementById('edit-pin').focus(),100); } else { loadEditRecords(); } }
 }
 
-// ═══════════════════════════════════════════════════
-// CLOCK
-// ═══════════════════════════════════════════════════
-function tick() {
-  const now = new Date();
-  document.getElementById('hdr-date').textContent = now.toLocaleDateString('en-GB', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  document.getElementById('hdr-time').textContent = now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  document.getElementById('dash-today-label').textContent = now.toLocaleDateString('en-GB', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+function renderReport(d) {
+  var range = document.getElementById('r-range').value;
+  var now   = new Date();
+  var label = range === 'today'
+    ? 'Today — ' + now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+    : 'All Time';
+  document.getElementById('r-period').textContent = 'Period: ' + label;
+  document.getElementById('rpt-header').style.display = 'block';
+
+  var entries = range==='today' ? d.today.entries    : d.allTime.entries;
+  var pax_    = range==='today' ? d.today.passengers : d.allTime.passengers;
+  var mjsr_   = range==='today' ? d.today.enteredMJSR: d.allTime.enteredMJSR;
+  var gv_     = range==='today' ? d.today.wentGV     : d.allTime.wentGV;
+  var gate    = range==='today' ? (d.gateToday||{mjsr:0,gv:0}) : (d.gateAllTime||{mjsr:0,gv:0});
+
+  var kpis = [
+    {l:'Total Vehicles',   v:entries,               s:'entries logged'},
+    {l:'Unique Plates',    v:d.allTime.uniquePlates, s:'distinct vehicles'},
+    {l:'Total Passengers', v:pax_,                  s:'recorded'},
+    {l:'Stated MJSR',      v:mjsr_,                 s:entries>0?pct(mjsr_,entries)+' of total':'—', c:'#1a73e8'},
+    {l:'Green Valley',     v:gv_,                   s:entries>0?pct(gv_,entries)+' of total':'—',   c:'#059669'},
+    {l:'Gate MJSR',        v:gate.mjsr,             s:'actual entries'},
+    {l:'Gate GV',          v:gate.gv,               s:'actual entries'}
+  ];
+
+  var dest=d.destinations||{};
+  var dM=dest['Malam Jabba Ski Resort (MJSR)']||0, dG=dest['Green Valley']||0;
+  var dB=dest['Both / Touring the area']||0, dP=dest['Just passing through']||0;
+  var dT=dM+dG+dB+dP||1;
+  var gM=gate.mjsr, gG=gate.gv;
+  var fn=d.funnel||{};
+  var f1=fn.cp1ToCp2||{}, f2=fn.cp2ToCp3||{}, f3=fn.cp3ToGate||{}, fo=fn.overall||{};
+  var gTotal=(gM||0)+(gG||0);
+
+  var vt=d.vtypes||{}, vtp=d.vtypesPax||{};
+  var pr=d.provinces||{}, prT=Object.values(pr).reduce(function(s,v){return s+v;},0)||1;
+  var cp=d.checkpoints;
+  var cpIncomplete = cp.cp1.entries===0 || cp.cp2.entries===0;
+
+  // Stage funnel rows
+  var funnelRows = [
+    {stage:'CP1 → CP2',c:'#d97706',vIn:f1.cp1Plates||0,pIn:f1.cp1Pax||0,cont:f1.reachedCp2||0,drop:f1.droppedOff||0,pct_:f1.continuedPct||0,note:'Plates from CP1 that continued to CP2'},
+    {stage:'CP2 → CP3',c:'#059669',vIn:f2.cp2Plates||0,pIn:f2.cp2Pax||0,cont:f2.reachedCp3||0,drop:f2.droppedOff||0,pct_:f2.continuedPct||0,note:'Plates from CP2 that continued to CP3'},
+    {stage:'CP3 → Gate',c:'#2563eb',vIn:f3.cp3Plates||0,pIn:f3.cp3Pax||0,cont:f3.gateTotal||0,drop:Math.max(0,(f3.cp3Pax||0)-(f3.gateTotal||0)),pct_:f3.conversionPct||0,note:'CP3 passengers vs total gate entries'}
+  ];
+
+  // Property conversion using CP3 pax as denominator
+  var cp3Pax=f3.cp3Pax||0;
+  var epM=cp3Pax>0?Math.round(cp3Pax*dM/dT):0;
+  var epG=cp3Pax>0?Math.round(cp3Pax*dG/dT):0;
+
+  document.getElementById('r-content').innerHTML =
+    '<div class="grid" style="margin-bottom:20px;">'+
+      kpis.map(function(k){
+        return '<div class="card"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+(k.c||'#1a73e8')+'">'+k.v+'</div><div class="kpi-sub">'+(k.s||'')+'</div></div>';
+      }).join('')+
+    '</div>'+
+
+    '<div class="sec-title">Stage-by-Stage Funnel Analysis</div>'+
+    (cpIncomplete?'<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:7px;padding:8px 14px;font-size:12px;color:#856404;margin-bottom:10px;">⚠ CP1 and/or CP2 have no entries yet — stage funnel will populate once all checkpoints are actively recording.</div>':'')+
+    '<div class="tbl-wrap"><table><thead><tr><th>Stage</th><th>Vehicles In</th><th>Passengers In</th><th>Continued / Gate In</th><th>Dropped Off</th><th>Retention %</th><th>Note</th></tr></thead><tbody>'+
+    funnelRows.map(function(r){
+      var pc=r.pct_>=75?'#16a34a':r.pct_>=40?'#d97706':'#dc2626';
+      return '<tr>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.stage+'</td>'+
+        '<td style="font-weight:700">'+r.vIn+'</td>'+
+        '<td style="font-weight:700">'+r.pIn+'</td>'+
+        '<td style="font-weight:700;color:'+pc+'">'+r.cont+'</td>'+
+        '<td style="font-weight:700;color:#dc2626">'+r.drop+'</td>'+
+        '<td style="font-size:20px;font-weight:700;color:'+pc+'">'+r.pct_+'%</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+r.note+'</td>'+
+      '</tr>';
+    }).join('')+
+    '</tbody></table></div>'+
+
+    '<div class="sec-title" style="margin-top:16px;">Overall Conversion</div>'+
+    '<div class="tbl-wrap" style="margin-bottom:16px;"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>'+
+    '<tr><td>Total Unique Vehicles (all CPs)</td><td style="font-weight:700">'+(fo.totalUniquePlates||0)+'</td></tr>'+
+    '<tr><td>Total Passengers (all CPs)</td><td style="font-weight:700">'+(fo.totalPax||0)+'</td></tr>'+
+    '<tr><td>Total Gate Entries (MJSR + GV)</td><td style="font-weight:700;color:#1a73e8">'+gTotal+'</td></tr>'+
+    '<tr><td>Overall Conversion (gate ÷ total pax)</td><td style="font-size:20px;font-weight:700;color:#1a73e8">'+(fo.conversionPct||0)+'%</td></tr>'+
+    '</tbody></table></div>'+
+
+    '<div class="sec-title">Property Breakdown — Passengers vs Gate Entries</div>'+
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Total passengers in vehicles that stated each destination vs actual gate entries per site.</p>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Passengers in Cars (stated dest.)</th><th>Gate Entries (people)</th><th>Conversion %</th><th>Difference</th></tr></thead><tbody>'+
+    [{n:'MJSR',g:gM,basePax:d.allTime.paxStatedMJSR||0,c:'#1a73e8'},{n:'Green Valley',g:gG,basePax:d.allTime.paxStatedGV||0,c:'#059669'}]
+    .map(function(r){
+      var conv    = r.basePax>0 ? pct(r.g,r.basePax) : '—';
+      var cc      = r.basePax>0 ? (parseInt(conv)>100?'#dc2626':r.c) : 'var(--muted)';
+      var diff    = r.basePax>0 ? (r.g-r.basePax) : null;
+      var diffStr = diff!==null?(diff>=0?'+'+diff:String(diff)):'—';
+      var diffCol = diff!==null?(diff>=0?'#16a34a':'#dc2626'):'var(--muted)';
+      return '<tr>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.n+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
+        '<td style="font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
+      '</tr>';
+    }).join('')+
+    '</tbody></table></div>'+
+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">'+
+      '<div><div class="sec-title">Province of Origin</div><div class="tbl-wrap"><table><thead><tr><th>Province</th><th>Vehicles</th><th>%</th></tr></thead><tbody>'+
+        Object.keys(pr).sort(function(a,b){return pr[b]-pr[a];}).map(function(k){ return '<tr><td>'+k+'</td><td style="font-weight:700">'+pr[k]+'</td><td>'+pct(pr[k],prT)+'</td></tr>'; }).join('')+
+      '</tbody></table></div></div>'+
+      '<div><div class="sec-title">Vehicle Types</div><div class="tbl-wrap"><table><thead><tr><th>Type</th><th>Count</th><th>Pax</th></tr></thead><tbody>'+
+        Object.keys(vt).sort(function(a,b){return vt[b]-vt[a];}).map(function(k){ return '<tr><td>'+k.split(' (')[0]+'</td><td style="font-weight:700">'+vt[k]+'</td><td>'+(vtp[k]||0)+'</td></tr>'; }).join('')+
+      '</tbody></table></div></div>'+
+    '</div>'+
+    '<div style="border-top:1px solid var(--border);padding-top:10px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;">'+
+      '<span>Generated: '+now.toLocaleString('en-GB')+'</span>'+
+      '<span>Samsons Group · MJSR Tourist Vehicle Count System</span>'+
+    '</div>';
 }
 
-// ═══════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════
-(function init() {
-  const today = new Date().toISOString().split('T')[0];
-  ['fw-date','zl-date'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
+// ── SUBMIT ENTRY ──────────────────────────────────────────
+function selCP(el, val) {
+  document.querySelectorAll('.cp-pill').forEach(function(p){ p.classList.remove('sel'); });
+  el.classList.add('sel');
+  document.getElementById('f-cp').value = val;
+  var cols = {'CP1 - TMA Splinobo':'var(--cp1)','CP2 - Jungle Forest Area':'var(--cp2)','CP3 - MJSR / GV Road Split':'var(--cp3)'};
+  document.getElementById('shift-cp-label').style.color = cols[val];
+  document.getElementById('shift-cp-label').textContent = val.replace(' - ',' · ');
+}
 
-  buildCheckRows('fw-checks-body', FW_CHECKS);
-  buildOI('fw-oi-body', 'fw', 3);
-  buildSignoffs('fw-signoffs', FW_SIGNOFFS);
-  buildEqpRows('zl-eqp-body', ZL_EQUIPMENT);
-  buildCheckRows('zl-checks-body', ZL_CHECKS);
-  buildOI('zl-oi-body', 'zl', 3);
-  buildSignoffs('zl-signoffs', ZL_SIGNOFFS);
+function submitEntry() {
+  var staff   = document.getElementById('f-staff').value.trim();
+  var reg     = document.getElementById('f-reg').value.trim().toUpperCase();
+  var date    = document.getElementById('f-date').value;
+  var time    = document.getElementById('f-time').value;
+  var vtype   = document.getElementById('f-vtype').value;
+  var prov    = document.getElementById('f-prov').value;
+  var pax     = document.getElementById('f-pax').value;
+  var kids    = document.getElementById('f-children').value;
+  var dest    = document.getElementById('f-dest').value;
+  var entered = document.getElementById('f-entered').value;
+  var cp      = document.getElementById('f-cp').value;
+  if (!staff||!reg||!date||!time||!vtype||!prov||!pax||kids===''||!dest||!entered) { toast('Complete all required fields','#dc2626'); return; }
+  var e = {staff,reg,date,time,vtype,prov,pax:parseInt(pax),kids:parseInt(kids),dest,entered,cp};
+  sessionE.unshift(e); sCount++; sPax+=parseInt(pax);
+  if (entered==='Yes - entered MJSR') sMJSR++;
+  document.getElementById('s-count').textContent = sCount;
+  document.getElementById('s-pax').textContent   = sPax;
+  document.getElementById('s-mjsr').textContent  = sMJSR;
+  renderShift();
+  ['f-reg','f-vtype','f-prov','f-pax','f-children','f-dest','f-entered','f-company','f-phone','f-notes'].forEach(function(id){ document.getElementById(id).value=''; });
+  var n=new Date(); document.getElementById('f-time').value=pad(n.getHours())+':'+pad(n.getMinutes());
+  toast('✓ Submitted — '+reg,'#16a34a');
+}
 
-  tick();
-  setInterval(tick, 1000);
+function renderShift() {
+  var el = document.getElementById('shift-log');
+  if (!sessionE.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🚗</div><p>No entries yet.</p></div>'; return; }
+  el.innerHTML = sessionE.slice(0,20).map(function(e){
+    var col = e.entered==='Yes - entered MJSR'?'var(--green)':e.entered.indexOf('Green Valley')>-1?'var(--cp2)':'var(--muted)';
+    return '<div class="log-row"><div><div class="log-reg">'+e.reg+'</div><div class="log-meta">'+e.vtype.split(' (')[0]+' · '+e.pax+' pax · '+e.dest.replace('Malam Jabba Ski Resort (MJSR)','MJSR').replace('Unknown / Not stated','Unknown').replace('Both / Touring the area','Both')+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:600;color:'+col+'">'+e.entered.split(' - ')[0]+'</div><div class="log-time">'+e.time+'</div></div></div>';
+  }).join('');
+}
 
-  loadDashboard();
-  scheduleMidnightReset();
-})();
+// ── GATE ENTRY ────────────────────────────────────────────
+function submitGate() {
+  var staff = document.getElementById('g-staff').value.trim();
+  var date  = document.getElementById('g-date').value;
+  var prop  = document.getElementById('g-prop').value;
+  var vis   = document.getElementById('g-vis').value;
+  var notes = document.getElementById('g-notes').value.trim();
+  if (!staff||!date||!prop||vis==='') { toast('Complete all required fields','#dc2626'); return; }
+  var btn = document.getElementById('gate-btn');
+  btn.textContent='SUBMITTING…'; btn.disabled=true;
+  var url = API+'?action=gateEntry&staff='+encodeURIComponent(staff)+'&date='+encodeURIComponent(date)+'&property='+encodeURIComponent(prop)+'&visitors='+encodeURIComponent(vis)+'&notes='+encodeURIComponent(notes);
+  apiFetch(url, function(err,d){
+    btn.textContent='SUBMIT GATE ENTRY'; btn.disabled=false;
+    if (err||d.status!=='ok') { toast('Error saving entry','#dc2626'); return; }
+    gateCache = null; // invalidate cache
+    cache = null;     // invalidate main cache so dashboard refreshes
+    loadGate(true);
+    ['g-staff','g-vis','g-notes'].forEach(function(id){ document.getElementById(id).value=''; });
+    toast('✓ Gate entry saved — '+prop+': '+vis+' visitors','#16a34a');
+  });
+}
+
+function loadGate(force) {
+  if (!force && gateCache) { renderGate(gateCache); return; }
+  apiFetch(API+'?action=getGateEntries', function(err,d){
+    if (err) { toast('Could not load gate entries','#dc2626'); return; }
+    gateCache = d.entries || [];
+    renderGate(gateCache);
+  });
+}
+
+function renderGate(entries) {
+  var el = document.getElementById('gate-log');
+  if (!entries.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🎫</div><p>No entries yet.</p></div>'; return; }
+  el.innerHTML = entries.map(function(e,i){
+    var col = e.property==='MJSR'?'#1a73e8':'#059669';
+    return '<div class="log-row" id="gr-'+i+'">'+
+      '<div style="flex:1"><div style="font-size:16px;font-weight:700;color:'+col+'">'+e.property+'</div><div class="log-meta">'+e.date+(e.notes?' · '+e.notes:'')+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:12px;">'+
+        '<div style="text-align:right"><div style="font-size:22px;font-weight:700;color:'+col+'">'+e.visitors+'</div><div class="log-time">visitors</div></div>'+
+        '<button class="btn-sm" onclick="openEdit('+i+')">✏ Edit</button>'+
+      '</div></div>'+
+      '<div class="edit-box" id="ge-'+i+'">'+
+        '<div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;">Edit Entry</div>'+
+        '<div class="edit-grid">'+
+          '<div><label class="edit-label">Date</label><input type="date" id="ge-d-'+i+'" value="'+e.date+'"></div>'+
+          '<div><label class="edit-label">Property</label><select id="ge-p-'+i+'"><option value="MJSR"'+(e.property==='MJSR'?' selected':'')+'>MJSR</option><option value="GV"'+(e.property==='GV'?' selected':'')+'>GV</option></select></div>'+
+          '<div><label class="edit-label">Visitors</label><input type="number" id="ge-v-'+i+'" value="'+e.visitors+'" min="0"></div>'+
+        '</div>'+
+        '<div style="margin-bottom:10px;"><label class="edit-label">Notes</label><input type="text" id="ge-n-'+i+'" value="'+(e.notes||'')+'"></div>'+
+        '<div style="display:flex;gap:8px;">'+
+          '<button class="btn-sm blue" onclick="saveEdit('+i+','+e.rowIndex+')">SAVE</button>'+
+          '<button class="btn-sm" onclick="closeEdit('+i+')">CANCEL</button>'+
+        '</div>'+
+      '</div>';
+  }).join('');
+}
+
+function openEdit(i) {
+  document.querySelectorAll('.edit-box').forEach(function(b){ b.style.display='none'; });
+  document.getElementById('ge-'+i).style.display='block';
+}
+function closeEdit(i) { document.getElementById('ge-'+i).style.display='none'; }
+
+function saveEdit(i, rowIndex) {
+  var date=document.getElementById('ge-d-'+i).value;
+  var prop=document.getElementById('ge-p-'+i).value;
+  var vis =document.getElementById('ge-v-'+i).value;
+  var note=document.getElementById('ge-n-'+i).value;
+  var url = API+'?action=editGateEntry&rowIndex='+rowIndex+'&date='+encodeURIComponent(date)+'&property='+encodeURIComponent(prop)+'&visitors='+encodeURIComponent(vis)+'&notes='+encodeURIComponent(note);
+  apiFetch(url, function(err,d){
+    if (err||d.status!=='ok') { toast('Could not save edit','#dc2626'); return; }
+    gateCache[i].date=date; gateCache[i].property=prop; gateCache[i].visitors=parseInt(vis); gateCache[i].notes=note;
+    renderGate(gateCache);
+    cache=null; // invalidate main data cache
+    toast('✓ Updated','#16a34a');
+  });
+}
+
+// ── LOG ───────────────────────────────────────────────────
+function loadLog(force) {
+  if (!force && logCache) { filterLog(); return; }
+  document.getElementById('log-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:28px;color:var(--muted);">Loading…</td></tr>';
+  apiFetch(API+'?action=getLog', function(err,d){
+    if (err) { toast('Could not load log','#dc2626'); return; }
+    logCache = d.entries || [];
+    filterLog();
+  });
+}
+
+function filterLog() {
+  if (!logCache) return;
+  var s  = (document.getElementById('log-search').value||'').toLowerCase();
+  var cp = document.getElementById('log-cp').value;
+  logFiltered = logCache.filter(function(e){
+    return (!s||(e.reg&&e.reg.toLowerCase().indexOf(s)>-1)||(e.staff&&e.staff.toLowerCase().indexOf(s)>-1)||(e.cp&&e.cp.toLowerCase().indexOf(s)>-1))
+        && (!cp||(e.cp&&e.cp.indexOf(cp)>-1));
+  });
+  logPage_=1; renderLog();
+}
+
+function renderLog() {
+  var total=logFiltered.length, start=(logPage_-1)*logSize, end=Math.min(start+logSize,total);
+  var pages=Math.ceil(total/logSize)||1;
+  var rows=logFiltered.slice(start,end);
+  document.getElementById('log-info').textContent='Showing '+(total?start+1:0)+'–'+end+' of '+total;
+  document.getElementById('log-page').textContent='Page '+logPage_+' of '+pages;
+  document.getElementById('log-prev').disabled=logPage_<=1;
+  document.getElementById('log-next').disabled=logPage_>=pages;
+  var cpC={'CP1':'var(--cp1)','CP2':'var(--cp2)','CP3':'var(--cp3)'};
+  var cpCounts={CP1:0,CP2:0,CP3:0}, staffC={};
+  logFiltered.forEach(function(e){
+    if(e.cp){if(e.cp.indexOf('CP1')>-1)cpCounts.CP1++;else if(e.cp.indexOf('CP2')>-1)cpCounts.CP2++;else if(e.cp.indexOf('CP3')>-1)cpCounts.CP3++;}
+    if(e.staff)staffC[e.staff]=(staffC[e.staff]||0)+1;
+  });
+  document.getElementById('log-summary').innerHTML=
+    '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;">Total: <strong style="color:var(--blue)">'+total+'</strong></div>'+
+    ['CP1','CP2','CP3'].map(function(cp){var col=cp==='CP1'?'var(--cp1)':cp==='CP2'?'var(--cp2)':'var(--cp3)';return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;"><span style="font-weight:700;color:'+col+'">'+cp+'</span>: '+cpCounts[cp]+'</div>';}).join('');
+  if (!rows.length) { document.getElementById('log-body').innerHTML='<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--muted);">No entries match filter</td></tr>'; return; }
+  document.getElementById('log-body').innerHTML=rows.map(function(e,i){
+    var idx = start+i; // index into logFiltered
+    var cpShort=e.cp?e.cp.replace(' - TMA Splinobo','').replace(' - Jungle Forest Area','').replace(' - MJSR / GV Road Split',''):'—';
+    var cpCol=(e.cp&&e.cp.indexOf('CP1')>-1)?'var(--cp1)':(e.cp&&e.cp.indexOf('CP2')>-1)?'var(--cp2)':'var(--cp3)';
+    var entCol=e.entered==='Yes - entered MJSR'?'var(--green)':e.entered.indexOf('Green Valley')>-1?'var(--cp2)':'var(--muted)';
+    var entShort=e.entered?e.entered.replace('Yes - entered MJSR','✓ MJSR').replace('No - went to Green Valley','GV').replace('No - turned around / left area','Turned').replace('No - passed through only','Passed'):'—';
+    var editRow =
+      '<tr id="log-edit-row-'+idx+'" style="display:none;background:#f0f7ff;">'+
+        '<td colspan="11" style="padding:14px 16px;">'+
+          '<div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;">Edit Entry — '+e.reg+'</div>'+
+          '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px;">'+
+            '<div><label class="edit-label">Date</label><input type="date" id="le-date-'+idx+'" value="'+(e.date||'')+'"></div>'+
+            '<div><label class="edit-label">Registration</label><input type="text" id="le-reg-'+idx+'" value="'+e.reg+'" style="text-transform:uppercase"></div>'+
+            '<div><label class="edit-label">Checkpoint</label>'+
+              '<select id="le-cp-'+idx+'">'+
+                '<option value="CP1 - TMA Splinobo"'+(e.cp==='CP1 - TMA Splinobo'?' selected':'')+'>CP1 - TMA Splinobo</option>'+
+                '<option value="CP2 - Jungle Forest Area"'+(e.cp==='CP2 - Jungle Forest Area'?' selected':'')+'>CP2 - Jungle Forest Area</option>'+
+                '<option value="CP3 - MJSR / GV Road Split"'+(e.cp==='CP3 - MJSR / GV Road Split'?' selected':'')+'>CP3 - MJSR / GV Road Split</option>'+
+              '</select>'+
+            '</div>'+
+            '<div><label class="edit-label">Passengers</label><input type="number" id="le-pax-'+idx+'" value="'+e.pax+'" min="1"></div>'+
+            '<div><label class="edit-label">Destination</label>'+
+              '<select id="le-dest-'+idx+'">'+
+                '<option value="Malam Jabba Ski Resort (MJSR)"'+(e.dest.indexOf('MJSR')>-1?' selected':'')+'>MJSR</option>'+
+                '<option value="Green Valley"'+(e.dest==='Green Valley'?' selected':'')+'>Green Valley</option>'+
+                '<option value="Both / Touring the area"'+(e.dest.indexOf('Both')>-1?' selected':'')+'>Both / Touring</option>'+
+                '<option value="Just passing through"'+(e.dest.indexOf('passing')>-1?' selected':'')+'>Passing Through</option>'+
+                '<option value="Unknown / Not stated"'+(e.dest.indexOf('Unknown')>-1?' selected':'')+'>Unknown</option>'+
+              '</select>'+
+            '</div>'+
+            '<div><label class="edit-label">Entered MJSR?</label>'+
+              '<select id="le-entered-'+idx+'">'+
+                '<option value="Yes - entered MJSR"'+(e.entered==='Yes - entered MJSR'?' selected':'')+'>Yes - entered MJSR</option>'+
+                '<option value="No - went to Green Valley"'+(e.entered==='No - went to Green Valley'?' selected':'')+'>No - Green Valley</option>'+
+                '<option value="No - turned around / left area"'+(e.entered==='No - turned around / left area'?' selected':'')+'>No - Turned around</option>'+
+                '<option value="No - passed through only"'+(e.entered==='No - passed through only'?' selected':'')+'>No - Passed through</option>'+
+                '<option value="Unknown"'+(e.entered==='Unknown'?' selected':'')+'>Unknown</option>'+
+              '</select>'+
+            '</div>'+
+          '</div>'+
+          '<div style="display:flex;gap:8px;">'+
+            '<button class="btn-sm blue" onclick="saveLogEdit('+idx+',\''+e.rowIndex+'\')">SAVE CHANGES</button>'+
+            '<button class="btn-sm" onclick="closeLogEdit('+idx+')">CANCEL</button>'+
+          '</div>'+
+        '</td>'+
+      '</tr>';
+    return '<tr id="log-row-'+idx+'">'+
+      '<td style="color:var(--muted);font-size:11px">'+(idx+1)+'</td>'+
+      '<td style="font-size:12px;white-space:nowrap">'+e.timestamp+'</td>'+
+      '<td style="font-weight:600;font-size:13px">'+e.staff+'</td>'+
+      '<td><span style="font-weight:700;font-size:13px;color:'+cpCol+'">'+cpShort+'</span></td>'+
+      '<td style="font-weight:700;font-size:15px;color:var(--blue);letter-spacing:.04em">'+e.reg+'</td>'+
+      '<td style="font-size:12px">'+e.vtype.split(' (')[0]+'</td>'+
+      '<td style="text-align:center;font-weight:600">'+e.pax+'</td>'+
+      '<td style="font-size:12px">'+e.dest.replace('Malam Jabba Ski Resort (MJSR)','MJSR').replace('Unknown / Not stated','Unknown').replace('Both / Touring the area','Both')+'</td>'+
+      '<td style="font-size:12px;font-weight:600;color:'+entCol+'">'+entShort+'</td>'+
+      '<td style="font-size:12px">'+e.province.split(' (')[0]+'</td>'+
+      '<td><button class="btn-sm" onclick="openLogEdit('+idx+')" style="font-size:11px;padding:4px 10px;">✏</button></td>'+
+    '</tr>'+editRow;
+  }).join('');
+}
+function logPage(d){ logPage_=Math.max(1,Math.min(logPage_+d,Math.ceil(logFiltered.length/logSize)||1)); renderLog(); }
+
+function openLogEdit(idx) {
+  // Close any other open edit rows
+  document.querySelectorAll('[id^="log-edit-row-"]').forEach(function(r){ r.style.display='none'; });
+  document.getElementById('log-edit-row-'+idx).style.display='table-row';
+}
+function closeLogEdit(idx) {
+  document.getElementById('log-edit-row-'+idx).style.display='none';
+}
+function saveLogEdit(idx, rowIndex) {
+  var date    = document.getElementById('le-date-'+idx).value;
+  var reg     = document.getElementById('le-reg-'+idx).value.trim().toUpperCase();
+  var cp      = document.getElementById('le-cp-'+idx).value;
+  var pax     = document.getElementById('le-pax-'+idx).value;
+  var dest    = document.getElementById('le-dest-'+idx).value;
+  var entered = document.getElementById('le-entered-'+idx).value;
+  if (!date||!reg||!pax) { toast('Date, registration and passengers are required','#dc2626'); return; }
+  var url = API+'?action=editLogEntry'+
+    '&rowIndex='+encodeURIComponent(rowIndex)+
+    '&date='+encodeURIComponent(date)+
+    '&reg='+encodeURIComponent(reg)+
+    '&cp='+encodeURIComponent(cp)+
+    '&pax='+encodeURIComponent(pax)+
+    '&dest='+encodeURIComponent(dest)+
+    '&entered='+encodeURIComponent(entered);
+  apiFetch(url, function(err,d){
+    if (err||d.status!=='ok') { toast('Could not save — '+( d&&d.error||err),'#dc2626'); return; }
+    // Update local cache
+    logFiltered[idx].date    = date;
+    logFiltered[idx].reg     = reg;
+    logFiltered[idx].cp      = cp;
+    logFiltered[idx].pax     = parseInt(pax);
+    logFiltered[idx].dest    = dest;
+    logFiltered[idx].entered = entered;
+    cache = null; // invalidate dashboard cache
+    renderLog();
+    toast('✓ Entry updated','#16a34a');
+  });
+}
+
+// ── EXPORT CSV ────────────────────────────────────────────
+function exportCSV() {
+  if (!cache) { toast('Load the Report first','#dc2626'); return; }
+  var d=cache, rows=[], now=new Date().toLocaleDateString('en-GB');
+  rows.push(['MJSR Tourist Vehicle Count — Report','Generated:',now]);
+  rows.push([]);
+  rows.push(['Total Entries',d.allTime.entries],['Unique Plates',d.allTime.uniquePlates],['Total Passengers',d.allTime.passengers],['Entered MJSR',d.allTime.enteredMJSR],['Green Valley',d.allTime.wentGV],['Conversion Rate',d.allTime.conversionRate]);
+  rows.push([]);
+  rows.push(['CHECKPOINTS'],['','Entries','Plates','MJSR']);
+  rows.push(['CP1',d.checkpoints.cp1.entries,d.checkpoints.cp1.plates,d.checkpoints.cp1.mjsr]);
+  rows.push(['CP2',d.checkpoints.cp2.entries,d.checkpoints.cp2.plates,d.checkpoints.cp2.mjsr]);
+  rows.push(['CP3',d.checkpoints.cp3.entries,d.checkpoints.cp3.plates,d.checkpoints.cp3.mjsr]);
+  rows.push([]);
+  rows.push(['PROVINCES'],['Province','Count']);
+  Object.keys(d.provinces||{}).forEach(function(k){rows.push([k,d.provinces[k]]);});
+  rows.push([]);
+  rows.push(['VEHICLE TYPES'],['Type','Count','Passengers']);
+  Object.keys(d.vtypes||{}).forEach(function(k){rows.push([k,d.vtypes[k],(d.vtypesPax||{})[k]||0]);});
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='MJSR_Report_'+now.replace(/\//g,'-')+'.csv'; a.click();
+  toast('✓ CSV exported','#16a34a');
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function pct(v,t){ return t>0 ? Math.round(v/t*100)+'%' : '0%'; }
+function toast(msg,col){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.style.background=col||'#16a34a'; t.style.display='block';
+  setTimeout(function(){t.style.display='none';},3000);
+}
 </script>
 </body>
 </html>
