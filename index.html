@@ -140,6 +140,7 @@ textarea{resize:vertical;min-height:64px;}
   <div class="tab" onclick="showTab('dashboard',this)">📊 Dashboard</div>
   <div class="tab" onclick="showTab('report',this)">📈 Report</div>
   <div class="tab" onclick="showTab('log',this)">🗒 Log</div>
+  <div class="tab" onclick="showTab('audit',this)">🔍 Audit</div>
 </div>
 
 <!-- ══ SUBMIT ══════════════════════════════════════════════ -->
@@ -426,6 +427,76 @@ textarea{resize:vertical;min-height:64px;}
   </div>
 </div>
 
+<!-- ══ AUDIT ════════════════════════════════════════════════ -->
+<div class="page" id="tab-audit">
+
+  <!-- PIN LOCK -->
+  <div id="audit-lock" style="text-align:center;padding:60px 20px;">
+    <div style="font-size:36px;margin-bottom:12px;">🔒</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px;">Audit &amp; Analysis</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Finance Director access only</div>
+    <input type="password" id="audit-pin" placeholder="Enter PIN" maxlength="6"
+      style="width:160px;padding:10px;text-align:center;font-size:18px;border:2px solid var(--border);border-radius:8px;letter-spacing:.3em;outline:none;"
+      onkeydown="if(event.key==='Enter')checkAuditPin()">
+    <br><br>
+    <button class="btn-primary" onclick="checkAuditPin()" style="width:160px;">UNLOCK</button>
+    <div id="audit-pin-err" style="color:#dc2626;font-size:13px;margin-top:10px;display:none;">Incorrect PIN</div>
+  </div>
+
+  <!-- AUDIT CONTENT (hidden until unlocked) -->
+  <div id="audit-content" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <div>
+        <div class="sec-title" style="margin:0;">Audit &amp; Analysis</div>
+        <div id="audit-period" style="font-size:12px;color:var(--muted);margin-top:2px;"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:12px;color:var(--muted);font-weight:600;">Filter by date:</label>
+        <input type="date" id="audit-date" style="padding:6px 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;" onchange="loadAudit()">
+        <button class="btn-sm blue" onclick="document.getElementById('audit-date').value='';loadAudit()">Last 7 Days</button>
+        <button class="btn-sm" onclick="document.getElementById('audit-date').value='';loadAudit()">↻ Refresh</button>
+      </div>
+    </div>
+
+    <!-- SUMMARY TILES -->
+    <div id="audit-summary" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:20px;"></div>
+
+    <!-- STAFF SUBMISSION COUNTS -->
+    <div class="sec-title">Staff Submission Counts by Checkpoint &amp; Day</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Shows how many entries each staff member submitted per checkpoint per day. Low counts on a busy day may indicate absent or underperforming staff.</p>
+    <div class="tbl-wrap" style="margin-bottom:20px;">
+      <table><thead><tr><th>Date</th><th>Checkpoint</th><th>Staff Member</th><th>Submissions</th><th>Assessment</th></tr></thead>
+      <tbody id="audit-staff-body"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- DAILY CP COMPARISON -->
+    <div class="sec-title">Daily Submissions Per Checkpoint</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Large differences between checkpoints on the same day suggest a CP was undermanned or staff were not recording consistently.</p>
+    <div class="tbl-wrap" style="margin-bottom:20px;">
+      <table><thead><tr><th>Date</th><th style="color:var(--cp1)">CP1 Entries</th><th style="color:var(--cp2)">CP2 Entries</th><th style="color:var(--cp3)">CP3 Entries</th><th>Largest Gap</th><th>Flag</th></tr></thead>
+      <tbody id="audit-daily-body"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- PLATE CROSS-REFERENCE -->
+    <div class="sec-title">Plate Cross-Reference — Missed Recordings</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Plates seen at CP2 or CP3 but not recorded at earlier checkpoints. Red rows indicate vehicles that passed through CP1 or CP2 without being logged — potential missed recordings.</p>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="btn-sm" id="filter-all"     onclick="filterPlates('all')"     style="border-color:var(--blue);color:var(--blue);">All Plates</button>
+      <button class="btn-sm" id="filter-missed1" onclick="filterPlates('missed1')" >Missed at CP1</button>
+      <button class="btn-sm" id="filter-missed2" onclick="filterPlates('missed2')" >Missed at CP2</button>
+      <button class="btn-sm" id="filter-all3"    onclick="filterPlates('all3')"    >Seen All 3 CPs</button>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr><th>Reg</th><th>Pax</th><th style="color:var(--cp1)">CP1</th><th style="color:var(--cp2)">CP2</th><th style="color:var(--cp3)">CP3</th><th>CP1 Staff</th><th>CP2 Staff</th><th>CP3 Staff</th><th>Flag</th></tr></thead>
+      <tbody id="audit-plate-body"><tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;" id="audit-plate-info"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -454,6 +525,7 @@ function showTab(id, el) {
   if (id === 'dashboard') { if (cache) renderDash(cache); else loadData(false); }
   if (id === 'gate')      { if (!gateCache) loadGate(false); }
   if (id === 'log')       { if (!logCache)  loadLog(false);  }
+  if (id === 'audit')     { if (auditUnlocked) loadAudit(); }
   // Report tab: do nothing — user clicks Refresh
 }
 
@@ -1220,6 +1292,158 @@ function renderCP4Summary(s) {
   document.getElementById('cp4-reasons-body').innerHTML  = tableRows(s.noReasons||{});
   document.getElementById('cp4-price-body').innerHTML    = tableRows(s.priceRatings||{});
   document.getElementById('cp4-offering-body').innerHTML = tableRows(s.offeringRatings||{});
+}
+
+// ── AUDIT ─────────────────────────────────────────────────
+var AUDIT_PIN = '1234';
+var auditUnlocked = false;
+var auditData = null;
+var plateCurrent = 'all';
+
+function checkAuditPin() {
+  var pin = document.getElementById('audit-pin').value;
+  if (pin === AUDIT_PIN) {
+    auditUnlocked = true;
+    document.getElementById('audit-lock').style.display    = 'none';
+    document.getElementById('audit-content').style.display = 'block';
+    loadAudit();
+  } else {
+    document.getElementById('audit-pin-err').style.display = 'block';
+    document.getElementById('audit-pin').value = '';
+  }
+}
+
+function loadAudit() {
+  var dateFilter = document.getElementById('audit-date').value;
+  var url = API + '?action=getAudit' + (dateFilter ? '&date='+dateFilter : '');
+  document.getElementById('audit-staff-body').innerHTML  = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
+  document.getElementById('audit-daily-body').innerHTML  = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
+  document.getElementById('audit-plate-body').innerHTML  = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
+  apiFetch(url, function(err, d) {
+    if (err) { toast('Could not load audit data', '#dc2626'); return; }
+    auditData = d;
+    document.getElementById('audit-period').textContent = 'Period: ' + d.fromDate + ' to ' + d.toDate;
+    renderAuditSummary(d.summary);
+    renderAuditStaff(d.staffCounts, d.dailyCounts);
+    renderAuditDaily(d.dailyCounts);
+    renderAuditPlates('all');
+  });
+}
+
+function renderAuditSummary(s) {
+  var missFlag = s.missedAtCP1 > 0 || s.missedAtCP2 > 0;
+  document.getElementById('audit-summary').innerHTML = [
+    {l:'Unique Plates',     v:s.totalUniquePlates, s:'in period',          c:'#1a73e8'},
+    {l:'CP1 Plates',        v:s.cp1Plates,         s:'recorded at CP1',    c:'var(--cp1)'},
+    {l:'CP2 Plates',        v:s.cp2Plates,         s:'recorded at CP2',    c:'var(--cp2)'},
+    {l:'CP3 Plates',        v:s.cp3Plates,         s:'recorded at CP3',    c:'var(--cp3)'},
+    {l:'Seen All 3 CPs',    v:s.seenAll3,          s:'full journey logged', c:'#16a34a'},
+    {l:'Missed at CP1',     v:s.missedAtCP1,       s:'seen at CP2/3 only', c:s.missedAtCP1>0?'#dc2626':'#16a34a'},
+    {l:'Missed at CP2',     v:s.missedAtCP2,       s:'seen at CP3 only',   c:s.missedAtCP2>0?'#dc2626':'#16a34a'}
+  ].map(function(k){
+    return '<div class="card" style="text-align:center;border-top:3px solid '+k.c+';">'+
+      '<div class="kpi-lbl">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div></div>';
+  }).join('');
+}
+
+function renderAuditStaff(staffCounts, dailyCounts) {
+  if (!staffCounts || !staffCounts.length) {
+    document.getElementById('audit-staff-body').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">No data in this period</td></tr>';
+    return;
+  }
+  // Build daily averages per CP for comparison
+  var dailyAvg = {};
+  if (dailyCounts) {
+    dailyCounts.forEach(function(d2) {
+      dailyAvg[d2.date] = { cp1:d2.cp1, cp2:d2.cp2, cp3:d2.cp3 };
+    });
+  }
+  document.getElementById('audit-staff-body').innerHTML = staffCounts.map(function(s) {
+    var cpCol = s.cp==='cp1'?'var(--cp1)':s.cp==='cp2'?'var(--cp2)':'var(--cp3)';
+    var cpLabel = s.cp.toUpperCase();
+    // Compare vs other staff at same CP same day
+    var sameCPSameDay = staffCounts.filter(function(x){ return x.cp===s.cp && x.date===s.date; });
+    var maxOnDay = Math.max.apply(null, sameCPSameDay.map(function(x){ return x.count; }));
+    var isLow = sameCPSameDay.length > 1 && s.count < maxOnDay * 0.5;
+    var rowBg = isLow ? 'background:#fff5f5;' : '';
+    var flag  = isLow ? '<span style="color:#dc2626;font-weight:700;">⚠ Low vs colleagues</span>' : '<span style="color:#16a34a;">✓ Normal</span>';
+    return '<tr style="'+rowBg+'">'+
+      '<td style="font-weight:600">'+s.date+'</td>'+
+      '<td style="font-weight:700;color:'+cpCol+'">'+cpLabel+'</td>'+
+      '<td style="font-weight:600">'+s.staff+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:'+cpCol+'">'+s.count+'</td>'+
+      '<td>'+flag+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function renderAuditDaily(dailyCounts) {
+  if (!dailyCounts || !dailyCounts.length) {
+    document.getElementById('audit-daily-body').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No data</td></tr>';
+    return;
+  }
+  document.getElementById('audit-daily-body').innerHTML = dailyCounts.map(function(d2) {
+    var vals = [d2.cp1, d2.cp2, d2.cp3];
+    var maxV = Math.max.apply(null, vals);
+    var minV = Math.min.apply(null, vals);
+    var gap  = maxV - minV;
+    var gapPct = maxV > 0 ? Math.round(gap / maxV * 100) : 0;
+    var flagStr = gapPct > 50 ? '<span style="color:#dc2626;font-weight:700;">⚠ Large gap ('+gapPct+'%)</span>' :
+                  gapPct > 25 ? '<span style="color:#d97706;font-weight:600;">△ Moderate gap ('+gapPct+'%)</span>' :
+                                '<span style="color:#16a34a;">✓ Consistent</span>';
+    var rowBg = gapPct > 50 ? 'background:#fff5f5;' : '';
+    return '<tr style="'+rowBg+'">'+
+      '<td style="font-weight:600">'+d2.date+'</td>'+
+      '<td style="font-weight:700;color:var(--cp1)">'+d2.cp1+'</td>'+
+      '<td style="font-weight:700;color:var(--cp2)">'+d2.cp2+'</td>'+
+      '<td style="font-weight:700;color:var(--cp3)">'+d2.cp3+'</td>'+
+      '<td style="font-weight:600">'+gap+' entries</td>'+
+      '<td>'+flagStr+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function filterPlates(mode) {
+  plateCurrent = mode;
+  ['all','missed1','missed2','all3'].forEach(function(m){
+    var btn = document.getElementById('filter-'+m);
+    if(btn){ btn.style.borderColor = m===mode?'var(--blue)':'var(--border)'; btn.style.color = m===mode?'var(--blue)':'var(--muted)'; }
+  });
+  renderAuditPlates(mode);
+}
+
+function renderAuditPlates(mode) {
+  if (!auditData || !auditData.plateMatrix) return;
+  var plates = auditData.plateMatrix;
+  if (mode === 'missed1') plates = plates.filter(function(p2){ return p2.missedCP1; });
+  else if (mode === 'missed2') plates = plates.filter(function(p2){ return p2.missedCP2; });
+  else if (mode === 'all3')    plates = plates.filter(function(p2){ return p2.cp1 && p2.cp2 && p2.cp3; });
+  document.getElementById('audit-plate-info').textContent = 'Showing ' + plates.length + ' plates';
+  if (!plates.length) {
+    document.getElementById('audit-plate-body').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);">No plates match this filter</td></tr>';
+    return;
+  }
+  function tick(v)  { return v ? '<span style="color:#16a34a;font-weight:700;font-size:16px;">✓</span>' : '<span style="color:#dc2626;font-weight:700;font-size:16px;">✗</span>'; }
+  document.getElementById('audit-plate-body').innerHTML = plates.slice(0,200).map(function(p2) {
+    var isMissed = p2.missedCP1 || p2.missedCP2;
+    var rowBg    = p2.missedCP1 ? 'background:#fff5f5;' : p2.missedCP2 ? 'background:#fffbeb;' : '';
+    var flagStr  = p2.missedCP1 ? '<span style="color:#dc2626;font-weight:700;">⚠ Not seen at CP1</span>' :
+                   p2.missedCP2 ? '<span style="color:#d97706;font-weight:700;">△ Not seen at CP2</span>' :
+                                  '<span style="color:#16a34a;">✓ All CPs</span>';
+    return '<tr style="'+rowBg+'">'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:700;color:#1a73e8;letter-spacing:.04em">'+p2.reg+'</td>'+
+      '<td style="font-weight:600">'+p2.pax+'</td>'+
+      '<td style="text-align:center">'+tick(p2.cp1)+'</td>'+
+      '<td style="text-align:center">'+tick(p2.cp2)+'</td>'+
+      '<td style="text-align:center">'+tick(p2.cp3)+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp1Staff+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp2Staff+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp3Staff+'</td>'+
+      '<td>'+flagStr+'</td>'+
+    '</tr>';
+  }).join('');
 }
 
 // ── HELPERS ───────────────────────────────────────────────
