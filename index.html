@@ -450,11 +450,16 @@ textarea{resize:vertical;min-height:64px;}
         <div class="sec-title" style="margin:0;">Audit &amp; Analysis</div>
         <div id="audit-period" style="font-size:12px;color:var(--muted);margin-top:2px;"></div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <label style="font-size:12px;color:var(--muted);font-weight:600;">Filter by date:</label>
-        <input type="date" id="audit-date" style="padding:6px 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;" onchange="loadAudit()">
-        <button class="btn-sm blue" onclick="document.getElementById('audit-date').value='';loadAudit()">Last 7 Days</button>
-        <button class="btn-sm" onclick="document.getElementById('audit-date').value='';loadAudit()">↻ Refresh</button>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-sm blue" id="aw-today" onclick="loadAuditWindow('today')">Today</button>
+        <button class="btn-sm" id="aw-7d"    onclick="loadAuditWindow('7d')">7 Days</button>
+        <button class="btn-sm" id="aw-14d"   onclick="loadAuditWindow('14d')">14 Days</button>
+        <button class="btn-sm" id="aw-30d"   onclick="loadAuditWindow('30d')">1 Month</button>
+        <button class="btn-sm" id="aw-90d"   onclick="loadAuditWindow('90d')">3 Months</button>
+        <button class="btn-sm" id="aw-all"   onclick="loadAuditWindow('all')">All Time</button>
+        <span style="font-size:12px;color:var(--muted);margin-left:4px;">or</span>
+        <input type="date" id="audit-date" style="padding:6px 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;" onchange="loadAuditDate()">
+        <button class="btn-sm" onclick="loadAuditWindow(auditWindow)">↻</button>
       </div>
     </div>
 
@@ -525,7 +530,7 @@ function showTab(id, el) {
   if (id === 'dashboard') { if (cache) renderDash(cache); else loadData(false); }
   if (id === 'gate')      { if (!gateCache) loadGate(false); }
   if (id === 'log')       { if (!logCache)  loadLog(false);  }
-  if (id === 'audit')     { if (auditUnlocked) loadAudit(); }
+  if (id === 'audit')     { if (auditUnlocked) loadAuditWindow(auditWindow); }
   // Report tab: do nothing — user clicks Refresh
 }
 
@@ -1299,6 +1304,7 @@ var AUDIT_PIN = '1234';
 var auditUnlocked = false;
 var auditData = null;
 var plateCurrent = 'all';
+var auditWindow  = '7d';
 
 function checkAuditPin() {
   var pin = document.getElementById('audit-pin').value;
@@ -1306,25 +1312,49 @@ function checkAuditPin() {
     auditUnlocked = true;
     document.getElementById('audit-lock').style.display    = 'none';
     document.getElementById('audit-content').style.display = 'block';
-    loadAudit();
+    loadAuditWindow('7d');
   } else {
     document.getElementById('audit-pin-err').style.display = 'block';
     document.getElementById('audit-pin').value = '';
   }
 }
 
-function loadAudit() {
-  var dateFilter = document.getElementById('audit-date').value;
-  var url = API + '?action=getAudit' + (dateFilter ? '&date='+dateFilter : '');
-  document.getElementById('audit-staff-body').innerHTML  = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
-  document.getElementById('audit-daily-body').innerHTML  = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
-  document.getElementById('audit-plate-body').innerHTML  = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
+function loadAuditWindow(win) {
+  auditWindow = win;
+  document.getElementById('audit-date').value = '';
+  // Highlight active button
+  ['today','7d','14d','30d','90d','all'].forEach(function(w) {
+    var btn = document.getElementById('aw-'+w);
+    if (!btn) return;
+    btn.style.borderColor = w===win ? 'var(--blue)' : 'var(--border)';
+    btn.style.color       = w===win ? 'var(--blue)' : 'var(--muted)';
+    btn.style.fontWeight  = w===win ? '700' : '400';
+  });
+  loadAudit('window='+win);
+}
+
+function loadAuditDate() {
+  var d = document.getElementById('audit-date').value;
+  if (!d) return;
+  ['today','7d','14d','30d','90d','all'].forEach(function(w) {
+    var btn = document.getElementById('aw-'+w);
+    if (btn) { btn.style.borderColor='var(--border)'; btn.style.color='var(--muted)'; btn.style.fontWeight='400'; }
+  });
+  loadAudit('date='+d);
+}
+
+function loadAudit(params) {
+  var url = API + '?action=getAudit' + (params ? '&'+params : '&window='+auditWindow);
+  ['audit-staff-body','audit-daily-body','audit-plate-body'].forEach(function(id){
+    var tbody = document.getElementById(id);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
+  });
   apiFetch(url, function(err, d) {
     if (err) { toast('Could not load audit data', '#dc2626'); return; }
     auditData = d;
     document.getElementById('audit-period').textContent = 'Period: ' + d.fromDate + ' to ' + d.toDate;
     renderAuditSummary(d.summary);
-    renderAuditStaff(d.staffCounts, d.dailyCounts);
+    renderAuditStaff(d.staffCounts);
     renderAuditDaily(d.dailyCounts);
     renderAuditPlates('all');
   });
@@ -1348,17 +1378,10 @@ function renderAuditSummary(s) {
   }).join('');
 }
 
-function renderAuditStaff(staffCounts, dailyCounts) {
+function renderAuditStaff(staffCounts) {
   if (!staffCounts || !staffCounts.length) {
     document.getElementById('audit-staff-body').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">No data in this period</td></tr>';
     return;
-  }
-  // Build daily averages per CP for comparison
-  var dailyAvg = {};
-  if (dailyCounts) {
-    dailyCounts.forEach(function(d2) {
-      dailyAvg[d2.date] = { cp1:d2.cp1, cp2:d2.cp2, cp3:d2.cp3 };
-    });
   }
   document.getElementById('audit-staff-body').innerHTML = staffCounts.map(function(s) {
     var cpCol = s.cp==='cp1'?'var(--cp1)':s.cp==='cp2'?'var(--cp2)':'var(--cp3)';
