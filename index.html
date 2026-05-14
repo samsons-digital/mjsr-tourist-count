@@ -10,7 +10,7 @@
   --bg:#f8f9fa; --bg2:#ffffff; --bg3:#f1f3f5; --border:#dee2e6;
   --blue:#1a73e8; --blue2:#1558b0; --green:#16a34a; --red:#dc2626;
   --text:#1a1f2e; --muted:#6b7280;
-  --cp1:#d97706; --cp2:#059669; --cp3:#2563eb;
+  --cp1:#d97706; --cp2:#059669; --cp3:#2563eb; --cp4:#7c3aed;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;min-height:100vh;}
@@ -73,6 +73,8 @@ textarea{resize:vertical;min-height:64px;}
 .cp-pill.cp1.sel{background:var(--cp1);color:#fff;}
 .cp-pill.cp2.sel{background:var(--cp2);color:#fff;}
 .cp-pill.cp3.sel{background:var(--cp3);color:#fff;}
+.cp-pill.cp4{color:var(--cp4);border-color:var(--cp4);}
+.cp-pill.cp4.sel{background:var(--cp4);color:#fff;}
 
 /* TABLE */
 .tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
@@ -135,7 +137,6 @@ textarea{resize:vertical;min-height:64px;}
   <div class="tab active" onclick="showTab('submit',this)">📋 Submit</div>
   <div class="tab" onclick="showTab('shift',this)">👤 My Shift</div>
   <div class="tab" onclick="showTab('gate',this)">🎫 Gate Entry</div>
-  <div class="tab" onclick="showTab('cp4',this)">🚗 CP4 Exit Survey</div>
   <div class="tab" onclick="showTab('dashboard',this)">📊 Dashboard</div>
   <div class="tab" onclick="showTab('report',this)">📈 Report</div>
   <div class="tab" onclick="showTab('log',this)">🗒 Log</div>
@@ -148,46 +149,114 @@ textarea{resize:vertical;min-height:64px;}
     <div class="cp-pill cp1 sel" onclick="selCP(this,'CP1 - TMA Splinobo')">CP1 · TMA Splinobo</div>
     <div class="cp-pill cp2"     onclick="selCP(this,'CP2 - Jungle Forest Area')">CP2 · Jungle Forest Area</div>
     <div class="cp-pill cp3"     onclick="selCP(this,'CP3 - MJSR / GV Road Split')">CP3 · MJSR / GV Split</div>
+    <div class="cp-pill cp4"     onclick="selCP(this,'CP4 - Exit Survey')">CP4 · Exit Survey</div>
   </div>
   <input type="hidden" id="f-cp" value="CP1 - TMA Splinobo">
-  <div class="sec-title">Vehicle Details</div>
-  <div class="form-grid">
-    <div><label class="f-label">Staff Name <span class="req">*</span></label><input id="f-staff" type="text" placeholder="Your full name"></div>
-    <div><label class="f-label">Registration <span class="req">*</span></label><input id="f-reg" type="text" placeholder="e.g. LZB-1234" style="text-transform:uppercase"></div>
-    <div><label class="f-label">Date <span class="req">*</span></label><input id="f-date" type="date"></div>
-    <div><label class="f-label">Time <span class="req">*</span></label><input id="f-time" type="time"></div>
-    <div><label class="f-label">Vehicle Type <span class="req">*</span></label>
-      <select id="f-vtype"><option value="">— Select —</option>
-        <option>Car / SUV (Private)</option><option>Minivan / MPV (Private)</option>
-        <option>Coaster / Minibus (9-22 seats)</option><option>Bus (23+ seats)</option>
-        <option>Pickup / Hilux</option><option>Motorcycle / Bike</option><option>Other</option>
-      </select></div>
-    <div><label class="f-label">Province (plate) <span class="req">*</span></label>
-      <select id="f-prov"><option value="">— Select —</option>
-        <option>Punjab (LA, LB, LC, LZB etc.)</option><option>KPK / Khyber Pakhtunkhwa (PES, ABT etc.)</option>
-        <option>Sindh (K, KA etc.)</option><option>Islamabad / ICT (ISD etc.)</option>
-        <option>AJK / Gilgit-Baltistan</option><option>Balochistan</option><option>Other / Unreadable</option>
-      </select></div>
-    <div><label class="f-label">Passengers incl. driver <span class="req">*</span></label><input id="f-pax" type="number" min="1" max="80" placeholder="e.g. 4"></div>
-    <div><label class="f-label">Children under 12 <span class="req">*</span></label><input id="f-children" type="number" min="0" placeholder="0"></div>
-    <div><label class="f-label">Stated Destination <span class="req">*</span></label>
-      <select id="f-dest"><option value="">— Select —</option>
-        <option>Malam Jabba Ski Resort (MJSR)</option><option>Green Valley</option>
-        <option>Both / Touring the area</option><option>Just passing through</option><option>Unknown / Not stated</option>
-      </select></div>
-    <div><label class="f-label">Entered MJSR? <span class="req">*</span></label>
-      <select id="f-entered"><option value="">— Select —</option>
-        <option>Yes - entered MJSR</option><option>No - went to Green Valley</option>
-        <option>No - turned around / left area</option><option>No - passed through only</option><option>Unknown</option>
-      </select></div>
+
+  <!-- ── CP1/2/3 FIELDS ──────────────────────────────────── -->
+  <div id="cp123-fields">
+    <div class="sec-title">Vehicle Details</div>
+    <div class="form-grid">
+      <div><label class="f-label">Staff Name <span class="req">*</span></label><input id="f-staff" type="text" placeholder="Your full name"></div>
+      <div><label class="f-label">Registration <span class="req">*</span></label><input id="f-reg" type="text" placeholder="e.g. LZB-1234" style="text-transform:uppercase"></div>
+      <div><label class="f-label">Date <span class="req">*</span></label><input id="f-date" type="date"></div>
+      <div><label class="f-label">Time <span class="req">*</span></label><input id="f-time" type="time"></div>
+      <div><label class="f-label">Vehicle Type <span class="req">*</span></label>
+        <select id="f-vtype"><option value="">— Select —</option>
+          <option>Car / SUV (Private)</option><option>Minivan / MPV (Private)</option>
+          <option>Coaster / Minibus (9-22 seats)</option><option>Bus (23+ seats)</option>
+          <option>Pickup / Hilux</option><option>Motorcycle / Bike</option><option>Other</option>
+        </select></div>
+      <div><label class="f-label">Province (plate) <span class="req">*</span></label>
+        <select id="f-prov"><option value="">— Select —</option>
+          <option>Punjab (LA, LB, LC, LZB etc.)</option><option>KPK / Khyber Pakhtunkhwa (PES, ABT etc.)</option>
+          <option>Sindh (K, KA etc.)</option><option>Islamabad / ICT (ISD etc.)</option>
+          <option>AJK / Gilgit-Baltistan</option><option>Balochistan</option><option>Other / Unreadable</option>
+        </select></div>
+      <div><label class="f-label">Passengers incl. driver <span class="req">*</span></label><input id="f-pax" type="number" min="1" max="80" placeholder="e.g. 4"></div>
+      <div><label class="f-label">Children under 12 <span class="req">*</span></label><input id="f-children" type="number" min="0" placeholder="0"></div>
+      <div><label class="f-label">Stated Destination <span class="req">*</span></label>
+        <select id="f-dest"><option value="">— Select —</option>
+          <option>Malam Jabba Ski Resort (MJSR)</option><option>Green Valley</option>
+          <option>Both / Touring the area</option><option>Just passing through</option><option>Unknown / Not stated</option>
+        </select></div>
+      <div><label class="f-label">Entered MJSR? <span class="req">*</span></label>
+        <select id="f-entered"><option value="">— Select —</option>
+          <option>Yes - entered MJSR</option><option>No - went to Green Valley</option>
+          <option>No - turned around / left area</option><option>No - passed through only</option><option>Unknown</option>
+        </select></div>
+    </div>
+    <hr class="divider"><div class="sub-title">Tour Company (optional)</div>
+    <div class="form-grid">
+      <div><label class="f-label">Company Name</label><input id="f-company" type="text" placeholder="As written on vehicle"></div>
+      <div><label class="f-label">Phone / WhatsApp</label><input id="f-phone" type="text"></div>
+      <div class="full"><label class="f-label">Notes</label><textarea id="f-notes" placeholder="Group type, language, observations..."></textarea></div>
+    </div>
+    <button class="btn-primary" id="submit-btn" onclick="submitEntry()">SUBMIT VEHICLE ENTRY</button>
   </div>
-  <hr class="divider"><div class="sub-title">Tour Company (optional)</div>
-  <div class="form-grid">
-    <div><label class="f-label">Company Name</label><input id="f-company" type="text" placeholder="As written on vehicle"></div>
-    <div><label class="f-label">Phone / WhatsApp</label><input id="f-phone" type="text"></div>
-    <div class="full"><label class="f-label">Notes</label><textarea id="f-notes" placeholder="Group type, language, observations..."></textarea></div>
+
+  <!-- ── CP4 EXIT SURVEY FIELDS ───────────────────────────── -->
+  <div id="cp4-fields" style="display:none;">
+    <div class="sec-title" style="color:var(--cp4);">CP4 · Exit Survey — Police Choki to Resort Gate</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Record departing vehicles and capture two key questions about entry and experience.</p>
+    <div class="form-grid">
+      <div><label class="f-label">Staff Name <span class="req">*</span></label><input id="cp4-staff" type="text" placeholder="Your full name"></div>
+      <div><label class="f-label">Registration <span class="req">*</span></label><input id="cp4-reg" type="text" placeholder="e.g. LZB-1234" style="text-transform:uppercase"></div>
+      <div><label class="f-label">Date <span class="req">*</span></label><input id="cp4-date" type="date"></div>
+      <div><label class="f-label">Time <span class="req">*</span></label><input id="cp4-time" type="time"></div>
+      <div><label class="f-label">Vehicle Type <span class="req">*</span></label>
+        <select id="cp4-vtype"><option value="">— Select —</option>
+          <option>Car / SUV (Private)</option><option>Minivan / MPV (Private)</option>
+          <option>Coaster / Minibus (9-22 seats)</option><option>Bus (23+ seats)</option>
+          <option>Pickup / Hilux</option><option>Motorcycle / Bike</option><option>Other</option>
+        </select></div>
+      <div><label class="f-label">Passengers <span class="req">*</span></label><input id="cp4-pax" type="number" min="1" max="80" placeholder="e.g. 4"></div>
+    </div>
+    <hr class="divider">
+    <div class="sub-title" style="color:var(--cp4);">Q1 — Did you enter the resort? <span class="req">*</span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 20px;">
+      <button class="cp4-ans-btn" id="cp4-ent-yes" onclick="setCP4Entry('Yes')"
+        style="padding:10px 24px;border-radius:8px;border:2px solid var(--border);background:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;">✅ Yes — Entered</button>
+      <button class="cp4-ans-btn" id="cp4-ent-no" onclick="setCP4Entry('No')"
+        style="padding:10px 24px;border-radius:8px;border:2px solid var(--border);background:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;">❌ No — Did Not Enter</button>
+    </div>
+    <input type="hidden" id="cp4-entered" value="">
+    <div id="cp4-no-section" style="display:none;margin-bottom:20px;">
+      <div class="sub-title" style="color:#dc2626;margin-bottom:10px;">Why did you not enter?</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;">
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Prices too high')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">💰 Prices too high</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Did not know what was offered')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">❓ Did not know offerings</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Resort was full / too busy')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🚫 Resort full / too busy</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Bad weather / conditions')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🌧 Bad weather</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Just passing through / sightseeing')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🚗 Just passing / sightseeing</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Time constraint')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">⏰ Time constraint</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Other reason')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">📝 Other reason</button>
+      </div>
+      <input type="hidden" id="cp4-no-reason" value="">
+    </div>
+    <div id="cp4-yes-section" style="display:none;margin-bottom:20px;">
+      <div class="sub-title" style="color:#16a34a;margin-bottom:10px;">How did you find our prices?</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Very Affordable')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😊 Very Affordable</button>
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Affordable')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">🙂 Affordable</button>
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Fair')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😐 Fair</button>
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Expensive')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😕 Expensive</button>
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Very Expensive')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😠 Very Expensive</button>
+      </div>
+      <input type="hidden" id="cp4-price-rating" value="">
+      <div class="sub-title" style="color:#16a34a;margin-bottom:10px;">How did you find our offerings / activities?</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Excellent')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">⭐ Excellent</button>
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Good')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">👍 Good</button>
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Average')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">👌 Average</button>
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Limited')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😒 Limited</button>
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Poor')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">👎 Poor</button>
+      </div>
+      <input type="hidden" id="cp4-offering-rating" value="">
+    </div>
+    <div><label class="f-label">Additional Notes</label><textarea id="cp4-notes" placeholder="Any extra comments..." style="width:100%;margin-bottom:16px;"></textarea></div>
+    <button class="btn-primary" id="cp4-submit-btn" onclick="submitCP4()" style="background:var(--cp4);">SUBMIT EXIT SURVEY</button>
   </div>
-  <button class="btn-primary" id="submit-btn" onclick="submitEntry()">SUBMIT VEHICLE ENTRY</button>
 </div>
 
 <!-- ══ MY SHIFT ════════════════════════════════════════════ -->
@@ -226,110 +295,6 @@ textarea{resize:vertical;min-height:64px;}
     <button class="btn-sm" onclick="loadGate(true)">↻ Refresh</button>
   </div>
   <div id="gate-log"><div class="empty"><div class="empty-icon">🎫</div><p>No entries yet.</p></div></div>
-</div>
-
-<!-- ══ CP4 EXIT SURVEY ═════════════════════════════════════ -->
-<div class="page" id="tab-cp4">
-  <div class="sec-title">CP4 · Exit Survey — Police Choki to Resort Gate</div>
-  <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Record departing vehicles. Ask two key questions to understand entry rates and price/offering feedback.</p>
-
-  <div class="form-grid">
-    <div><label class="f-label">Staff Name <span class="req">*</span></label><input id="cp4-staff" type="text" placeholder="Your full name"></div>
-    <div><label class="f-label">Registration <span class="req">*</span></label><input id="cp4-reg" type="text" placeholder="e.g. LZB-1234" style="text-transform:uppercase"></div>
-    <div><label class="f-label">Date <span class="req">*</span></label><input id="cp4-date" type="date"></div>
-    <div><label class="f-label">Time <span class="req">*</span></label><input id="cp4-time" type="time"></div>
-    <div><label class="f-label">Vehicle Type <span class="req">*</span></label>
-      <select id="cp4-vtype"><option value="">— Select —</option>
-        <option>Car / SUV (Private)</option><option>Minivan / MPV (Private)</option>
-        <option>Coaster / Minibus (9-22 seats)</option><option>Bus (23+ seats)</option>
-        <option>Pickup / Hilux</option><option>Motorcycle / Bike</option><option>Other</option>
-      </select></div>
-    <div><label class="f-label">Passengers <span class="req">*</span></label><input id="cp4-pax" type="number" min="1" max="80" placeholder="e.g. 4"></div>
-  </div>
-
-  <hr class="divider">
-  <div class="sub-title" style="color:var(--cp3);">Question 1 — Did you enter the resort? <span class="req">*</span></div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;margin-top:10px;">
-    <button class="cp4-ans-btn" id="cp4-ent-yes" onclick="setCP4Entry('Yes')"
-      style="padding:10px 24px;border-radius:8px;border:2px solid var(--border);background:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;">
-      ✅ Yes — Entered
-    </button>
-    <button class="cp4-ans-btn" id="cp4-ent-no" onclick="setCP4Entry('No')"
-      style="padding:10px 24px;border-radius:8px;border:2px solid var(--border);background:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;">
-      ❌ No — Did Not Enter
-    </button>
-  </div>
-  <input type="hidden" id="cp4-entered" value="">
-
-  <!-- IF NO: Reason -->
-  <div id="cp4-no-section" style="display:none;margin-bottom:20px;">
-    <div class="sub-title" style="color:#dc2626;margin-bottom:10px;">Why did you not enter?</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;" id="cp4-reason-btns">
-      <button class="cp4-r-btn" onclick="setCP4Reason(this,'Prices too high')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">💰 Prices too high</button>
-      <button class="cp4-r-btn" onclick="setCP4Reason(this,'Did not know what was offered')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">❓ Did not know what was offered</button>
-      <button class="cp4-r-btn" onclick="setCP4Reason(this,'Resort was full / too busy')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🚫 Resort was full / too busy</button>
-      <button class="cp4-r-btn" onclick="setCP4Reason(this,'Bad weather / conditions')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🌧 Bad weather / conditions</button>
-      <button class="cp4-r-btn" onclick="setCP4Reason(this,'Just passing through / sightseeing')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🚗 Just passing / sightseeing</button>
-      <button class="cp4-r-btn" onclick="setCP4Reason(this,'Time constraint')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">⏰ Time constraint</button>
-      <button class="cp4-r-btn" onclick="setCP4Reason(this,'Other reason')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">📝 Other reason</button>
-    </div>
-    <input type="hidden" id="cp4-no-reason" value="">
-  </div>
-
-  <!-- IF YES: Ratings -->
-  <div id="cp4-yes-section" style="display:none;margin-bottom:20px;">
-    <div class="sub-title" style="color:#16a34a;margin-bottom:10px;">How did you find our prices?</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="cp4-price-btns">
-      <button class="cp4-p-btn" onclick="setCP4Price(this,'Very Affordable')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😊 Very Affordable</button>
-      <button class="cp4-p-btn" onclick="setCP4Price(this,'Affordable')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">🙂 Affordable</button>
-      <button class="cp4-p-btn" onclick="setCP4Price(this,'Fair')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😐 Fair</button>
-      <button class="cp4-p-btn" onclick="setCP4Price(this,'Expensive')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😕 Expensive</button>
-      <button class="cp4-p-btn" onclick="setCP4Price(this,'Very Expensive')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😠 Very Expensive</button>
-    </div>
-    <input type="hidden" id="cp4-price-rating" value="">
-
-    <div class="sub-title" style="color:#16a34a;margin-bottom:10px;">How did you find our offerings / activities?</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="cp4-offering-btns">
-      <button class="cp4-o-btn" onclick="setCP4Offering(this,'Excellent')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">⭐ Excellent</button>
-      <button class="cp4-o-btn" onclick="setCP4Offering(this,'Good')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">👍 Good</button>
-      <button class="cp4-o-btn" onclick="setCP4Offering(this,'Average')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">👌 Average</button>
-      <button class="cp4-o-btn" onclick="setCP4Offering(this,'Limited')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😒 Limited</button>
-      <button class="cp4-o-btn" onclick="setCP4Offering(this,'Poor')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">👎 Poor</button>
-    </div>
-    <input type="hidden" id="cp4-offering-rating" value="">
-  </div>
-
-  <div><label class="f-label">Additional Notes</label><textarea id="cp4-notes" placeholder="Any extra comments from the customer..." style="width:100%;margin-bottom:16px;"></textarea></div>
-  <button class="btn-primary" id="cp4-submit-btn" onclick="submitCP4()">SUBMIT EXIT SURVEY</button>
-
-  <hr class="divider">
-
-  <!-- SUMMARY -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-    <div class="sec-title" style="margin:0;">CP4 Summary</div>
-    <button class="btn-sm" onclick="loadCP4Summary()">↻ Refresh Summary</button>
-  </div>
-  <div id="cp4-summary-grid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:16px;">
-    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Total Surveys</div><div class="kpi-val">—</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-    <div>
-      <div class="sec-title">Reason Not Entered</div>
-      <div class="tbl-wrap"><table><thead><tr><th>Reason</th><th>Count</th><th>%</th></tr></thead>
-        <tbody id="cp4-reasons-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
-      </table></div>
-    </div>
-    <div>
-      <div class="sec-title">Price Feedback</div>
-      <div class="tbl-wrap"><table><thead><tr><th>Rating</th><th>Count</th><th>%</th></tr></thead>
-        <tbody id="cp4-price-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
-      </table></div>
-      <div class="sec-title" style="margin-top:12px;">Offering Feedback</div>
-      <div class="tbl-wrap"><table><thead><tr><th>Rating</th><th>Count</th><th>%</th></tr></thead>
-        <tbody id="cp4-offering-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
-      </table></div>
-    </div>
-  </div>
 </div>
 
 <!-- ══ DASHBOARD ═══════════════════════════════════════════ -->
@@ -489,7 +454,6 @@ function showTab(id, el) {
   if (id === 'dashboard') { if (cache) renderDash(cache); else loadData(false); }
   if (id === 'gate')      { if (!gateCache) loadGate(false); }
   if (id === 'log')       { if (!logCache)  loadLog(false);  }
-  if (id === 'cp4')       { initCP4(); loadCP4Summary(); }
   // Report tab: do nothing — user clicks Refresh
 }
 
@@ -789,8 +753,21 @@ function selCP(el, val) {
   document.querySelectorAll('.cp-pill').forEach(function(p){ p.classList.remove('sel'); });
   el.classList.add('sel');
   document.getElementById('f-cp').value = val;
-  var cols = {'CP1 - TMA Splinobo':'var(--cp1)','CP2 - Jungle Forest Area':'var(--cp2)','CP3 - MJSR / GV Road Split':'var(--cp3)'};
-  document.getElementById('shift-cp-label').style.color = cols[val];
+  var isCP4 = val === 'CP4 - Exit Survey';
+  document.getElementById('cp123-fields').style.display = isCP4 ? 'none' : 'block';
+  document.getElementById('cp4-fields').style.display   = isCP4 ? 'block' : 'none';
+  if (isCP4) {
+    var n = new Date();
+    document.getElementById('cp4-date').value = n.toISOString().split('T')[0];
+    document.getElementById('cp4-time').value = pad(n.getHours())+':'+pad(n.getMinutes());
+  }
+  var cols = {
+    'CP1 - TMA Splinobo':'var(--cp1)',
+    'CP2 - Jungle Forest Area':'var(--cp2)',
+    'CP3 - MJSR / GV Road Split':'var(--cp3)',
+    'CP4 - Exit Survey':'var(--cp4)'
+  };
+  document.getElementById('shift-cp-label').style.color = cols[val] || 'var(--cp1)';
   document.getElementById('shift-cp-label').textContent = val.replace(' - ',' · ');
 }
 
