@@ -466,6 +466,40 @@ textarea{resize:vertical;min-height:64px;}
     <!-- SUMMARY TILES -->
     <div id="audit-summary" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:20px;"></div>
 
+    <!-- CP3 BASELINE ANALYSIS -->
+    <div class="sec-title" style="color:var(--cp3);">CP3 Baseline — Miss Rate Per Checkpoint Per Day</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Using CP3 as ground truth. Every plate at CP3 should have been recorded at CP1 and CP2. Red = high miss rate, amber = moderate.</p>
+    <div class="tbl-wrap" style="margin-bottom:20px;">
+      <table><thead><tr>
+        <th>Date</th>
+        <th style="color:var(--cp3)">CP3 Plates</th>
+        <th style="color:var(--cp1)">Missed at CP1</th>
+        <th style="color:var(--cp1)">CP1 Miss %</th>
+        <th style="color:var(--cp2)">Missed at CP2</th>
+        <th style="color:var(--cp2)">CP2 Miss %</th>
+        <th>Both Missed</th>
+        <th>Flag</th>
+      </tr></thead>
+      <tbody id="audit-baseline-body"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- CP3 PLATES NOT RECORDED AT CP1 -->
+    <div class="sec-title" style="color:#dc2626;">CP1 Accountability — Plates at CP3 Not Recorded at CP1</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">These vehicles passed CP1 and were recorded at CP3 but CP1 staff never logged them. Sorted by passenger count — highest impact first.</p>
+    <div class="tbl-wrap" style="margin-bottom:20px;">
+      <table><thead><tr>
+        <th>Registration</th>
+        <th>Passengers</th>
+        <th>Date(s)</th>
+        <th style="color:var(--cp2)">Seen at CP2?</th>
+        <th style="color:var(--cp2)">CP2 Staff</th>
+        <th style="color:var(--cp3)">CP3 Staff</th>
+      </tr></thead>
+      <tbody id="audit-cp1miss-body"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
     <!-- STAFF SUBMISSION COUNTS -->
     <div class="sec-title">Staff Submission Counts by Checkpoint &amp; Day</div>
     <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Shows how many entries each staff member submitted per checkpoint per day. Low counts on a busy day may indicate absent or underperforming staff.</p>
@@ -482,6 +516,50 @@ textarea{resize:vertical;min-height:64px;}
       <table><thead><tr><th>Date</th><th style="color:var(--cp1)">CP1 Entries</th><th style="color:var(--cp2)">CP2 Entries</th><th style="color:var(--cp3)">CP3 Entries</th><th>Largest Gap</th><th>Flag</th></tr></thead>
       <tbody id="audit-daily-body"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
       </table>
+    </div>
+
+    <!-- JOURNEY DROP-OFF ANALYSIS -->
+    <div class="sec-title" style="color:#7c3aed;">Vehicle Journey Drop-Off Analysis</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Tracks where vehicles stop their journey using plate matching. A vehicle seen at CP1 but not CP2 or CP3 turned around before the jungle area. Seen at CP1+CP2 but not CP3 stopped in the jungle area. This identifies real customer drop-off vs staff recording gaps.</p>
+
+    <!-- Journey summary tiles -->
+    <div id="journey-tiles" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:16px;"></div>
+
+    <!-- Daily drop-off table -->
+    <div class="sec-title" style="font-size:10px;margin-bottom:6px;">Daily Journey Breakdown</div>
+    <div class="tbl-wrap" style="margin-bottom:16px;">
+      <table><thead><tr>
+        <th>Date</th>
+        <th style="color:#16a34a">Full Journey (All 3)</th>
+        <th style="color:#d97706">Dropped at CP2 Area</th>
+        <th style="color:#dc2626">Dropped at CP1 Area</th>
+        <th style="color:var(--muted)">No CP1 Data</th>
+        <th>Drop-off Rate</th>
+      </tr></thead>
+      <tbody id="journey-daily-body"><tr><td colspan="6" style="text-align:center;padding:16px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- Dropped at CP2 detail -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div>
+        <div class="sec-title" style="color:#d97706;margin-bottom:6px;">Stopped in Jungle Area (CP1+CP2, no CP3)</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">These vehicles journeyed past CP1 and CP2 but never reached CP3 — they stopped, turned around, or diverted in the jungle area.</p>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Reg</th><th>Pax</th><th>Date(s)</th><th>CP1 Staff</th><th>CP2 Staff</th></tr></thead>
+          <tbody id="journey-cp2drop-body"><tr><td colspan="5" style="text-align:center;padding:12px;color:var(--muted);">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="sec-title" style="color:#dc2626;margin-bottom:6px;">Turned Around Early (CP1 only, no CP2/CP3)</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">These vehicles were recorded at CP1 but never seen again — they turned around before reaching the jungle area at CP2.</p>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Reg</th><th>Pax</th><th>Date(s)</th><th>CP1 Staff</th></tr></thead>
+          <tbody id="journey-cp1drop-body"><tr><td colspan="4" style="text-align:center;padding:12px;color:var(--muted);">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- PLATE CROSS-REFERENCE -->
@@ -1356,26 +1434,131 @@ function loadAudit(params) {
     renderAuditSummary(d.summary);
     renderAuditStaff(d.staffCounts);
     renderAuditDaily(d.dailyCounts);
+    renderJourneyDropoff(d.journeyDropoff);
     renderAuditPlates('all');
   });
 }
 
 function renderAuditSummary(s) {
-  var missFlag = s.missedAtCP1 > 0 || s.missedAtCP2 > 0;
   document.getElementById('audit-summary').innerHTML = [
-    {l:'Unique Plates',     v:s.totalUniquePlates, s:'in period',          c:'#1a73e8'},
-    {l:'CP1 Plates',        v:s.cp1Plates,         s:'recorded at CP1',    c:'var(--cp1)'},
-    {l:'CP2 Plates',        v:s.cp2Plates,         s:'recorded at CP2',    c:'var(--cp2)'},
-    {l:'CP3 Plates',        v:s.cp3Plates,         s:'recorded at CP3',    c:'var(--cp3)'},
-    {l:'Seen All 3 CPs',    v:s.seenAll3,          s:'full journey logged', c:'#16a34a'},
-    {l:'Missed at CP1',     v:s.missedAtCP1,       s:'seen at CP2/3 only', c:s.missedAtCP1>0?'#dc2626':'#16a34a'},
-    {l:'Missed at CP2',     v:s.missedAtCP2,       s:'seen at CP3 only',   c:s.missedAtCP2>0?'#dc2626':'#16a34a'}
+    {l:'CP3 Plates (baseline)', v:s.cp3Plates,       s:'ground truth',              c:'var(--cp3)'},
+    {l:'CP2 Plates',            v:s.cp2Plates,        s:'recorded at CP2',           c:'var(--cp2)'},
+    {l:'CP1 Plates',            v:s.cp1Plates,        s:'recorded at CP1',           c:'var(--cp1)'},
+    {l:'Seen All 3 CPs',        v:s.seenAll3,         s:'fully tracked',             c:'#16a34a'},
+    {l:'CP1 Miss Rate',         v:s.cp1MissRate+'%',  s:s.cp3NotInCP1+' CP3 plates not in CP1',   c:s.cp1MissRate>30?'#dc2626':s.cp1MissRate>10?'#d97706':'#16a34a'},
+    {l:'CP2 Miss Rate',         v:s.cp2MissRate+'%',  s:s.cp3NotInCP2+' CP3 plates not in CP2',   c:s.cp2MissRate>30?'#dc2626':s.cp2MissRate>10?'#d97706':'#16a34a'},
+    {l:'Both CPs Missed',       v:s.bothMissRate+'%', s:s.cp3NotInEither+' plates missed by both', c:s.bothMissRate>20?'#dc2626':s.bothMissRate>5?'#d97706':'#16a34a'}
   ].map(function(k){
     return '<div class="card" style="text-align:center;border-top:3px solid '+k.c+';">'+
       '<div class="kpi-lbl">'+k.l+'</div>'+
       '<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div>'+
       '<div class="kpi-sub">'+k.s+'</div></div>';
   }).join('');
+
+  // Render CP3 baseline daily miss table
+  var cba = auditData.cp3BaselineAnalysis || {};
+  renderCP3BaselineDaily(cba.dailyMiss || []);
+  renderCP3MissedDetail(cba.cp3MissedCP1Detail || []);
+}
+
+function renderCP3BaselineDaily(daily) {
+  var el = document.getElementById('audit-baseline-body');
+  if (!el) return;
+  if (!daily || !daily.length) {
+    el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted);">No CP3 data in this period</td></tr>';
+    return;
+  }
+  el.innerHTML = daily.map(function(d2) {
+    var cp1MissPct = d2.cp3 > 0 ? Math.round(d2.missedCP1 / d2.cp3 * 100) : 0;
+    var cp2MissPct = d2.cp3 > 0 ? Math.round(d2.missedCP2 / d2.cp3 * 100) : 0;
+    var rowBg = cp1MissPct > 50 ? 'background:#fff5f5;' : cp1MissPct > 25 ? 'background:#fffbeb;' : '';
+    var cp1Col = cp1MissPct > 50 ? '#dc2626' : cp1MissPct > 25 ? '#d97706' : '#16a34a';
+    var cp2Col = cp2MissPct > 50 ? '#dc2626' : cp2MissPct > 25 ? '#d97706' : '#16a34a';
+    var flag   = cp1MissPct > 50 ? '<span style="color:#dc2626;font-weight:700;">🚨 CP1 critical miss</span>' :
+                 cp1MissPct > 25 ? '<span style="color:#d97706;font-weight:700;">⚠ CP1 high miss</span>' :
+                 cp1MissPct > 10 ? '<span style="color:#d97706;">△ CP1 moderate</span>' :
+                                   '<span style="color:#16a34a;">✓ Within range</span>';
+    return '<tr style="'+rowBg+'">'+
+      '<td style="font-weight:600">'+d2.date+'</td>'+
+      '<td style="font-weight:700;color:var(--cp3)">'+d2.cp3+'</td>'+
+      '<td style="font-weight:700;color:'+cp1Col+'">'+d2.missedCP1+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:'+cp1Col+'">'+cp1MissPct+'%</td>'+
+      '<td style="font-weight:700;color:'+cp2Col+'">'+d2.missedCP2+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:'+cp2Col+'">'+cp2MissPct+'%</td>'+
+      '<td style="font-weight:600">'+d2.missedBoth+'</td>'+
+      '<td>'+flag+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function renderCP3MissedDetail(plates) {
+  var el = document.getElementById('audit-cp1miss-body');
+  if (!el) return;
+  if (!plates || !plates.length) {
+    el.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--muted);">No missed plates — CP1 recorded all CP3 plates ✓</td></tr>';
+    return;
+  }
+  el.innerHTML = plates.map(function(p2) {
+    var cp2Str = p2.cp2
+      ? '<span style="color:#16a34a;font-weight:700;">✓ Yes</span>'
+      : '<span style="color:#d97706;font-weight:700;">✗ Also missed CP2</span>';
+    return '<tr style="background:#fff5f5;">'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:700;color:#dc2626;letter-spacing:.04em">'+p2.reg+'</td>'+
+      '<td style="font-weight:700">'+p2.pax+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.dates+'</td>'+
+      '<td>'+cp2Str+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp2Staff+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp3Staff+'</td>'+
+    '</tr>';
+  }).join('');
+}
+function renderJourneyDropoff(jd) {
+  if (!jd) return;
+  var s = jd.summary || {};
+  var total   = (s.allThree||0)+(s.cp1ToCp2Only||0)+(s.cp1Only||0)+(s.cp2AndCp3||0)+(s.cp2Only||0)+(s.cp3Only||0);
+  var tracked = (s.allThree||0)+(s.cp1ToCp2Only||0)+(s.cp1Only||0);
+  document.getElementById('journey-tiles').innerHTML = [
+    {l:'Full Journey (All 3)',  v:s.allThree||0,      s:total>0?pct(s.allThree||0,total)+' of plates':'—',   c:'#16a34a'},
+    {l:'Dropped at CP2 Area',   v:s.cp1ToCp2Only||0,  s:'had CP1+CP2, never reached CP3',                    c:'#d97706'},
+    {l:'Turned Around at CP1',  v:s.cp1Only||0,        s:'CP1 only, never continued',                        c:'#dc2626'},
+    {l:'CP1 Drop-Off Rate',     v:tracked>0?pct(s.cp1Only||0,tracked):'—',  s:'of CP1-tracked plates',      c:(s.cp1Only||0)>tracked*0.3?'#dc2626':'#d97706'},
+    {l:'CP2 Area Drop-Off',     v:tracked>0?pct(s.cp1ToCp2Only||0,Math.max(tracked-(s.cp1Only||0),1)):'—', s:'of plates past CP1', c:'#d97706'},
+    {l:'No CP1 Data',           v:(s.cp2AndCp3||0)+(s.cp2Only||0)+(s.cp3Only||0), s:'CP1 not recorded', c:'var(--muted)'}
+  ].map(function(k){
+    return '<div class="card" style="text-align:center;border-top:3px solid '+k.c+';">'+
+      '<div class="kpi-lbl">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div></div>';
+  }).join('');
+
+  var daily = jd.dailyDropoff || [];
+  document.getElementById('journey-daily-body').innerHTML = !daily.length
+    ? '<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--muted);">No data</td></tr>'
+    : daily.map(function(d2) {
+        var tracked2 = d2.allThree+d2.droppedCP2+d2.droppedCP1;
+        var dropRate = tracked2>0 ? pct(d2.droppedCP1+d2.droppedCP2,tracked2) : '—';
+        var dc = parseInt(dropRate)>40?'#dc2626':parseInt(dropRate)>20?'#d97706':'#16a34a';
+        return '<tr><td style="font-weight:600">'+d2.date+'</td>'+
+          '<td style="font-weight:700;color:#16a34a">'+d2.allThree+'</td>'+
+          '<td style="font-weight:700;color:#d97706">'+d2.droppedCP2+'</td>'+
+          '<td style="font-weight:700;color:#dc2626">'+d2.droppedCP1+'</td>'+
+          '<td style="color:var(--muted)">'+d2.noCP1+'</td>'+
+          '<td style="font-weight:700;color:'+dc+'">'+dropRate+'</td></tr>';
+      }).join('');
+
+  function dropTable(list, cols, color, emptyMsg) {
+    if (!list || !list.length) return '<tr><td colspan="'+cols+'" style="text-align:center;padding:12px;color:var(--muted);">'+emptyMsg+'</td></tr>';
+    return list.map(function(p2) {
+      var cells = '<td style="font-weight:700;color:'+color+'">'+p2.reg+'</td>'+
+        '<td style="font-weight:600">'+p2.pax+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+p2.dates+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+(p2.cp1Staff||'')+'</td>';
+      if (cols === 5) cells += '<td style="font-size:11px;color:var(--muted)">'+(p2.cp2Staff||'')+'</td>';
+      return '<tr>'+cells+'</tr>';
+    }).join('');
+  }
+  document.getElementById('journey-cp2drop-body').innerHTML = dropTable(jd.droppedAtCP2,'5','#d97706','No vehicles dropped in jungle area');
+  document.getElementById('journey-cp1drop-body').innerHTML = dropTable(jd.droppedAtCP1,'4','#dc2626','No vehicles turned around at CP1');
 }
 
 function renderAuditStaff(staffCounts) {
@@ -1384,24 +1567,22 @@ function renderAuditStaff(staffCounts) {
     return;
   }
   document.getElementById('audit-staff-body').innerHTML = staffCounts.map(function(s) {
-    var cpCol = s.cp==='cp1'?'var(--cp1)':s.cp==='cp2'?'var(--cp2)':'var(--cp3)';
+    var cpCol   = s.cp==='cp1'?'var(--cp1)':s.cp==='cp2'?'var(--cp2)':'var(--cp3)';
     var cpLabel = s.cp.toUpperCase();
-    // Compare vs other staff at same CP same day
     var sameCPSameDay = staffCounts.filter(function(x){ return x.cp===s.cp && x.date===s.date; });
     var maxOnDay = Math.max.apply(null, sameCPSameDay.map(function(x){ return x.count; }));
-    var isLow = sameCPSameDay.length > 1 && s.count < maxOnDay * 0.5;
-    var rowBg = isLow ? 'background:#fff5f5;' : '';
-    var flag  = isLow ? '<span style="color:#dc2626;font-weight:700;">⚠ Low vs colleagues</span>' : '<span style="color:#16a34a;">✓ Normal</span>';
+    var isLow   = sameCPSameDay.length > 1 && s.count < maxOnDay * 0.5;
+    var rowBg   = isLow ? 'background:#fff5f5;' : '';
+    var flag    = isLow ? '<span style="color:#dc2626;font-weight:700;">⚠ Low vs colleagues</span>' : '<span style="color:#16a34a;">✓ Normal</span>';
     return '<tr style="'+rowBg+'">'+
       '<td style="font-weight:600">'+s.date+'</td>'+
       '<td style="font-weight:700;color:'+cpCol+'">'+cpLabel+'</td>'+
       '<td style="font-weight:600">'+s.staff+'</td>'+
-      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:'+cpCol+'">'+s.count+'</td>'+
+      '<td style="font-size:20px;font-weight:700;color:'+cpCol+'">'+s.count+'</td>'+
       '<td>'+flag+'</td>'+
     '</tr>';
   }).join('');
 }
-
 function renderAuditDaily(dailyCounts) {
   if (!dailyCounts || !dailyCounts.length) {
     document.getElementById('audit-daily-body').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No data</td></tr>';
