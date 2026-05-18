@@ -963,55 +963,29 @@ function submitEntry() {
   var dest    = document.getElementById('f-dest').value;
   var entered = document.getElementById('f-entered').value;
   var cp      = document.getElementById('f-cp').value;
-  var company = document.getElementById('f-company').value.trim();
-  var phone   = document.getElementById('f-phone').value.trim();
-  var notes   = document.getElementById('f-notes').value.trim();
 
   if (!staff||!reg||!date||!time||!vtype||!prov||!pax||kids===''||!dest||!entered) {
     toast('Complete all required fields','#dc2626'); return;
   }
 
-  var btn = document.getElementById('submit-btn');
-  btn.textContent = 'SAVING…'; btn.disabled = true;
+  // Update session counters and shift display only
+  // Staff use the Google Form for actual data submission
+  var entry = {staff:staff,reg:reg,date:date,time:time,vtype:vtype,pax:parseInt(pax),dest:dest,entered:entered,cp:cp};
+  sessionE.unshift(entry);
+  sCount++; sPax+=parseInt(pax);
+  if (entered==='Yes - entered MJSR') sMJSR++;
+  document.getElementById('s-count').textContent = sCount;
+  document.getElementById('s-pax').textContent   = sPax;
+  document.getElementById('s-mjsr').textContent  = sMJSR;
+  renderShift();
 
-  var url = API+'?action=saveEntry'+
-    '&staff='+encodeURIComponent(staff)+
-    '&reg='+encodeURIComponent(reg)+
-    '&date='+encodeURIComponent(date)+
-    '&time='+encodeURIComponent(time)+
-    '&vtype='+encodeURIComponent(vtype)+
-    '&province='+encodeURIComponent(prov)+
-    '&pax='+encodeURIComponent(pax)+
-    '&kids='+encodeURIComponent(kids)+
-    '&dest='+encodeURIComponent(dest)+
-    '&entered='+encodeURIComponent(entered)+
-    '&cp='+encodeURIComponent(cp)+
-    '&company='+encodeURIComponent(company)+
-    '&phone='+encodeURIComponent(phone)+
-    '&notes='+encodeURIComponent(notes);
-
-  apiFetch(url, function(err, d) {
-    btn.textContent = 'SUBMIT VEHICLE ENTRY'; btn.disabled = false;
-    if (err || d.status !== 'ok') { toast('Could not save entry — check connection','#dc2626'); return; }
-
-    // Update session counters
-    var entry = {staff:staff,reg:reg,date:date,time:time,vtype:vtype,pax:parseInt(pax),dest:dest,entered:entered,cp:cp};
-    sessionE.unshift(entry); sCount++; sPax+=parseInt(pax);
-    if (entered==='Yes - entered MJSR') sMJSR++;
-    document.getElementById('s-count').textContent = sCount;
-    document.getElementById('s-pax').textContent   = sPax;
-    document.getElementById('s-mjsr').textContent  = sMJSR;
-    renderShift();
-    cache = null; // invalidate dashboard cache
-
-    // Reset fields
-    ['f-reg','f-vtype','f-prov','f-pax','f-children','f-dest','f-entered','f-company','f-phone','f-notes'].forEach(function(id){
-      document.getElementById(id).value='';
-    });
-    var n=new Date();
-    document.getElementById('f-time').value=pad(n.getHours())+':'+pad(n.getMinutes());
-    toast('✓ Saved — '+reg,'#16a34a');
+  // Reset form fields
+  ['f-reg','f-vtype','f-prov','f-pax','f-children','f-dest','f-entered','f-company','f-phone','f-notes'].forEach(function(id){
+    document.getElementById(id).value='';
   });
+  var n=new Date();
+  document.getElementById('f-time').value=pad(n.getHours())+':'+pad(n.getMinutes());
+  toast('✓ Logged — '+reg,'#16a34a');
 }
 
 function renderShift() {
