@@ -257,6 +257,31 @@ textarea{resize:vertical;min-height:64px;}
     </div>
     <div><label class="f-label">Additional Notes</label><textarea id="cp4-notes" placeholder="Any extra comments..." style="width:100%;margin-bottom:16px;"></textarea></div>
     <button class="btn-primary" id="cp4-submit-btn" onclick="submitCP4()" style="background:var(--cp4);">SUBMIT EXIT SURVEY</button>
+
+    <hr class="divider">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="sec-title" style="margin:0;">CP4 Summary</div>
+      <button class="btn-sm" onclick="loadCP4Summary()">↻ Refresh</button>
+    </div>
+    <div id="cp4-summary-grid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:16px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div class="sec-title">Reason Not Entered</div>
+        <div class="tbl-wrap"><table><thead><tr><th>Reason</th><th>Count</th><th>%</th></tr></thead>
+          <tbody id="cp4-reasons-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="sec-title">Price Feedback</div>
+        <div class="tbl-wrap"><table><thead><tr><th>Rating</th><th>Count</th><th>%</th></tr></thead>
+          <tbody id="cp4-price-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+        </table></div>
+        <div class="sec-title" style="margin-top:12px;">Offering Feedback</div>
+        <div class="tbl-wrap"><table><thead><tr><th>Rating</th><th>Count</th><th>%</th></tr></thead>
+          <tbody id="cp4-offering-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
   </div>
 </div>
 
