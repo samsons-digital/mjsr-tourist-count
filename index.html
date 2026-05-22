@@ -262,6 +262,13 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; 
         <div class="card"><div class="kpi-lbl">Gate MJSR All Time</div><div class="kpi-val" id="d-a-gate-mjsr" style="color:var(--blue);">&mdash;</div></div>
       </div>
 
+      <div class="sec-title">Conversion Funnel <span style="font-weight:400;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;">&middot; Stated MJSR vs Gate Actual + CP4 Survey</span></div>
+      <div id="conv-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:20px;">
+        <div class="card" style="border-top:3px solid var(--gold);">
+          <div class="kpi-lbl">Loading&hellip;</div>
+        </div>
+      </div>
+
       <div class="sec-title">Recent Submissions (last 20)</div>
       <div class="tbl-wrap">
         <table class="log-table">
@@ -602,6 +609,7 @@ function loadDashboard(force) {
     renderDashboard(d);
     var t = new Date(d.lastUpdated);
     document.getElementById('live-label').textContent = 'Updated ' + pad(t.getHours()) + ':' + pad(t.getMinutes());
+    loadConversion();
   });
 }
 
@@ -653,6 +661,63 @@ function renderDashboard(d) {
         '</tr>';
     }).join('');
   }
+}
+
+// =====================================================================
+// CONVERSION FUNNEL
+// =====================================================================
+function loadConversion() {
+  apiFetch(API + '?action=getConversion', function(err, d) {
+    if (err || !d.ok) {
+      document.getElementById('conv-grid').innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--red);">Could not load conversion data</div>';
+      return;
+    }
+    renderConversion(d.windows);
+  });
+}
+
+function renderConversion(w) {
+  var windows = [
+    { key: 'today', label: 'Today', data: w.today },
+    { key: 'last7', label: 'Last 7 Days', data: w.last7 },
+    { key: 'last30', label: 'Last 30 Days', data: w.last30 }
+  ];
+  var html = windows.map(function(win) {
+    var d = win.data;
+    var rateA = d.rateA;
+    var rateB = d.rateB;
+    var rateAcol = rateA === null ? 'var(--muted)' : rateA >= 75 ? 'var(--green)' : rateA >= 50 ? 'var(--orange)' : 'var(--red)';
+    var rateBcol = rateB === null ? 'var(--muted)' : rateB >= 75 ? 'var(--green)' : rateB >= 50 ? 'var(--orange)' : 'var(--red)';
+    var rateAtxt = rateA === null ? '\u2014' : rateA + '%';
+    var rateBtxt = rateB === null ? '\u2014' : rateB + '%';
+    var rateAnote = d.cp3PaxStatedMJSR === 0
+      ? 'No CP3 MJSR data'
+      : d.gateMJSR === 0
+        ? 'No gate entry yet'
+        : d.gateMJSR + ' gate / ' + d.cp3PaxStatedMJSR + ' stated';
+    var rateBnote = d.cp4Total === 0
+      ? 'No CP4 surveys'
+      : d.cp4Yes + ' yes / ' + d.cp4Total + ' surveyed';
+    return '<div class="card" style="border-top:3px solid var(--gold);">' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">' +
+        '<div style="font-weight:700;font-size:13px;">' + win.label + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);">' + d.fromDate + (d.fromDate === d.toDate ? '' : ' \u2192 ' + d.toDate) + '</div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+        '<div style="border-right:1px solid var(--border);padding-right:10px;">' +
+          '<div class="kpi-lbl" style="font-size:10px;">Gate vs CP3 Stated</div>' +
+          '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:700;color:' + rateAcol + ';line-height:1.1;">' + rateAtxt + '</div>' +
+          '<div style="font-size:10px;color:var(--muted);margin-top:4px;">' + rateAnote + '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="kpi-lbl" style="font-size:10px;">CP4 Survey Yes</div>' +
+          '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:700;color:' + rateBcol + ';line-height:1.1;">' + rateBtxt + '</div>' +
+          '<div style="font-size:10px;color:var(--muted);margin-top:4px;">' + rateBnote + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('conv-grid').innerHTML = html;
 }
 
 // =====================================================================
