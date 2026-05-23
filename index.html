@@ -372,7 +372,7 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; 
       <hr class="divider">
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div class="sec-title" style="margin:0;">CP4 Summary</div>
+        <div class="sec-title" style="margin:0;">CP4 Summary <span style="font-weight:400;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;">&middot; All time totals</span></div>
         <button class="btn-sm" onclick="loadCP4Summary()">&#x21bb; Refresh</button>
       </div>
       <div class="grid" id="cp4-sum-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));"></div>
@@ -824,10 +824,10 @@ function loadCP4Summary() {
     var entPct = d.total > 0 ? Math.round(d.enteredYes / d.total * 100) : 0;
     var noPct = d.total > 0 ? Math.round(d.enteredNo / d.total * 100) : 0;
     grid.innerHTML = [
-      { l: 'Total Surveys', v: d.total, s: 'all time', c: 'var(--blue)' },
+      { l: 'All Time Total', v: d.total, s: 'surveys to date', c: 'var(--blue)' },
       { l: 'Today', v: d.todayTotal, s: 'surveys today', c: 'var(--gold)' },
-      { l: 'Entered', v: d.enteredYes, s: entPct + '% of surveyed', c: 'var(--green)' },
-      { l: 'Did Not Enter', v: d.enteredNo, s: noPct + '% of surveyed', c: 'var(--red)' }
+      { l: 'All Time Entered', v: d.enteredYes, s: entPct + '% of surveyed', c: 'var(--green)' },
+      { l: 'All Time Did Not Enter', v: d.enteredNo, s: noPct + '% of surveyed', c: 'var(--red)' }
     ].map(function(k) {
       return '<div class="card" style="text-align:center;border-top:3px solid ' + k.c + ';">' +
         '<div class="kpi-lbl">' + k.l + '</div>' +
