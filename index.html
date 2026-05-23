@@ -824,10 +824,10 @@ function loadCP4Summary() {
     var entPct = d.total > 0 ? Math.round(d.enteredYes / d.total * 100) : 0;
     var noPct = d.total > 0 ? Math.round(d.enteredNo / d.total * 100) : 0;
     grid.innerHTML = [
-      { l: 'All Time Total', v: d.total, s: 'surveys to date', c: 'var(--blue)' },
-      { l: 'Today', v: d.todayTotal, s: 'surveys today', c: 'var(--gold)' },
-      { l: 'All Time Entered', v: d.enteredYes, s: entPct + '% of surveyed', c: 'var(--green)' },
-      { l: 'All Time Did Not Enter', v: d.enteredNo, s: noPct + '% of surveyed', c: 'var(--red)' }
+      { l: 'All Time Total', v: d.total, s: 'passengers surveyed', c: 'var(--blue)' },
+      { l: 'Today', v: d.todayTotal, s: 'passengers surveyed today', c: 'var(--gold)' },
+      { l: 'All Time Entered', v: d.enteredYes, s: entPct + '% of passengers surveyed', c: 'var(--green)' },
+      { l: 'All Time Did Not Enter', v: d.enteredNo, s: noPct + '% of passengers surveyed', c: 'var(--red)' }
     ].map(function(k) {
       return '<div class="card" style="text-align:center;border-top:3px solid ' + k.c + ';">' +
         '<div class="kpi-lbl">' + k.l + '</div>' +
