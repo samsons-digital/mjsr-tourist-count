@@ -261,6 +261,7 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; 
         <div class="card"><div class="kpi-lbl">Unique Vehicles</div><div class="kpi-val" id="d-a-unique">&mdash;</div><div class="kpi-sub">by plate</div></div>
         <div class="card"><div class="kpi-lbl">Total Passengers</div><div class="kpi-val" id="d-a-pax">&mdash;</div></div>
         <div class="card"><div class="kpi-lbl">Gate MJSR All Time</div><div class="kpi-val" id="d-a-gate-mjsr" style="color:var(--blue);">&mdash;</div></div>
+        <div class="card" style="border-top:3px solid var(--gold);"><div class="kpi-lbl">MJSR Conversion</div><div class="kpi-val" id="d-a-conv">&mdash;</div><div class="kpi-sub" id="d-a-conv-sub">gate vs CP3 stated</div></div>
       </div>
 
       <div class="sec-title">Conversion Funnel <span style="font-weight:400;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;">&middot; Stated MJSR vs Gate Actual + CP4 Survey</span></div>
@@ -669,6 +670,21 @@ function renderDashboard(d) {
   document.getElementById('d-a-unique').textContent = a.uniquePlates || 0;
   document.getElementById('d-a-pax').textContent = a.passengers || 0;
   document.getElementById('d-a-gate-mjsr').textContent = ga.mjsr || 0;
+
+  // All-time MJSR conversion: gate actual vs CP3 stated MJSR pax (consistent with Funnel)
+  var conv = d.allTimeConversion;
+  var convPax = d.allTimeCP3StatedMJSRPax || 0;
+  var convEl = document.getElementById('d-a-conv');
+  var convSub = document.getElementById('d-a-conv-sub');
+  if (conv === null || conv === undefined) {
+    convEl.textContent = '\u2014';
+    convEl.style.color = 'var(--muted)';
+    convSub.textContent = 'no CP3 MJSR data';
+  } else {
+    convEl.textContent = conv + '%';
+    convEl.style.color = conv >= 75 ? 'var(--green)' : conv >= 50 ? 'var(--orange)' : 'var(--red)';
+    convSub.textContent = (ga.mjsr || 0) + ' gate / ' + convPax + ' CP3 stated';
+  }
 
   // Recent submissions
   var recent = d.recent || [];
