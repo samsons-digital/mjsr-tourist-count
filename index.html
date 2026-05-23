@@ -225,6 +225,7 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; 
     <div class="tab" onclick="showTab('cp4')">CP4 Exit Survey</div>
     <div class="tab" onclick="showTab('gate')">Gate Entry</div>
     <div class="tab" onclick="showTab('log')">Recent Log</div>
+    <div class="tab" onclick="showTab('journey')">Vehicle Journey</div>
     <div class="tab" onclick="showTab('report')">Reports</div>
   </div>
 
@@ -470,6 +471,35 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; 
       </div>
     </div>
 
+    <!-- VEHICLE JOURNEY TAB -->
+    <div class="tab-content" id="tab-journey">
+      <div class="sec-title">Vehicle Journey <span style="font-weight:400;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;">&middot; Cross-checkpoint plate validation</span></div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Tracks each unique vehicle plate across CP1, CP2, CP3 and CP4. Shows the % of vehicles that completed the full checkpoint sequence and were verified at exit.</p>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+          <div>
+            <label class="f-label">Range</label>
+            <select id="j-range" onchange="toggleJourneyCustomRange()" style="width:auto;">
+              <option value="today">Today</option>
+              <option value="last7" selected>Last 7 days</option>
+              <option value="last30">Last 30 days</option>
+              <option value="alltime">All time</option>
+              <option value="custom">Custom range</option>
+            </select>
+          </div>
+          <div id="j-custom" style="display:none;gap:8px;">
+            <div><label class="f-label">From</label><input id="j-from" type="date" style="width:auto;"></div>
+            <div><label class="f-label">To</label><input id="j-to" type="date" style="width:auto;"></div>
+          </div>
+          <button class="btn-sm blue" onclick="loadJourney()">Run Analysis</button>
+        </div>
+        <div id="j-period" style="font-size:12px;color:var(--muted);margin-top:10px;"></div>
+      </div>
+
+      <div id="j-content"><p class="empty">Choose a range and click Run Analysis</p></div>
+    </div>
+
     <!-- REPORTS TAB -->
     <div class="tab-content" id="tab-report">
       <div class="sec-title">Reports</div>
@@ -564,7 +594,7 @@ function showTab(id) {
   document.getElementById('tab-' + id).classList.add('active');
   // Find the clicked tab button
   var tabs = document.querySelectorAll('.tab');
-  var labels = ['dashboard', 'cp4', 'gate', 'log', 'report'];
+  var labels = ['dashboard', 'cp4', 'gate', 'log', 'journey', 'report'];
   for (var i = 0; i < labels.length; i++) {
     if (labels[i] === id) tabs[i].classList.add('active');
   }
@@ -967,6 +997,173 @@ function renderLog() {
       '<td>' + escapeHtml(entShort) + '</td>' +
       '</tr>';
   }).join('');
+}
+
+// =====================================================================
+// VEHICLE JOURNEY
+// =====================================================================
+function toggleJourneyCustomRange() {
+  var range = document.getElementById('j-range').value;
+  document.getElementById('j-custom').style.display = (range === 'custom') ? 'flex' : 'none';
+}
+
+function loadJourney() {
+  var range = document.getElementById('j-range').value;
+  var qs = '?action=getJourney&range=' + range;
+  if (range === 'custom') {
+    var from = document.getElementById('j-from').value;
+    var to = document.getElementById('j-to').value;
+    if (!from || !to) { toast('Pick a from and to date', '#dc2626'); return; }
+    qs += '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
+  }
+  document.getElementById('j-content').innerHTML = '<p class="empty"><span class="loading"></span>Analysing plate journeys&hellip;</p>';
+  apiFetch(API + qs, function(err, d) {
+    if (err || !d.ok) {
+      document.getElementById('j-content').innerHTML = '<p class="empty" style="color:var(--red);">Could not load journey analysis: ' + escapeHtml(err || d.error || 'unknown') + '</p>';
+      return;
+    }
+    renderJourney(d);
+  });
+}
+
+function renderJourney(d) {
+  document.getElementById('j-period').textContent = 'Period: ' + d.fromDate + ' to ' + d.toDate;
+  var t = d.totals || {};
+  var r = d.rates || {};
+  var vehicles = d.vehicles || [];
+
+  // Summary tiles
+  var tilesHtml =
+    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:8px;">' +
+      '<div class="card" style="border-top:3px solid var(--gold);">' +
+        '<div class="kpi-lbl">Unique Vehicles</div>' +
+        '<div class="kpi-val" style="color:var(--gold);">' + (t.totalPlates || 0) + '</div>' +
+        '<div class="kpi-sub">distinct plates in period</div>' +
+      '</div>' +
+      '<div class="card" style="border-top:3px solid var(--blue);">' +
+        '<div class="kpi-lbl">Passed All 3 CPs</div>' +
+        '<div class="kpi-val" style="color:var(--blue);">' + (t.completedCP123 || 0) + '</div>' +
+        '<div class="kpi-sub">' + (r.pctCP123 || 0) + '% of vehicles</div>' +
+      '</div>' +
+      '<div class="card" style="border-top:3px solid var(--green);">' +
+        '<div class="kpi-lbl">Full Journey + CP4</div>' +
+        '<div class="kpi-val" style="color:var(--green);">' + (t.completedCP123_CP4 || 0) + '</div>' +
+        '<div class="kpi-sub">' + (r.pctCP123CP4 || 0) + '% of all vehicles</div>' +
+      '</div>' +
+      '<div class="card" style="border-top:3px solid var(--cp4);">' +
+        '<div class="kpi-lbl">CP4 Capture Rate</div>' +
+        '<div class="kpi-val" style="color:var(--cp4);">' + (r.pctVerifiedOfCompleted || 0) + '%</div>' +
+        '<div class="kpi-sub">of full journey vehicles</div>' +
+      '</div>' +
+    '</div>';
+
+  // Breakdown of partial journeys
+  var partialHtml =
+    '<div class="sec-title">Partial Journey Breakdown</div>' +
+    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:20px;">' +
+      tile('CP1 + CP2 only', t.cp1Cp2 || 0, 'var(--orange)') +
+      tile('CP1 + CP3 only', t.cp1Cp3 || 0, 'var(--orange)') +
+      tile('CP2 + CP3 only', t.cp2Cp3 || 0, 'var(--orange)') +
+      tile('CP1 only', t.onlyCP1 || 0, 'var(--cp1)') +
+      tile('CP2 only', t.onlyCP2 || 0, 'var(--cp2)') +
+      tile('CP3 only', t.onlyCP3 || 0, 'var(--cp3)') +
+      tile('CP4 only', t.onlyCP4 || 0, 'var(--cp4)') +
+    '</div>';
+
+  // Filter + search controls + table
+  var tableHtml =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">' +
+      '<div class="sec-title" style="margin:0;">All Vehicles (' + vehicles.length + ')</div>' +
+      '<div style="display:flex;gap:8px;align-items:center;">' +
+        '<select id="j-filter" onchange="renderJourneyTable()" style="width:auto;">' +
+          '<option value="">All vehicles</option>' +
+          '<option value="full">Full Journey Verified (CP1+CP2+CP3+CP4)</option>' +
+          '<option value="cp123">All 3 CPs (no CP4)</option>' +
+          '<option value="partial">Partial only (1 or 2 CPs)</option>' +
+          '<option value="cp4only">CP4 only (no entry CPs)</option>' +
+        '</select>' +
+        '<input id="j-search" type="text" placeholder="Search plate..." oninput="renderJourneyTable()" style="width:auto;min-width:160px;">' +
+      '</div>' +
+    '</div>' +
+    '<div class="tbl-wrap"><table class="log-table">' +
+      '<thead><tr>' +
+        '<th>Plate</th>' +
+        '<th style="text-align:center;">CP1</th>' +
+        '<th style="text-align:center;">CP2</th>' +
+        '<th style="text-align:center;">CP3</th>' +
+        '<th style="text-align:center;">CP4</th>' +
+        '<th style="text-align:center;">Max Pax</th>' +
+        '<th>First Seen</th>' +
+        '<th>Last Seen</th>' +
+        '<th>Status</th>' +
+      '</tr></thead>' +
+      '<tbody id="j-tbody"></tbody>' +
+    '</table></div>';
+
+  document.getElementById('j-content').innerHTML = tilesHtml + partialHtml + tableHtml;
+
+  // Cache for filter/search
+  window._journeyCache = vehicles;
+  renderJourneyTable();
+}
+
+function tile(label, val, colour) {
+  return '<div class="card" style="text-align:center;">' +
+    '<div class="kpi-lbl" style="font-size:10px;">' + label + '</div>' +
+    '<div style="font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:700;color:' + colour + ';line-height:1;">' + val + '</div>' +
+  '</div>';
+}
+
+function renderJourneyTable() {
+  var vehicles = window._journeyCache || [];
+  var filter = document.getElementById('j-filter').value;
+  var search = (document.getElementById('j-search').value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  var filtered = vehicles.filter(function(v) {
+    if (search && v.plateKey.toLowerCase().indexOf(search) === -1) return false;
+    if (!filter) return true;
+    if (filter === 'full') return v.cp1 && v.cp2 && v.cp3 && v.cp4;
+    if (filter === 'cp123') return v.cp1 && v.cp2 && v.cp3 && !v.cp4;
+    if (filter === 'partial') {
+      var cnt = (v.cp1?1:0) + (v.cp2?1:0) + (v.cp3?1:0);
+      return cnt >= 1 && cnt < 3;
+    }
+    if (filter === 'cp4only') return v.cp4 && !v.cp1 && !v.cp2 && !v.cp3;
+    return true;
+  });
+
+  var tbody = document.getElementById('j-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">No vehicles match the filter</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.slice(0, 500).map(function(v) {
+    var fullJourney = v.cp1 && v.cp2 && v.cp3 && v.cp4;
+    var statusCol = fullJourney ? 'var(--green)' :
+                    (v.cp1 && v.cp2 && v.cp3) ? 'var(--blue)' :
+                    'var(--muted)';
+    return '<tr>' +
+      '<td style="font-weight:700;color:var(--blue);">' + escapeHtml(v.plate) + '</td>' +
+      '<td style="text-align:center;">' + tick(v.cp1, 'var(--cp1)') + '</td>' +
+      '<td style="text-align:center;">' + tick(v.cp2, 'var(--cp2)') + '</td>' +
+      '<td style="text-align:center;">' + tick(v.cp3, 'var(--cp3)') + '</td>' +
+      '<td style="text-align:center;">' + tick(v.cp4, 'var(--cp4)') + '</td>' +
+      '<td style="text-align:center;font-weight:600;">' + (v.maxPax || 0) + '</td>' +
+      '<td style="color:var(--muted);font-size:11px;white-space:nowrap;">' + escapeHtml(v.firstSeen) + '</td>' +
+      '<td style="color:var(--muted);font-size:11px;white-space:nowrap;">' + escapeHtml(v.lastSeen) + '</td>' +
+      '<td style="color:' + statusCol + ';font-weight:600;font-size:11px;">' + escapeHtml(v.status) + '</td>' +
+      '</tr>';
+  }).join('');
+
+  if (filtered.length > 500) {
+    tbody.innerHTML += '<tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;">Showing first 500 of ' + filtered.length + '. Use filters/search to narrow.</td></tr>';
+  }
+}
+
+function tick(on, colour) {
+  return on
+    ? '<span style="color:' + colour + ';font-weight:700;font-size:16px;">&#x2713;</span>'
+    : '<span style="color:#d4d0c4;">&#x2717;</span>';
 }
 
 // =====================================================================
