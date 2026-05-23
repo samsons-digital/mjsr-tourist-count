@@ -257,10 +257,10 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; 
 
       <div class="sec-title">All Time</div>
       <div class="grid">
-        <div class="card"><div class="kpi-lbl">Total Entries</div><div class="kpi-val" id="d-a-entries">&mdash;</div></div>
+        <div class="card"><div class="kpi-lbl">Total Form Submissions</div><div class="kpi-val" id="d-a-entries">&mdash;</div><div class="kpi-sub">across CP1, CP2, CP3</div></div>
         <div class="card"><div class="kpi-lbl">Unique Vehicles</div><div class="kpi-val" id="d-a-unique">&mdash;</div><div class="kpi-sub">by plate</div></div>
-        <div class="card"><div class="kpi-lbl">Total Passengers</div><div class="kpi-val" id="d-a-pax">&mdash;</div></div>
-        <div class="card"><div class="kpi-lbl">Gate MJSR All Time</div><div class="kpi-val" id="d-a-gate-mjsr" style="color:var(--blue);">&mdash;</div></div>
+        <div class="card"><div class="kpi-lbl">CP3 Passengers</div><div class="kpi-val" id="d-a-pax">&mdash;</div><div class="kpi-sub">all destinations, no double-count</div></div>
+        <div class="card"><div class="kpi-lbl">Gate MJSR All Time</div><div class="kpi-val" id="d-a-gate-mjsr" style="color:var(--blue);">&mdash;</div><div class="kpi-sub">actual recorded entries</div></div>
         <div class="card" style="border-top:3px solid var(--gold);"><div class="kpi-lbl">MJSR Conversion</div><div class="kpi-val" id="d-a-conv">&mdash;</div><div class="kpi-sub" id="d-a-conv-sub">gate vs CP3 stated</div></div>
       </div>
 
@@ -668,7 +668,7 @@ function renderDashboard(d) {
 
   document.getElementById('d-a-entries').textContent = a.entries || 0;
   document.getElementById('d-a-unique').textContent = a.uniquePlates || 0;
-  document.getElementById('d-a-pax').textContent = a.passengers || 0;
+  document.getElementById('d-a-pax').textContent = a.cp3Pax || 0;
   document.getElementById('d-a-gate-mjsr').textContent = ga.mjsr || 0;
 
   // All-time MJSR conversion: gate actual vs CP3 stated MJSR pax (consistent with Funnel)
