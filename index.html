@@ -249,9 +249,9 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; 
 
       <div class="sec-title">Today by Checkpoint</div>
       <div class="grid">
-        <div class="card"><div class="kpi-lbl" style="color:var(--cp1)">CP1 - TMA Splinobo</div><div class="kpi-val" id="d-cp1" style="color:var(--cp1);">&mdash;</div></div>
-        <div class="card"><div class="kpi-lbl" style="color:var(--cp2)">CP2 - Jungle Forest</div><div class="kpi-val" id="d-cp2" style="color:var(--cp2);">&mdash;</div></div>
-        <div class="card"><div class="kpi-lbl" style="color:var(--cp3)">CP3 - MJSR/GV Split</div><div class="kpi-val" id="d-cp3" style="color:var(--cp3);">&mdash;</div></div>
+        <div class="card"><div class="kpi-lbl" style="color:var(--cp1)">CP1 - TMA Splinobo</div><div class="kpi-val" id="d-cp1" style="color:var(--cp1);">&mdash;</div><div class="kpi-sub" id="d-cp1-sub">&mdash;</div></div>
+        <div class="card"><div class="kpi-lbl" style="color:var(--cp2)">CP2 - Jungle Forest</div><div class="kpi-val" id="d-cp2" style="color:var(--cp2);">&mdash;</div><div class="kpi-sub" id="d-cp2-sub">&mdash;</div></div>
+        <div class="card"><div class="kpi-lbl" style="color:var(--cp3)">CP3 - MJSR/GV Split</div><div class="kpi-val" id="d-cp3" style="color:var(--cp3);">&mdash;</div><div class="kpi-sub" id="d-cp3-sub">&mdash;</div></div>
       </div>
 
       <div class="sec-title">All Time</div>
@@ -628,9 +628,12 @@ function renderDashboard(d) {
   document.getElementById('d-t-gate-mjsr').textContent = gt.mjsr || 0;
   document.getElementById('d-t-gate-gv').textContent = gt.gv || 0;
 
-  document.getElementById('d-cp1').textContent = t.cp1 || 0;
-  document.getElementById('d-cp2').textContent = t.cp2 || 0;
-  document.getElementById('d-cp3').textContent = t.cp3 || 0;
+  document.getElementById('d-cp1').textContent = t.cp1Pax || 0;
+  document.getElementById('d-cp2').textContent = t.cp2Pax || 0;
+  document.getElementById('d-cp3').textContent = t.cp3Pax || 0;
+  document.getElementById('d-cp1-sub').textContent = (t.cp1 || 0) + ' vehicles';
+  document.getElementById('d-cp2-sub').textContent = (t.cp2 || 0) + ' vehicles';
+  document.getElementById('d-cp3-sub').textContent = (t.cp3 || 0) + ' vehicles';
 
   document.getElementById('d-a-entries').textContent = a.entries || 0;
   document.getElementById('d-a-unique').textContent = a.uniquePlates || 0;
@@ -1063,9 +1066,9 @@ function renderReport(d) {
     '</div>';
 
   var cpHtml = '<div class="grid">' +
-    '<div class="card"><div class="kpi-lbl" style="color:var(--cp1);">CP1</div><div class="kpi-val" style="color:var(--cp1);">' + (k.cp1 || 0) + '</div></div>' +
-    '<div class="card"><div class="kpi-lbl" style="color:var(--cp2);">CP2</div><div class="kpi-val" style="color:var(--cp2);">' + (k.cp2 || 0) + '</div></div>' +
-    '<div class="card"><div class="kpi-lbl" style="color:var(--cp3);">CP3</div><div class="kpi-val" style="color:var(--cp3);">' + (k.cp3 || 0) + '</div></div>' +
+    '<div class="card"><div class="kpi-lbl" style="color:var(--cp1);">CP1</div><div class="kpi-val" style="color:var(--cp1);">' + (k.cp1Pax || 0) + '</div><div class="kpi-sub">' + (k.cp1 || 0) + ' vehicles</div></div>' +
+    '<div class="card"><div class="kpi-lbl" style="color:var(--cp2);">CP2</div><div class="kpi-val" style="color:var(--cp2);">' + (k.cp2Pax || 0) + '</div><div class="kpi-sub">' + (k.cp2 || 0) + ' vehicles</div></div>' +
+    '<div class="card"><div class="kpi-lbl" style="color:var(--cp3);">CP3</div><div class="kpi-val" style="color:var(--cp3);">' + (k.cp3Pax || 0) + '</div><div class="kpi-sub">' + (k.cp3 || 0) + ' vehicles</div></div>' +
   '</div>';
 
   // Vehicle types table
