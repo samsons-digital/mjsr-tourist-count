@@ -1,1340 +1,1970 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>MJSR Tourist Vehicle Count Portal</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MJSR Tourist Vehicle Count</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f5f3ee;
-  --bg2: #ffffff;
-  --bg3: #faf8f3;
-  --border: #e5e0d4;
-  --text: #1a1a1a;
-  --muted: #6b6b6b;
-  --gold: #b8922e;
-  --blue: #1a73e8;
-  --green: #16a34a;
-  --red: #dc2626;
-  --orange: #d97706;
-  --purple: #7c3aed;
-  --cp1: #d97706;
-  --cp2: #059669;
-  --cp3: #2563eb;
-  --cp4: #7c3aed;
+  --bg:#f8f9fa; --bg2:#ffffff; --bg3:#f1f3f5; --border:#dee2e6;
+  --blue:#1a73e8; --blue2:#1558b0; --green:#16a34a; --red:#dc2626;
+  --text:#1a1f2e; --muted:#6b7280;
+  --cp1:#d97706; --cp2:#059669; --cp3:#2563eb; --cp4:#7c3aed;
 }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; padding: 0; }
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.5;
-}
-.app { max-width: 1200px; margin: 0 auto; padding: 0; min-height: 100vh; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;min-height:100vh;}
 
-/* Header */
-.hdr {
-  background: linear-gradient(135deg, #2c2820 0%, #1a1814 100%);
-  color: #fff; padding: 16px 20px; border-bottom: 3px solid var(--gold);
-}
-.hdr-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
-.hdr-sub { font-size: 12px; color: #b8b0a0; margin-top: 2px; }
-.live-dot {
-  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-  background: var(--green); margin-right: 6px;
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.4 } }
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-icon{width:32px;height:32px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.brand h1{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.04em;color:var(--text);}
+.brand small{font-size:11px;color:var(--muted);display:block;}
+.live{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:500;}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* Tabs */
-.tabs {
-  display: flex; background: var(--bg2); border-bottom: 1px solid var(--border);
-  overflow-x: auto; -webkit-overflow-scrolling: touch;
-}
-.tab {
-  padding: 14px 18px; font-weight: 600; font-size: 13px; color: var(--muted);
-  cursor: pointer; border-bottom: 3px solid transparent;
-  white-space: nowrap; transition: all .15s; user-select: none;
-}
-.tab:hover { color: var(--text); background: var(--bg3); }
-.tab.active { color: var(--gold); border-bottom-color: var(--gold); background: var(--bg3); }
+/* NAV */
+.nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 16px;overflow-x:auto;}
+.tab{padding:12px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;text-transform:uppercase;transition:color .2s;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
 
-/* Main */
-.main { padding: 20px; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+/* PAGES */
+.page{display:none;padding:20px;max-width:960px;margin:0 auto;}
+.page.active{display:block;}
 
-/* Cards */
-.card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px;
-}
-.grid {
-  display: grid; gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  margin-bottom: 20px;
-}
-.kpi-lbl {
-  font-size: 11px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.07em; color: var(--muted); margin-bottom: 8px;
-}
-.kpi-val {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 36px; font-weight: 700; line-height: 1; color: var(--blue);
-}
-.kpi-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+/* COMPONENTS */
+.sec-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-bottom:10px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;}
+.kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--blue);line-height:1;}
+.kpi-lbl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-bottom:4px;}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px;}
 
-/* Section title */
-.sec-title {
-  font-size: 14px; font-weight: 700; margin: 24px 0 12px;
-  text-transform: uppercase; letter-spacing: 0.05em; color: var(--text);
-}
-.sec-title:first-child { margin-top: 0; }
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+.full{grid-column:1/-1;}
+.f-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-family:'Barlow Condensed',sans-serif;display:block;margin-bottom:5px;}
+.req{color:var(--blue);}
+input,select,textarea{width:100%;background:#fff;border:1px solid var(--border);border-radius:7px;color:var(--text);padding:9px 12px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.1);}
+select option{background:#fff;}
+textarea{resize:vertical;min-height:64px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.sub-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--cp3);margin-bottom:12px;}
 
-/* Form */
-.form-grid {
-  display: grid; gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  margin-bottom: 16px;
-}
-.f-label {
-  display: block; font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.05em;
-  color: var(--muted); margin-bottom: 6px;
-}
-.req { color: var(--red); }
-input[type="text"], input[type="number"], input[type="date"],
-input[type="time"], input[type="password"], select, textarea {
-  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border);
-  border-radius: 8px; font-size: 14px; font-family: inherit;
-  background: #fff; color: var(--text); transition: border .15s;
-}
-input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--gold);
-}
-textarea { min-height: 60px; resize: vertical; }
+/* BUTTONS */
+.btn-primary{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .2s;}
+.btn-primary:hover{background:var(--blue2);}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+.btn-sm{padding:7px 14px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .2s;}
+.btn-sm:hover{border-color:var(--blue);color:var(--blue);}
+.btn-sm.blue{border-color:var(--blue);color:var(--blue);}
 
-/* Buttons */
-.btn {
-  padding: 12px 20px; border: none; border-radius: 8px;
-  font-weight: 700; font-size: 14px; cursor: pointer;
-  transition: all .15s; font-family: inherit;
-}
-.btn-primary {
-  background: var(--gold); color: #fff; padding: 14px 24px; font-size: 15px;
-}
-.btn-primary:hover { background: #a07f23; }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-sm {
-  padding: 8px 14px; font-size: 12px; font-weight: 600;
-  border: 1.5px solid var(--border); background: #fff; color: var(--text);
-  border-radius: 7px; cursor: pointer;
-}
-.btn-sm:hover { background: var(--bg3); border-color: var(--gold); }
-.btn-sm.blue { background: var(--blue); color: #fff; border-color: var(--blue); }
-.btn-sm.blue:hover { background: #1357b8; }
+/* CP PILLS */
+.cp-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.cp-pill{padding:7px 14px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.04em;border:2px solid;cursor:pointer;background:transparent;transition:all .2s;}
+.cp-pill.cp1{color:var(--cp1);border-color:var(--cp1);}
+.cp-pill.cp2{color:var(--cp2);border-color:var(--cp2);}
+.cp-pill.cp3{color:var(--cp3);border-color:var(--cp3);}
+.cp-pill.cp1.sel{background:var(--cp1);color:#fff;}
+.cp-pill.cp2.sel{background:var(--cp2);color:#fff;}
+.cp-pill.cp3.sel{background:var(--cp3);color:#fff;}
+.cp-pill.cp4{color:var(--cp4);border-color:var(--cp4);}
+.cp-pill.cp4.sel{background:var(--cp4);color:#fff;}
 
-/* Choice buttons (yes/no, ratings) */
-.choice-row {
-  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
-}
-.choice {
-  padding: 10px 16px; border-radius: 8px; border: 2px solid var(--border);
-  background: #fff; font-weight: 600; font-size: 13px; cursor: pointer;
-  transition: all .15s;
-}
-.choice:hover { border-color: var(--gold); }
-.choice.on { background: var(--gold); color: #fff; border-color: var(--gold); }
-.choice.on-green { background: var(--green); color: #fff; border-color: var(--green); }
-.choice.on-red { background: var(--red); color: #fff; border-color: var(--red); }
+/* TABLE */
+.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tbl-wrap table{width:100%;border-collapse:collapse;}
+.tbl-wrap th{background:var(--bg3);padding:9px 14px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.tbl-wrap td{padding:9px 14px;border-bottom:1px solid var(--border);font-size:13px;}
+.tbl-wrap tr:last-child td{border-bottom:none;}
+.tbl-wrap tr:hover td{background:var(--bg3);}
 
-/* Tables */
-.tbl-wrap {
-  overflow-x: auto; border: 1px solid var(--border); border-radius: 8px;
-  background: var(--bg2);
-}
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td {
-  padding: 10px 12px; text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-th {
-  background: var(--bg3); font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted);
-}
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(--bg3); }
+/* FUNNEL BAR */
+.f-row{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:grid;grid-template-columns:190px 1fr 60px;align-items:center;gap:14px;}
+.f-lbl{display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;}
+.f-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.f-bar-bg{background:var(--bg3);border-radius:4px;height:7px;overflow:hidden;border:1px solid var(--border);}
+.f-bar{height:100%;border-radius:4px;transition:width .8s ease;}
+.f-num{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;text-align:right;}
 
-/* Toast */
-.toast {
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-  background: var(--text); color: #fff; padding: 12px 20px;
-  border-radius: 8px; font-weight: 600; font-size: 13px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 1000;
-}
-.toast.show { opacity: 1; }
+/* LOG ENTRY */
+.log-row{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;animation:fi .3s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.log-reg{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.05em;color:var(--blue);}
+.log-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.log-time{font-size:12px;color:var(--muted);}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
 
-/* Empty state */
-.empty {
-  text-align: center; padding: 40px 20px; color: var(--muted);
-}
-.empty-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.5; }
+/* INLINE EDIT */
+.edit-box{background:#f0f7ff;border:1px solid var(--blue);border-radius:8px;padding:14px;margin-top:6px;display:none;}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.edit-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-family:'Barlow Condensed',sans-serif;display:block;margin-bottom:3px;}
 
-/* Log table specific */
-.log-table { font-size: 12px; }
-.log-table td { padding: 8px 10px; }
-.cp-tag {
-  display: inline-block; padding: 2px 8px; border-radius: 4px;
-  font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
-}
-.cp-tag.cp1 { background: #fff3e0; color: var(--cp1); }
-.cp-tag.cp2 { background: #e6f4ee; color: var(--cp2); }
-.cp-tag.cp3 { background: #e3edfd; color: var(--cp3); }
+/* TOAST */
+.toast{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:7px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;z-index:999;animation:su .3s ease;}
+@keyframes su{from{bottom:0;opacity:0}to{bottom:20px;opacity:1}}
 
-/* Loading */
-.loading {
-  display: inline-block; width: 12px; height: 12px;
-  border: 2px solid var(--border); border-top-color: var(--gold);
-  border-radius: 50%; animation: spin 0.8s linear infinite;
-  margin-right: 6px; vertical-align: middle;
+/* PRINT */
+@media print{
+  .topbar,.nav,.toast{display:none!important;}
+  .page{display:none!important;}
+  #tab-report{display:block!important;padding:0;}
+  #rpt-header{display:block!important;}
+  body{background:#fff;}
 }
-@keyframes spin { to { transform: rotate(360deg) } }
-
-/* Divider */
-hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- HEADER -->
-  <div class="hdr">
-    <div class="hdr-title">MJSR Tourist Vehicle Count</div>
-    <div class="hdr-sub"><span class="live-dot"></span><span id="live-label">Loading...</span></div>
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🏔</div>
+    <div>
+      <h1>TOURIST VEHICLE COUNT</h1>
+      <small>Malam Jabba Ski Resort · Checkpoint System</small>
+    </div>
   </div>
-
-  <!-- TAB BAR -->
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('dashboard')">Dashboard</div>
-    <div class="tab" onclick="showTab('cp4')">CP4 Exit Survey</div>
-    <div class="tab" onclick="showTab('gate')">Gate Entry</div>
-    <div class="tab" onclick="showTab('log')">Recent Log</div>
-    <div class="tab" onclick="showTab('journey')">Vehicle Journey</div>
-    <div class="tab" onclick="showTab('report')">Reports</div>
-  </div>
-
-  <div class="main">
-
-    <!-- DASHBOARD TAB -->
-    <div class="tab-content active" id="tab-dashboard">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="font-size:13px;color:var(--muted);">Today's overview &middot; <span id="dash-date"></span></div>
-        <button class="btn-sm blue" onclick="loadDashboard(true)">&#x21bb; Refresh</button>
-      </div>
-
-      <div class="sec-title">Today</div>
-      <div class="grid">
-        <div class="card"><div class="kpi-lbl">Entries</div><div class="kpi-val" id="d-t-entries">&mdash;</div><div class="kpi-sub">all checkpoints</div></div>
-        <div class="card"><div class="kpi-lbl">Passengers</div><div class="kpi-val" id="d-t-pax">&mdash;</div><div class="kpi-sub">recorded today</div></div>
-        <div class="card"><div class="kpi-lbl">Entered MJSR</div><div class="kpi-val" id="d-t-mjsr" style="color:var(--green);">&mdash;</div><div class="kpi-sub">stated MJSR</div></div>
-        <div class="card"><div class="kpi-lbl">Went to GV</div><div class="kpi-val" id="d-t-gv" style="color:var(--cp2);">&mdash;</div><div class="kpi-sub">diverted to Green Valley</div></div>
-        <div class="card"><div class="kpi-lbl">Gate MJSR</div><div class="kpi-val" id="d-t-gate-mjsr" style="color:var(--blue);">&mdash;</div><div class="kpi-sub">actual entries today</div></div>
-        <div class="card"><div class="kpi-lbl">Gate GV</div><div class="kpi-val" id="d-t-gate-gv" style="color:var(--cp2);">&mdash;</div><div class="kpi-sub">actual entries today</div></div>
-      </div>
-
-      <div class="sec-title">Today by Checkpoint</div>
-      <div class="grid">
-        <div class="card"><div class="kpi-lbl" style="color:var(--cp1)">CP1 - TMA Splinobo</div><div class="kpi-val" id="d-cp1" style="color:var(--cp1);">&mdash;</div><div class="kpi-sub" id="d-cp1-sub">&mdash;</div></div>
-        <div class="card"><div class="kpi-lbl" style="color:var(--cp2)">CP2 - Jungle Forest</div><div class="kpi-val" id="d-cp2" style="color:var(--cp2);">&mdash;</div><div class="kpi-sub" id="d-cp2-sub">&mdash;</div></div>
-        <div class="card"><div class="kpi-lbl" style="color:var(--cp3)">CP3 - MJSR/GV Split</div><div class="kpi-val" id="d-cp3" style="color:var(--cp3);">&mdash;</div><div class="kpi-sub" id="d-cp3-sub">&mdash;</div></div>
-      </div>
-
-      <div class="sec-title">All Time</div>
-      <div class="grid">
-        <div class="card"><div class="kpi-lbl">Total Form Submissions</div><div class="kpi-val" id="d-a-entries">&mdash;</div><div class="kpi-sub">across CP1, CP2, CP3</div></div>
-        <div class="card"><div class="kpi-lbl">Unique Vehicles</div><div class="kpi-val" id="d-a-unique">&mdash;</div><div class="kpi-sub">by plate</div></div>
-        <div class="card"><div class="kpi-lbl">CP3 Passengers</div><div class="kpi-val" id="d-a-pax">&mdash;</div><div class="kpi-sub">all destinations, no double-count</div></div>
-        <div class="card"><div class="kpi-lbl">Gate MJSR All Time</div><div class="kpi-val" id="d-a-gate-mjsr" style="color:var(--blue);">&mdash;</div><div class="kpi-sub">actual recorded entries</div></div>
-        <div class="card" style="border-top:3px solid var(--gold);"><div class="kpi-lbl">MJSR Conversion</div><div class="kpi-val" id="d-a-conv">&mdash;</div><div class="kpi-sub" id="d-a-conv-sub">gate vs CP3 stated</div></div>
-      </div>
-
-      <div class="sec-title">Conversion Funnel <span style="font-weight:400;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;">&middot; Stated MJSR vs Gate Actual + CP4 Survey</span></div>
-      <div id="conv-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:20px;">
-        <div class="card" style="border-top:3px solid var(--gold);">
-          <div class="kpi-lbl">Loading&hellip;</div>
-        </div>
-      </div>
-
-      <div class="sec-title">Recent Submissions (last 20)</div>
-      <div class="tbl-wrap">
-        <table class="log-table">
-          <thead><tr>
-            <th>Submitted</th><th>Staff</th><th>CP</th><th>Reg</th>
-            <th>Pax</th><th>Destination</th><th>Entered</th>
-          </tr></thead>
-          <tbody id="dash-recent"><tr><td colspan="7" class="empty">Loading&hellip;</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- CP4 EXIT SURVEY TAB -->
-    <div class="tab-content" id="tab-cp4">
-      <div class="sec-title" style="color:var(--cp4);">CP4 Exit Survey</div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Survey vehicles leaving the resort area. Submit one per vehicle interviewed.</p>
-
-      <div class="form-grid">
-        <div>
-          <label class="f-label">Staff Name <span class="req">*</span></label>
-          <select id="cp4-staff"><option value="">&mdash; Select &mdash;</option></select>
-        </div>
-        <div>
-          <label class="f-label">Vehicle Registration <span class="req">*</span></label>
-          <input id="cp4-reg" type="text" placeholder="e.g. LZB-1234" style="text-transform:uppercase">
-        </div>
-        <div>
-          <label class="f-label">Date <span class="req">*</span></label>
-          <input id="cp4-date" type="date">
-        </div>
-        <div>
-          <label class="f-label">Time <span class="req">*</span></label>
-          <input id="cp4-time" type="time">
-        </div>
-        <div>
-          <label class="f-label">Vehicle Type <span class="req">*</span></label>
-          <select id="cp4-vtype">
-            <option value="">&mdash; Select &mdash;</option>
-            <option>Car / SUV (Private)</option>
-            <option>Minivan / MPV (Private)</option>
-            <option>Coaster / Minibus (9-22 seats)</option>
-            <option>Bus (23+ seats)</option>
-            <option>Pickup / Hilux</option>
-            <option>Motorcycle / Bike</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div>
-          <label class="f-label">Passengers <span class="req">*</span></label>
-          <input id="cp4-pax" type="number" min="1" max="80" placeholder="e.g. 4">
-        </div>
-      </div>
-
-      <hr class="divider">
-
-      <div class="sec-title" style="color:var(--cp4);">Q1 - Did you enter the resort? <span class="req">*</span></div>
-      <div class="choice-row">
-        <button class="choice" id="cp4-ent-yes" onclick="setCP4Entry('Yes')">&#x2705; Yes - Entered</button>
-        <button class="choice" id="cp4-ent-no" onclick="setCP4Entry('No')">&#x274C; No - Did Not Enter</button>
-      </div>
-
-      <div id="cp4-no-section" style="display:none;">
-        <div class="sec-title" style="color:var(--red);">Why did you not enter?</div>
-        <div class="choice-row">
-          <button class="choice cp4-no-r" onclick="setCP4Reason(this,'Prices too high')">&#x1f4b0; Prices too high</button>
-          <button class="choice cp4-no-r" onclick="setCP4Reason(this,'Did not know what was offered')">&#x2753; Did not know offerings</button>
-          <button class="choice cp4-no-r" onclick="setCP4Reason(this,'Resort was full / too busy')">&#x1f6ab; Full / too busy</button>
-          <button class="choice cp4-no-r" onclick="setCP4Reason(this,'Bad weather / conditions')">&#x1f327; Bad weather</button>
-          <button class="choice cp4-no-r" onclick="setCP4Reason(this,'Just passing through / sightseeing')">&#x1f697; Just passing</button>
-          <button class="choice cp4-no-r" onclick="setCP4Reason(this,'Time constraint')">&#x23f0; Time constraint</button>
-          <button class="choice cp4-no-r" onclick="setCP4Reason(this,'Other reason')">&#x1f4dd; Other</button>
-        </div>
-      </div>
-
-      <div id="cp4-yes-section" style="display:none;">
-        <div class="sec-title" style="color:var(--green);">How did you find our prices?</div>
-        <div class="choice-row">
-          <button class="choice cp4-yes-p" onclick="setCP4Price(this,'Very Affordable')">&#x1f600; Very Affordable</button>
-          <button class="choice cp4-yes-p" onclick="setCP4Price(this,'Affordable')">&#x1f642; Affordable</button>
-          <button class="choice cp4-yes-p" onclick="setCP4Price(this,'Fair')">&#x1f610; Fair</button>
-          <button class="choice cp4-yes-p" onclick="setCP4Price(this,'Expensive')">&#x1f615; Expensive</button>
-          <button class="choice cp4-yes-p" onclick="setCP4Price(this,'Very Expensive')">&#x1f620; Very Expensive</button>
-        </div>
-        <div class="sec-title" style="color:var(--green);">How did you find our offerings / activities?</div>
-        <div class="choice-row">
-          <button class="choice cp4-yes-o" onclick="setCP4Offering(this,'Excellent')">&#x2b50; Excellent</button>
-          <button class="choice cp4-yes-o" onclick="setCP4Offering(this,'Good')">&#x1f44d; Good</button>
-          <button class="choice cp4-yes-o" onclick="setCP4Offering(this,'Average')">&#x1f44c; Average</button>
-          <button class="choice cp4-yes-o" onclick="setCP4Offering(this,'Limited')">&#x1f612; Limited</button>
-          <button class="choice cp4-yes-o" onclick="setCP4Offering(this,'Poor')">&#x1f44e; Poor</button>
-        </div>
-      </div>
-
-      <div>
-        <label class="f-label">Additional Notes</label>
-        <textarea id="cp4-notes" placeholder="Any extra comments..."></textarea>
-      </div>
-
-      <button class="btn btn-primary" id="cp4-submit-btn" onclick="submitCP4()" style="background:var(--cp4);margin-top:12px;">SUBMIT EXIT SURVEY</button>
-
-      <hr class="divider">
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div class="sec-title" style="margin:0;">CP4 Summary <span style="font-weight:400;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;">&middot; All time totals</span></div>
-        <button class="btn-sm" onclick="loadCP4Summary()">&#x21bb; Refresh</button>
-      </div>
-      <div class="grid" id="cp4-sum-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
-        <div>
-          <div class="sec-title" style="margin-top:0;">Reason Not Entered</div>
-          <div class="tbl-wrap"><table>
-            <thead><tr><th>Reason</th><th>Count</th></tr></thead>
-            <tbody id="cp4-no-table"></tbody>
-          </table></div>
-        </div>
-        <div>
-          <div class="sec-title" style="margin-top:0;">Price Ratings</div>
-          <div class="tbl-wrap"><table>
-            <thead><tr><th>Rating</th><th>Count</th></tr></thead>
-            <tbody id="cp4-price-table"></tbody>
-          </table></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- GATE ENTRY TAB -->
-    <div class="tab-content" id="tab-gate">
-      <div class="sec-title">Gate Entry</div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Submit at end of day per property. Used to calculate visitor conversion rate.</p>
-
-      <div class="card" style="margin-bottom:20px;">
-        <div class="form-grid">
-          <div>
-            <label class="f-label">Staff Name <span class="req">*</span></label>
-            <select id="g-staff"><option value="">&mdash; Select &mdash;</option></select>
-          </div>
-          <div>
-            <label class="f-label">Date <span class="req">*</span></label>
-            <input id="g-date" type="date">
-          </div>
-          <div>
-            <label class="f-label">Property <span class="req">*</span></label>
-            <select id="g-prop">
-              <option value="">&mdash; Select &mdash;</option>
-              <option value="MJSR">MJSR (Malam Jabba)</option>
-              <option value="GV">GV (Green Valley)</option>
-            </select>
-          </div>
-          <div>
-            <label class="f-label">Visitor Count <span class="req">*</span></label>
-            <input id="g-vis" type="number" min="0" placeholder="e.g. 142">
-          </div>
-        </div>
-        <div style="margin-bottom:12px;">
-          <label class="f-label">Notes (optional)</label>
-          <input id="g-notes" type="text" placeholder="Any unusual observations...">
-        </div>
-        <button class="btn btn-primary" id="gate-submit-btn" onclick="submitGate()">SUBMIT GATE ENTRY</button>
-      </div>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div class="sec-title" style="margin:0;">Recent Gate Entries</div>
-        <button class="btn-sm" onclick="loadGate()">&#x21bb; Refresh</button>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr>
-            <th>Date</th><th>Property</th><th>Visitors</th><th>Staff</th><th>Notes</th><th>Submitted</th>
-          </tr></thead>
-          <tbody id="gate-tbody"><tr><td colspan="6" class="empty">Loading&hellip;</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- RECENT LOG TAB -->
-    <div class="tab-content" id="tab-log">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
-        <div class="sec-title" style="margin:0;">Recent Submissions</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <select id="log-cp" onchange="renderLog()" style="width:auto;">
-            <option value="">All CPs</option>
-            <option value="CP1">CP1 only</option>
-            <option value="CP2">CP2 only</option>
-            <option value="CP3">CP3 only</option>
-          </select>
-          <input id="log-search" type="text" placeholder="Search plate or staff..." oninput="renderLog()" style="width:auto;min-width:180px;">
-          <button class="btn-sm blue" onclick="loadLog(true)">&#x21bb; Refresh</button>
-        </div>
-      </div>
-      <div id="log-info" style="font-size:12px;color:var(--muted);margin-bottom:8px;"></div>
-      <div class="tbl-wrap">
-        <table class="log-table">
-          <thead><tr>
-            <th>Submitted</th><th>Staff</th><th>CP</th><th>Date</th><th>Time</th>
-            <th>Reg</th><th>Type</th><th>Pax</th><th>Destination</th><th>Entered</th>
-          </tr></thead>
-          <tbody id="log-tbody"><tr><td colspan="10" class="empty">Loading&hellip;</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- VEHICLE JOURNEY TAB -->
-    <div class="tab-content" id="tab-journey">
-      <div class="sec-title">Vehicle Journey <span style="font-weight:400;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;">&middot; Cross-checkpoint plate validation</span></div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Tracks each unique vehicle plate across CP1, CP2, CP3 and CP4. Shows the % of vehicles that completed the full checkpoint sequence and were verified at exit.</p>
-
-      <div class="card" style="margin-bottom:20px;">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
-          <div>
-            <label class="f-label">Range</label>
-            <select id="j-range" onchange="toggleJourneyCustomRange()" style="width:auto;">
-              <option value="today">Today</option>
-              <option value="last7" selected>Last 7 days</option>
-              <option value="last30">Last 30 days</option>
-              <option value="alltime">All time</option>
-              <option value="custom">Custom range</option>
-            </select>
-          </div>
-          <div id="j-custom" style="display:none;gap:8px;">
-            <div><label class="f-label">From</label><input id="j-from" type="date" style="width:auto;"></div>
-            <div><label class="f-label">To</label><input id="j-to" type="date" style="width:auto;"></div>
-          </div>
-          <button class="btn-sm blue" onclick="loadJourney()">Run Analysis</button>
-        </div>
-        <div id="j-period" style="font-size:12px;color:var(--muted);margin-top:10px;"></div>
-      </div>
-
-      <div id="j-content"><p class="empty">Choose a range and click Run Analysis</p></div>
-    </div>
-
-    <!-- REPORTS TAB -->
-    <div class="tab-content" id="tab-report">
-      <div class="sec-title">Reports</div>
-
-      <div class="card" style="margin-bottom:20px;">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
-          <div>
-            <label class="f-label">Range</label>
-            <select id="r-range" onchange="toggleCustomRange()" style="width:auto;">
-              <option value="today">Today</option>
-              <option value="last7" selected>Last 7 days</option>
-              <option value="last30">Last 30 days</option>
-              <option value="alltime">All time</option>
-              <option value="custom">Custom range</option>
-            </select>
-          </div>
-          <div id="r-custom" style="display:none;gap:8px;">
-            <div><label class="f-label">From</label><input id="r-from" type="date" style="width:auto;"></div>
-            <div><label class="f-label">To</label><input id="r-to" type="date" style="width:auto;"></div>
-          </div>
-          <button class="btn-sm blue" onclick="loadReport()">Generate Report</button>
-        </div>
-        <div id="r-period" style="font-size:12px;color:var(--muted);margin-top:10px;"></div>
-      </div>
-
-      <div id="r-content"><p class="empty">Choose a range and click Generate Report</p></div>
-    </div>
-
-  </div>
-
-  <div class="toast" id="toast"></div>
+  <div class="live"><div class="live-dot"></div><span id="live-label">LIVE</span></div>
 </div>
 
+<div class="nav">
+  <div class="tab active" onclick="showTab('submit',this)">📋 Submit</div>
+  <div class="tab" onclick="showTab('shift',this)">👤 My Shift</div>
+  <div class="tab" onclick="showTab('gate',this)">🎫 Gate Entry</div>
+  <div class="tab" onclick="showTab('dashboard',this)">📊 Dashboard</div>
+  <div class="tab" onclick="showTab('report',this)">📈 Report</div>
+  <div class="tab" onclick="showTab('log',this)">🗒 Log</div>
+  <div class="tab" onclick="showTab('audit',this)">🔍 Audit</div>
+  <div class="tab" onclick="showTab('gv',this)" style="color:#059669;border-bottom-color:#059669;">🌿 GV Insights</div>
+</div>
+
+<!-- ══ SUBMIT ══════════════════════════════════════════════ -->
+<div class="page active" id="tab-submit">
+  <div class="sec-title">Select Checkpoint</div>
+  <div class="cp-row">
+    <div class="cp-pill cp1 sel" onclick="selCP(this,'CP1 - TMA Splinobo')">CP1 · TMA Splinobo</div>
+    <div class="cp-pill cp2"     onclick="selCP(this,'CP2 - Jungle Forest Area')">CP2 · Jungle Forest Area</div>
+    <div class="cp-pill cp3"     onclick="selCP(this,'CP3 - MJSR / GV Road Split')">CP3 · MJSR / GV Split</div>
+    <div class="cp-pill cp4"     onclick="selCP(this,'CP4 - Exit Survey')">CP4 · Exit Survey</div>
+  </div>
+  <input type="hidden" id="f-cp" value="CP1 - TMA Splinobo">
+
+  <!-- ── CP1/2/3 FIELDS ──────────────────────────────────── -->
+  <div id="cp123-fields">
+    <div class="sec-title">Vehicle Details</div>
+    <div class="form-grid">
+      <div><label class="f-label">Staff Name <span class="req">*</span></label><input id="f-staff" type="text" placeholder="Your full name"></div>
+      <div><label class="f-label">Registration <span class="req">*</span></label><input id="f-reg" type="text" placeholder="e.g. LZB-1234" style="text-transform:uppercase"></div>
+      <div><label class="f-label">Date <span class="req">*</span></label><input id="f-date" type="date"></div>
+      <div><label class="f-label">Time <span class="req">*</span></label><input id="f-time" type="time"></div>
+      <div><label class="f-label">Vehicle Type <span class="req">*</span></label>
+        <select id="f-vtype"><option value="">— Select —</option>
+          <option>Car / SUV (Private)</option><option>Minivan / MPV (Private)</option>
+          <option>Coaster / Minibus (9-22 seats)</option><option>Bus (23+ seats)</option>
+          <option>Pickup / Hilux</option><option>Motorcycle / Bike</option><option>Other</option>
+        </select></div>
+      <div><label class="f-label">Province (plate) <span class="req">*</span></label>
+        <select id="f-prov"><option value="">— Select —</option>
+          <option>Punjab (LA, LB, LC, LZB etc.)</option><option>KPK / Khyber Pakhtunkhwa (PES, ABT etc.)</option>
+          <option>Sindh (K, KA etc.)</option><option>Islamabad / ICT (ISD etc.)</option>
+          <option>AJK / Gilgit-Baltistan</option><option>Balochistan</option><option>Other / Unreadable</option>
+        </select></div>
+      <div><label class="f-label">Passengers incl. driver <span class="req">*</span></label><input id="f-pax" type="number" min="1" max="80" placeholder="e.g. 4"></div>
+      <div><label class="f-label">Children under 12 <span class="req">*</span></label><input id="f-children" type="number" min="0" placeholder="0"></div>
+      <div><label class="f-label">Stated Destination <span class="req">*</span></label>
+        <select id="f-dest"><option value="">— Select —</option>
+          <option>Malam Jabba Ski Resort (MJSR)</option><option>Green Valley</option>
+          <option>Both / Touring the area</option><option>Just passing through</option><option>Unknown / Not stated</option>
+        </select></div>
+      <div><label class="f-label">Entered MJSR? <span class="req">*</span></label>
+        <select id="f-entered"><option value="">— Select —</option>
+          <option>Yes - entered MJSR</option><option>No - went to Green Valley</option>
+          <option>No - turned around / left area</option><option>No - passed through only</option><option>Unknown</option>
+        </select></div>
+    </div>
+    <hr class="divider"><div class="sub-title">Tour Company (optional)</div>
+    <div class="form-grid">
+      <div><label class="f-label">Company Name</label><input id="f-company" type="text" placeholder="As written on vehicle"></div>
+      <div><label class="f-label">Phone / WhatsApp</label><input id="f-phone" type="text"></div>
+      <div class="full"><label class="f-label">Notes</label><textarea id="f-notes" placeholder="Group type, language, observations..."></textarea></div>
+    </div>
+    <button class="btn-primary" id="submit-btn" onclick="submitEntry()">SUBMIT VEHICLE ENTRY</button>
+  </div>
+
+  <!-- ── CP4 EXIT SURVEY FIELDS ───────────────────────────── -->
+  <div id="cp4-fields" style="display:none;">
+    <div class="sec-title" style="color:var(--cp4);">CP4 · Exit Survey — Police Choki to Resort Gate</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Record departing vehicles and capture two key questions about entry and experience.</p>
+    <div class="form-grid">
+      <div><label class="f-label">Staff Name <span class="req">*</span></label><input id="cp4-staff" type="text" placeholder="Your full name"></div>
+      <div><label class="f-label">Registration <span class="req">*</span></label><input id="cp4-reg" type="text" placeholder="e.g. LZB-1234" style="text-transform:uppercase"></div>
+      <div><label class="f-label">Date <span class="req">*</span></label><input id="cp4-date" type="date"></div>
+      <div><label class="f-label">Time <span class="req">*</span></label><input id="cp4-time" type="time"></div>
+      <div><label class="f-label">Vehicle Type <span class="req">*</span></label>
+        <select id="cp4-vtype"><option value="">— Select —</option>
+          <option>Car / SUV (Private)</option><option>Minivan / MPV (Private)</option>
+          <option>Coaster / Minibus (9-22 seats)</option><option>Bus (23+ seats)</option>
+          <option>Pickup / Hilux</option><option>Motorcycle / Bike</option><option>Other</option>
+        </select></div>
+      <div><label class="f-label">Passengers <span class="req">*</span></label><input id="cp4-pax" type="number" min="1" max="80" placeholder="e.g. 4"></div>
+    </div>
+    <hr class="divider">
+    <div class="sub-title" style="color:var(--cp4);">Q1 — Did you enter the resort? <span class="req">*</span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 20px;">
+      <button class="cp4-ans-btn" id="cp4-ent-yes" onclick="setCP4Entry('Yes')"
+        style="padding:10px 24px;border-radius:8px;border:2px solid var(--border);background:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;">✅ Yes — Entered</button>
+      <button class="cp4-ans-btn" id="cp4-ent-no" onclick="setCP4Entry('No')"
+        style="padding:10px 24px;border-radius:8px;border:2px solid var(--border);background:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;">❌ No — Did Not Enter</button>
+    </div>
+    <input type="hidden" id="cp4-entered" value="">
+    <div id="cp4-no-section" style="display:none;margin-bottom:20px;">
+      <div class="sub-title" style="color:#dc2626;margin-bottom:10px;">Why did you not enter?</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;">
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Prices too high')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">💰 Prices too high</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Did not know what was offered')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">❓ Did not know offerings</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Resort was full / too busy')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🚫 Resort full / too busy</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Bad weather / conditions')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🌧 Bad weather</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Just passing through / sightseeing')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🚗 Just passing / sightseeing</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Time constraint')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">⏰ Time constraint</button>
+        <button class="cp4-r-btn" onclick="setCP4Reason(this,'Other reason')" style="padding:9px 14px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">📝 Other reason</button>
+      </div>
+      <input type="hidden" id="cp4-no-reason" value="">
+    </div>
+    <div id="cp4-yes-section" style="display:none;margin-bottom:20px;">
+      <div class="sub-title" style="color:#16a34a;margin-bottom:10px;">How did you find our prices?</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Very Affordable')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😊 Very Affordable</button>
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Affordable')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">🙂 Affordable</button>
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Fair')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😐 Fair</button>
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Expensive')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😕 Expensive</button>
+        <button class="cp4-p-btn" onclick="setCP4Price(this,'Very Expensive')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😠 Very Expensive</button>
+      </div>
+      <input type="hidden" id="cp4-price-rating" value="">
+      <div class="sub-title" style="color:#16a34a;margin-bottom:10px;">How did you find our offerings / activities?</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Excellent')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">⭐ Excellent</button>
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Good')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">👍 Good</button>
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Average')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">👌 Average</button>
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Limited')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">😒 Limited</button>
+        <button class="cp4-o-btn" onclick="setCP4Offering(this,'Poor')" style="padding:9px 16px;border-radius:7px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;">👎 Poor</button>
+      </div>
+      <input type="hidden" id="cp4-offering-rating" value="">
+    </div>
+    <div><label class="f-label">Additional Notes</label><textarea id="cp4-notes" placeholder="Any extra comments..." style="width:100%;margin-bottom:16px;"></textarea></div>
+    <button class="btn-primary" id="cp4-submit-btn" onclick="submitCP4()" style="background:var(--cp4);">SUBMIT EXIT SURVEY</button>
+
+    <hr class="divider">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="sec-title" style="margin:0;">CP4 Summary</div>
+      <button class="btn-sm" onclick="loadCP4Summary()">↻ Refresh</button>
+    </div>
+    <div id="cp4-summary-grid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:16px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div class="sec-title">Reason Not Entered</div>
+        <div class="tbl-wrap"><table><thead><tr><th>Reason</th><th>Count</th><th>%</th></tr></thead>
+          <tbody id="cp4-reasons-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="sec-title">Price Feedback</div>
+        <div class="tbl-wrap"><table><thead><tr><th>Rating</th><th>Count</th><th>%</th></tr></thead>
+          <tbody id="cp4-price-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+        </table></div>
+        <div class="sec-title" style="margin-top:12px;">Offering Feedback</div>
+        <div class="tbl-wrap"><table><thead><tr><th>Rating</th><th>Count</th><th>%</th></tr></thead>
+          <tbody id="cp4-offering-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MY SHIFT ════════════════════════════════════════════ -->
+<div class="page" id="tab-shift">
+  <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div id="shift-cp-label" style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--cp1);">CP1 · TMA Splinobo</div>
+      <div id="shift-date" style="font-size:12px;color:var(--muted);margin-top:2px;"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <div class="card" style="text-align:center;padding:10px 16px;"><div class="kpi-lbl">Logged</div><div class="kpi-val" id="s-count">0</div></div>
+      <div class="card" style="text-align:center;padding:10px 16px;"><div class="kpi-lbl">Passengers</div><div class="kpi-val" id="s-pax">0</div></div>
+      <div class="card" style="text-align:center;padding:10px 16px;"><div class="kpi-lbl">To MJSR</div><div class="kpi-val" id="s-mjsr" style="color:var(--green);">0</div></div>
+    </div>
+  </div>
+  <div class="sec-title">Entries This Session</div>
+  <div id="shift-log"><div class="empty"><div class="empty-icon">🚗</div><p>No entries yet.</p></div></div>
+</div>
+
+<!-- ══ GATE ENTRY ══════════════════════════════════════════ -->
+<div class="page" id="tab-gate">
+  <div class="sec-title">End of Day Gate Entry</div>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Submit once per property at end of day. Used to calculate visitor conversion rate.</p>
+  <div class="form-grid">
+    <div><label class="f-label">Submitted By <span class="req">*</span></label><input id="g-staff" type="text" placeholder="Your full name"></div>
+    <div><label class="f-label">Date <span class="req">*</span></label><input id="g-date" type="date"></div>
+    <div><label class="f-label">Property <span class="req">*</span></label>
+      <select id="g-prop"><option value="">— Select —</option><option value="MJSR">MJSR</option><option value="GV">Green Valley</option></select></div>
+    <div><label class="f-label">Total Visitors <span class="req">*</span></label><input id="g-vis" type="number" min="0" placeholder="e.g. 342"></div>
+    <div class="full"><label class="f-label">Notes</label><textarea id="g-notes" placeholder="Weather, events, early closure..."></textarea></div>
+  </div>
+  <button class="btn-primary" id="gate-btn" onclick="submitGate()">SUBMIT GATE ENTRY</button>
+  <hr class="divider">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div class="sec-title" style="margin:0;">Recent Gate Entries</div>
+    <button class="btn-sm" onclick="loadGate(true)">↻ Refresh</button>
+  </div>
+  <div id="gate-log"><div class="empty"><div class="empty-icon">🎫</div><p>No entries yet.</p></div></div>
+</div>
+
+<!-- ══ DASHBOARD ═══════════════════════════════════════════ -->
+<div class="page" id="tab-dashboard">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div class="sec-title" style="margin:0;">Live Overview</div>
+    <button class="btn-sm blue" onclick="loadData(true)">↻ Refresh</button>
+  </div>
+
+  <!-- CONVERSION TILES -->
+  <div class="sec-title">MJSR Conversion — Passengers Stated vs Gate Entries</div>
+  <div id="conv-tiles" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Today</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last Weekend</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last 7 Days</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last 14 Days</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last 4 Weeks</div><div class="kpi-val">—</div></div>
+    <div class="card" style="text-align:center;opacity:.5"><div class="kpi-lbl">Last 2 Months</div><div class="kpi-val">—</div></div>
+  </div>
+
+  <!-- GENERAL STATS -->
+  <div class="grid">
+    <div class="card"><div class="kpi-lbl">Entries Today</div><div class="kpi-val" id="d-entries">—</div><div class="kpi-sub">all checkpoints</div></div>
+    <div class="card"><div class="kpi-lbl">Unique Vehicles</div><div class="kpi-val" id="d-unique">—</div><div class="kpi-sub">by plate, all time</div></div>
+    <div class="card"><div class="kpi-lbl">Passengers Today</div><div class="kpi-val" id="d-pax">—</div></div>
+    <div class="card"><div class="kpi-lbl">Entered MJSR</div><div class="kpi-val" id="d-mjsr" style="color:var(--green);">—</div><div class="kpi-sub">today</div></div>
+  </div>
+  <div class="sec-title">Checkpoint Funnel</div>
+  <div class="f-row"><div class="f-lbl"><div class="f-dot" style="background:var(--cp1)"></div><span style="color:var(--cp1)">CP1 · TMA Splinobo</span></div><div class="f-bar-bg"><div class="f-bar" id="bar-cp1" style="background:var(--cp1);width:0%"></div></div><div class="f-num" id="cnt-cp1" style="color:var(--cp1)">—</div></div>
+  <div class="f-row"><div class="f-lbl"><div class="f-dot" style="background:var(--cp2)"></div><span style="color:var(--cp2)">CP2 · Jungle Forest</span></div><div class="f-bar-bg"><div class="f-bar" id="bar-cp2" style="background:var(--cp2);width:0%"></div></div><div class="f-num" id="cnt-cp2" style="color:var(--cp2)">—</div></div>
+  <div class="f-row"><div class="f-lbl"><div class="f-dot" style="background:var(--cp3)"></div><span style="color:var(--cp3)">CP3 · MJSR/GV Split</span></div><div class="f-bar-bg"><div class="f-bar" id="bar-cp3" style="background:var(--cp3);width:0%"></div></div><div class="f-num" id="cnt-cp3" style="color:var(--cp3)">—</div></div>
+
+  <!-- CHECKPOINT DROP-OFF TABLE -->
+  <div class="sec-title" style="margin-top:20px;">Vehicle &amp; Passenger Drop-Off Between Checkpoints</div>
+  <div class="tbl-wrap" style="margin-bottom:20px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Vehicles</th>
+          <th>Passengers</th>
+          <th>Next Stage Vehicles</th>
+          <th>Next Stage Passengers</th>
+          <th>Vehicle Drop-Off</th>
+          <th>Pax Drop-Off</th>
+          <th>Retained %</th>
+        </tr>
+      </thead>
+      <tbody id="dropoff-body">
+        <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted);">Refresh to load</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sec-title" style="margin-top:20px;">Vehicle Journey Tracker</div>
+  <div class="tbl-wrap"><table><thead><tr><th>Journey</th><th>Vehicles</th></tr></thead><tbody id="journey-body"><tr><td colspan="2" style="color:var(--muted);text-align:center;padding:20px;">Click Refresh to load</td></tr></tbody></table></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div>
+      <div class="sec-title">Vehicle Types</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Type</th><th>Count</th><th>Pax</th></tr></thead><tbody id="vtype-body"></tbody></table></div>
+    </div>
+    <div>
+      <div class="sec-title">Province of Origin</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Province</th><th>Vehicles</th></tr></thead><tbody id="prov-body"></tbody></table></div>
+    </div>
+  </div>
+  <div class="sec-title" style="margin-top:4px;">Stage-by-Stage Funnel Analysis</div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tracks vehicle and passenger flow through each checkpoint stage. Drop-off identified by plate matching between stages. Gate conversion uses CP3 passenger count as denominator.</p>
+  <div class="tbl-wrap" style="margin-bottom:20px;"><table>
+    <thead><tr><th>Checkpoint</th><th>Vehicles</th><th>Passengers</th><th>Gate Entries</th><th>Conversion %</th><th>Note</th></tr></thead>
+    <tbody id="funnel-body"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:16px;">Refresh to load</td></tr></tbody>
+  </table></div>
+
+  <div class="sec-title">Overall Conversion Summary</div>
+  <div class="grid" id="overall-conv-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:20px;"></div>
+
+  <div class="sec-title">Visitor Conversion — Property Breakdown</div>
+  <div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Passengers in Cars (stated dest.)</th><th>Gate Entries (people)</th><th>Conversion %</th><th>Difference</th></tr></thead><tbody id="conv-body"><tr><td colspan="5" style="color:var(--muted);text-align:center;padding:16px;">Refresh to load</td></tr></tbody></table></div>
+</div>
+
+<!-- ══ REPORT ══════════════════════════════════════════════ -->
+<div class="page" id="tab-report">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+    <div>
+      <div class="sec-title" style="margin:0;">Management Summary Report</div>
+      <div style="font-size:12px;color:var(--muted);">Tourist Vehicle Count · Malam Jabba Ski Resort</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <select id="r-range" style="padding:7px 12px;font-size:13px;border-radius:6px;border:1px solid var(--border);background:#fff;">
+        <option value="today">Today</option><option value="all" selected>All Time</option>
+      </select>
+      <button class="btn-sm blue" id="r-refresh-btn" onclick="loadReport()">↻ Refresh Report</button>
+      <button class="btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn-sm" onclick="window.print()">🖨 Print</button>
+    </div>
+  </div>
+  <div id="rpt-header" style="display:none;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--blue);">
+    <div style="font-size:20px;font-weight:700;color:var(--blue2);font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;">MJSR TOURIST VEHICLE COUNT — MANAGEMENT SUMMARY</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="r-period"></div>
+  </div>
+  <div id="r-content">
+    <div class="empty"><div class="empty-icon">📈</div><p>Click <strong>↻ Refresh Report</strong> to load data.</p></div>
+  </div>
+</div>
+
+<!-- ══ LOG ═════════════════════════════════════════════════ -->
+<div class="page" id="tab-log">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+    <div class="sec-title" style="margin:0;">Submission Log</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <input type="text" id="log-search" placeholder="Search reg, staff, CP..." oninput="filterLog()" style="width:180px;padding:7px 10px;font-size:13px;">
+      <select id="log-cp" onchange="filterLog()" style="padding:7px 10px;font-size:13px;border-radius:6px;border:1px solid var(--border);background:#fff;">
+        <option value="">All CPs</option><option value="CP1">CP1</option><option value="CP2">CP2</option><option value="CP3">CP3</option>
+      </select>
+      <button class="btn-sm" onclick="loadLog(true)">↻ Refresh</button>
+    </div>
+  </div>
+  <div id="log-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>Time</th><th>Staff</th><th>CP</th><th>Reg</th><th>Type</th><th>Pax</th><th>Destination</th><th>Entered</th><th>Province</th><th></th></tr></thead>
+    <tbody id="log-body"><tr><td colspan="11" style="text-align:center;padding:28px;color:var(--muted);">Click Refresh to load</td></tr></tbody>
+  </table></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;color:var(--muted);">
+    <span id="log-info"></span>
+    <div style="display:flex;gap:6px;">
+      <button class="btn-sm" id="log-prev" onclick="logPage(-1)">← Prev</button>
+      <span id="log-page" style="padding:6px 12px;font-size:13px;"></span>
+      <button class="btn-sm" id="log-next" onclick="logPage(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AUDIT ════════════════════════════════════════════════ -->
+<div class="page" id="tab-audit">
+
+  <!-- PIN LOCK -->
+  <div id="audit-lock" style="text-align:center;padding:60px 20px;">
+    <div style="font-size:36px;margin-bottom:12px;">🔒</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px;">Audit &amp; Analysis</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Finance Director access only</div>
+    <input type="password" id="audit-pin" placeholder="Enter PIN" maxlength="6"
+      style="width:160px;padding:10px;text-align:center;font-size:18px;border:2px solid var(--border);border-radius:8px;letter-spacing:.3em;outline:none;"
+      onkeydown="if(event.key==='Enter')checkAuditPin()">
+    <br><br>
+    <button class="btn-primary" onclick="checkAuditPin()" style="width:160px;">UNLOCK</button>
+    <div id="audit-pin-err" style="color:#dc2626;font-size:13px;margin-top:10px;display:none;">Incorrect PIN</div>
+  </div>
+
+  <!-- AUDIT CONTENT (hidden until unlocked) -->
+  <div id="audit-content" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <div>
+        <div class="sec-title" style="margin:0;">Audit &amp; Analysis</div>
+        <div id="audit-period" style="font-size:12px;color:var(--muted);margin-top:2px;"></div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-sm blue" id="aw-today" onclick="loadAuditWindow('today')">Today</button>
+        <button class="btn-sm" id="aw-7d"    onclick="loadAuditWindow('7d')">7 Days</button>
+        <button class="btn-sm" id="aw-14d"   onclick="loadAuditWindow('14d')">14 Days</button>
+        <button class="btn-sm" id="aw-30d"   onclick="loadAuditWindow('30d')">1 Month</button>
+        <button class="btn-sm" id="aw-90d"   onclick="loadAuditWindow('90d')">3 Months</button>
+        <button class="btn-sm" id="aw-all"   onclick="loadAuditWindow('all')">All Time</button>
+        <span style="font-size:12px;color:var(--muted);margin-left:4px;">or</span>
+        <input type="date" id="audit-date" style="padding:6px 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;" onchange="loadAuditDate()">
+        <button class="btn-sm" onclick="loadAuditWindow(auditWindow)">↻</button>
+      </div>
+    </div>
+
+    <!-- SUMMARY TILES -->
+    <div id="audit-summary" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:20px;"></div>
+
+    <!-- CP3 BASELINE ANALYSIS -->
+    <div class="sec-title" style="color:var(--cp3);">CP3 Baseline — Miss Rate Per Checkpoint Per Day</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Using CP3 as ground truth. Every plate at CP3 should have been recorded at CP1 and CP2. Red = high miss rate, amber = moderate.</p>
+    <div class="tbl-wrap" style="margin-bottom:20px;">
+      <table><thead><tr>
+        <th>Date</th>
+        <th style="color:var(--cp3)">CP3 Plates</th>
+        <th style="color:var(--cp1)">Missed at CP1</th>
+        <th style="color:var(--cp1)">CP1 Miss %</th>
+        <th style="color:var(--cp2)">Missed at CP2</th>
+        <th style="color:var(--cp2)">CP2 Miss %</th>
+        <th>Both Missed</th>
+        <th>Flag</th>
+      </tr></thead>
+      <tbody id="audit-baseline-body"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- CP3 PLATES NOT RECORDED AT CP1 -->
+    <div class="sec-title" style="color:#dc2626;">CP1 Accountability — Plates at CP3 Not Recorded at CP1</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">These vehicles passed CP1 and were recorded at CP3 but CP1 staff never logged them. Sorted by passenger count — highest impact first.</p>
+    <div class="tbl-wrap" style="margin-bottom:20px;">
+      <table><thead><tr>
+        <th>Registration</th>
+        <th>Passengers</th>
+        <th>Date(s)</th>
+        <th style="color:var(--cp2)">Seen at CP2?</th>
+        <th style="color:var(--cp2)">CP2 Staff</th>
+        <th style="color:var(--cp3)">CP3 Staff</th>
+      </tr></thead>
+      <tbody id="audit-cp1miss-body"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- STAFF SUBMISSION COUNTS -->
+    <div class="sec-title">Staff Submission Counts by Checkpoint &amp; Day</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Shows how many entries each staff member submitted per checkpoint per day. Low counts on a busy day may indicate absent or underperforming staff.</p>
+    <div class="tbl-wrap" style="margin-bottom:20px;">
+      <table><thead><tr><th>Date</th><th>Checkpoint</th><th>Staff Member</th><th>Submissions</th><th>Assessment</th></tr></thead>
+      <tbody id="audit-staff-body"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- DAILY CP COMPARISON -->
+    <div class="sec-title">Daily Submissions Per Checkpoint</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Large differences between checkpoints on the same day suggest a CP was undermanned or staff were not recording consistently.</p>
+    <div class="tbl-wrap" style="margin-bottom:20px;">
+      <table><thead><tr><th>Date</th><th style="color:var(--cp1)">CP1 Entries</th><th style="color:var(--cp2)">CP2 Entries</th><th style="color:var(--cp3)">CP3 Entries</th><th>Largest Gap</th><th>Flag</th></tr></thead>
+      <tbody id="audit-daily-body"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- JOURNEY DROP-OFF ANALYSIS -->
+    <div class="sec-title" style="color:#7c3aed;">Vehicle Journey Drop-Off Analysis</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Tracks where vehicles stop their journey using plate matching. A vehicle seen at CP1 but not CP2 or CP3 turned around before the jungle area. Seen at CP1+CP2 but not CP3 stopped in the jungle area. This identifies real customer drop-off vs staff recording gaps.</p>
+
+    <!-- Journey summary tiles -->
+    <div id="journey-tiles" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:16px;"></div>
+
+    <!-- Daily drop-off table -->
+    <div class="sec-title" style="font-size:10px;margin-bottom:6px;">Daily Journey Breakdown</div>
+    <div class="tbl-wrap" style="margin-bottom:16px;">
+      <table><thead><tr>
+        <th>Date</th>
+        <th style="color:#16a34a">Full Journey (All 3)</th>
+        <th style="color:#d97706">Dropped at CP2 Area</th>
+        <th style="color:#dc2626">Dropped at CP1 Area</th>
+        <th style="color:var(--muted)">No CP1 Data</th>
+        <th>Drop-off Rate</th>
+      </tr></thead>
+      <tbody id="journey-daily-body"><tr><td colspan="6" style="text-align:center;padding:16px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- Dropped at CP2 detail -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div>
+        <div class="sec-title" style="color:#d97706;margin-bottom:6px;">Stopped in Jungle Area (CP1+CP2, no CP3)</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">These vehicles journeyed past CP1 and CP2 but never reached CP3 — they stopped, turned around, or diverted in the jungle area.</p>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Reg</th><th>Pax</th><th>Date(s)</th><th>CP1 Staff</th><th>CP2 Staff</th></tr></thead>
+          <tbody id="journey-cp2drop-body"><tr><td colspan="5" style="text-align:center;padding:12px;color:var(--muted);">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="sec-title" style="color:#dc2626;margin-bottom:6px;">Turned Around Early (CP1 only, no CP2/CP3)</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">These vehicles were recorded at CP1 but never seen again — they turned around before reaching the jungle area at CP2.</p>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Reg</th><th>Pax</th><th>Date(s)</th><th>CP1 Staff</th></tr></thead>
+          <tbody id="journey-cp1drop-body"><tr><td colspan="4" style="text-align:center;padding:12px;color:var(--muted);">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLATE CROSS-REFERENCE -->
+    <div class="sec-title">Plate Cross-Reference — Missed Recordings</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Plates seen at CP2 or CP3 but not recorded at earlier checkpoints. Red rows indicate vehicles that passed through CP1 or CP2 without being logged — potential missed recordings.</p>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="btn-sm" id="filter-all"     onclick="filterPlates('all')"     style="border-color:var(--blue);color:var(--blue);">All Plates</button>
+      <button class="btn-sm" id="filter-missed1" onclick="filterPlates('missed1')" >Missed at CP1</button>
+      <button class="btn-sm" id="filter-missed2" onclick="filterPlates('missed2')" >Missed at CP2</button>
+      <button class="btn-sm" id="filter-all3"    onclick="filterPlates('all3')"    >Seen All 3 CPs</button>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr><th>Reg</th><th>Pax</th><th style="color:var(--cp1)">CP1</th><th style="color:var(--cp2)">CP2</th><th style="color:var(--cp3)">CP3</th><th>CP1 Staff</th><th>CP2 Staff</th><th>CP3 Staff</th><th>Flag</th></tr></thead>
+      <tbody id="audit-plate-body"><tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;" id="audit-plate-info"></div>
+  </div>
+</div>
+
+<!-- ══ GV INSIGHTS ══════════════════════════════════════════ -->
+<div class="page" id="tab-gv">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#059669;">🌿 Green Valley Visitor Insights</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">Understand why visitors chose GV over MJSR — staff-assisted interview</div>
+    </div>
+  </div>
+
+  <div class="form-grid">
+    <div><label class="f-label">Staff Name <span class="req">*</span></label><input id="gv-staff" type="text" placeholder="Your full name"></div>
+    <div><label class="f-label">Date <span class="req">*</span></label><input id="gv-date" type="date"></div>
+    <div><label class="f-label">Time <span class="req">*</span></label><input id="gv-time" type="time"></div>
+    <div><label class="f-label">Province / Where From <span class="req">*</span></label>
+      <select id="gv-province"><option value="">— Select —</option>
+        <option>Punjab</option><option>KPK / Khyber Pakhtunkhwa</option>
+        <option>Islamabad / ICT</option><option>Sindh</option>
+        <option>Balochistan</option><option>AJK / Gilgit-Baltistan</option>
+        <option>Local — Swat District</option><option>International</option>
+        <option>Other</option>
+      </select></div>
+    <div><label class="f-label">Distance Travelled <span class="req">*</span></label>
+      <select id="gv-distance"><option value="">— Select —</option>
+        <option>Local — within Swat</option><option>Within KPK (up to 3 hrs)</option>
+        <option>Punjab / Islamabad (3-6 hrs)</option><option>Other province (6+ hrs)</option>
+        <option>International</option>
+      </select></div>
+    <div><label class="f-label">Group Type <span class="req">*</span></label>
+      <select id="gv-grouptype"><option value="">— Select —</option>
+        <option>Family with children</option><option>Family without children</option>
+        <option>Friends group</option><option>Couple</option>
+        <option>School / College students</option><option>Corporate group</option>
+        <option>Tour group (organised)</option><option>Solo traveller</option>
+      </select></div>
+    <div><label class="f-label">Group Size <span class="req">*</span></label><input id="gv-groupsize" type="number" min="1" max="200" placeholder="e.g. 6"></div>
+    <div><label class="f-label">Contact Number (optional)</label><input id="gv-phone" type="text" placeholder="03xx-xxxxxxx"></div>
+  </div>
+
+  <hr class="divider">
+  <div class="sub-title" style="color:#059669;">How They Heard About This Area</div>
+  <div class="form-grid">
+    <div><label class="f-label">How did you hear about GV / MJSR? <span class="req">*</span></label>
+      <select id="gv-heardfrom"><option value="">— Select —</option>
+        <option>Word of mouth / friends or family</option><option>Social media</option>
+        <option>Roadside signage</option><option>Tour operator recommended</option>
+        <option>Returning visitor</option><option>Online search / Google</option>
+        <option>Other</option>
+      </select></div>
+    <div><label class="f-label">Have you visited MJSR before? <span class="req">*</span></label>
+      <select id="gv-visitedmjsr"><option value="">— Select —</option>
+        <option>Yes — visited before</option><option>No — never visited</option>
+      </select></div>
+  </div>
+
+  <hr class="divider">
+  <div class="sub-title" style="color:#059669;">Why GV Over MJSR</div>
+  <div class="form-grid">
+    <div><label class="f-label">Primary reason for choosing GV over MJSR? <span class="req">*</span></label>
+      <select id="gv-whygv"><option value="">— Select —</option>
+        <option>MJSR entry prices too high</option>
+        <option>GV is free / cheaper to access</option>
+        <option>Just wanted scenery / fresh air — no paid activities needed</option>
+        <option>Did not know what MJSR offered</option>
+        <option>Came for a picnic / BBQ — GV suits better</option>
+        <option>Tour operator brought us here</option>
+        <option>MJSR was too busy / crowded</option>
+        <option>Children too young for MJSR activities</option>
+        <option>Travelling through — short stop only</option>
+        <option>Other reason</option>
+      </select></div>
+    <div><label class="f-label">Do you know about MJSR and its activities? <span class="req">*</span></label>
+      <select id="gv-knowsmjsr"><option value="">— Select —</option>
+        <option>Yes — fully aware</option>
+        <option>Heard of it but not sure what it offers</option>
+        <option>No — not aware</option>
+      </select></div>
+  </div>
+
+  <hr class="divider">
+  <div class="sub-title" style="color:#059669;">MJSR Pricing and Future Visit</div>
+  <div class="form-grid">
+    <div><label class="f-label">How do you find MJSR activity prices? <span class="req">*</span></label>
+      <select id="gv-mjsrpricing"><option value="">— Select —</option>
+        <option>Very affordable — good value</option>
+        <option>Reasonable for the experience</option>
+        <option>Slightly expensive for our budget</option>
+        <option>Too expensive — main reason we chose GV</option>
+        <option>Not sure / not checked pricing</option>
+      </select></div>
+    <div><label class="f-label">Would you consider visiting MJSR on a future trip? <span class="req">*</span></label>
+      <select id="gv-wouldvisit"><option value="">— Select —</option>
+        <option>Yes — definitely</option>
+        <option>Yes — if prices were lower</option>
+        <option>Maybe — need more information</option>
+        <option>Unlikely</option>
+        <option>No</option>
+      </select></div>
+  </div>
+
+  <hr class="divider">
+  <div class="sub-title" style="color:#059669;">Open Feedback</div>
+  <div class="form-grid">
+    <div class="full"><label class="f-label">What could MJSR change to attract you in the future?</label>
+      <textarea id="gv-improve" placeholder="Lower prices, more family activities, better food, easier access..." style="min-height:80px;"></textarea></div>
+    <div class="full"><label class="f-label">Additional Notes</label>
+      <textarea id="gv-notes" placeholder="Any other observations..."></textarea></div>
+  </div>
+
+  <button class="btn-primary" id="gv-submit-btn" onclick="submitGV()" style="background:#059669;margin-bottom:24px;">SUBMIT GV INSIGHT SURVEY</button>
+
+  <hr class="divider">
+
+  <!-- SUMMARY -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div class="sec-title" style="margin:0;color:#059669;">Survey Summary</div>
+    <button class="btn-sm" onclick="loadGVSummary()" style="border-color:#059669;color:#059669;">↻ Refresh</button>
+  </div>
+  <div id="gv-summary-tiles" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:16px;"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div>
+      <div class="sec-title">Why Chose GV</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Reason</th><th>Count</th><th>%</th></tr></thead>
+        <tbody id="gv-whygv-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+      </table></div>
+    </div>
+    <div>
+      <div class="sec-title">MJSR Pricing Opinion</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Rating</th><th>Count</th><th>%</th></tr></thead>
+        <tbody id="gv-pricing-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+      </table></div>
+    </div>
+    <div>
+      <div class="sec-title">Would Visit MJSR?</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Response</th><th>Count</th><th>%</th></tr></thead>
+        <tbody id="gv-wouldvisit-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+      </table></div>
+    </div>
+    <div>
+      <div class="sec-title">Group Types</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Type</th><th>Count</th><th>%</th></tr></thead>
+        <tbody id="gv-grouptype-body"><tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="sec-title" style="margin-top:16px;">Recent Surveys</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Date</th><th>Staff</th><th>Province</th><th>Group</th><th>Size</th><th>Why GV</th><th>Knows MJSR</th><th>Pricing</th><th>Would Visit</th></tr></thead>
+    <tbody id="gv-recent-body"><tr><td colspan="9" style="text-align:center;padding:16px;color:var(--muted);">Refresh to load</td></tr></tbody>
+  </table></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-// =====================================================================
-// CONFIG
-// =====================================================================
 var API = 'https://script.google.com/macros/s/AKfycbzUgPzfPKbg5f4spw2L0ahGZvXHBXO1OMwhWD8zk2paf1MX5rW8_PSyg0BJQwo_ZENUTg/exec';
-
-// =====================================================================
-// STATE
-// =====================================================================
-var dashCache = null;
+var cache = null;
+var sessionE = [], sCount=0, sPax=0, sMJSR=0;
 var gateCache = null;
-var logCache = null;
-var cp4Selected = { entered: '', noReason: '', priceRating: '', offeringRating: '' };
+var logCache = null, logFiltered = [], logPage_ = 1, logSize = 25;
 
-// =====================================================================
-// UTIL
-// =====================================================================
-function pad(n) { return n < 10 ? '0' + n : '' + n; }
-function todayISO() {
+// ── INIT ──────────────────────────────────────────────────
+window.onload = function() {
   var n = new Date();
-  return n.getFullYear() + '-' + pad(n.getMonth()+1) + '-' + pad(n.getDate());
+  document.getElementById('f-date').value = n.toISOString().split('T')[0];
+  document.getElementById('g-date').value = n.toISOString().split('T')[0];
+  document.getElementById('f-time').value = pad(n.getHours())+':'+pad(n.getMinutes());
+  document.getElementById('shift-date').textContent = n.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+};
+function pad(n){ return String(n).padStart(2,'0'); }
+
+// ── TAB ───────────────────────────────────────────────────
+function showTab(id, el) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'dashboard') { if (cache) renderDash(cache); else loadData(false); }
+  if (id === 'gate')      { if (!gateCache) loadGate(false); }
+  if (id === 'log')       { if (!logCache)  loadLog(false);  }
+  if (id === 'audit')     { if (auditUnlocked) loadAuditWindow(auditWindow); }
+  if (id === 'gv')        { initGV(); loadGVSummary(); }
+  // Report tab: do nothing — user clicks Refresh
 }
-function nowHHMM() {
-  var n = new Date();
-  return pad(n.getHours()) + ':' + pad(n.getMinutes());
-}
-function todayDDMMYYYY() {
-  var n = new Date();
-  return pad(n.getDate()) + '/' + pad(n.getMonth()+1) + '/' + n.getFullYear();
-}
-function toast(msg, color) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  if (color) t.style.background = color;
-  else t.style.background = '#1a1a1a';
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 2800);
-}
-function escapeHtml(s) {
-  if (s === null || s === undefined) return '';
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+
+// ── CORE FETCH ────────────────────────────────────────────
 function apiFetch(url, cb) {
   fetch(url, { redirect: 'follow' })
-    .then(function(r) { return r.text(); })
-    .then(function(t) {
+    .then(function(r){ return r.text(); })
+    .then(function(t){
       try { cb(null, JSON.parse(t)); }
-      catch (e) { cb('Parse error: ' + t.substring(0, 120)); }
+      catch(e){ cb('Parse error: ' + t.substring(0,100)); }
     })
-    .catch(function(e) { cb(e.toString()); });
+    .catch(function(e){ cb(e.toString()); });
 }
 
-// =====================================================================
-// TAB SWITCHING
-// =====================================================================
-function showTab(id) {
-  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-  document.getElementById('tab-' + id).classList.add('active');
-  // Find the clicked tab button
-  var tabs = document.querySelectorAll('.tab');
-  var labels = ['dashboard', 'cp4', 'gate', 'log', 'journey', 'report'];
-  for (var i = 0; i < labels.length; i++) {
-    if (labels[i] === id) tabs[i].classList.add('active');
-  }
-  if (id === 'dashboard') { if (!dashCache) loadDashboard(false); }
-  if (id === 'gate')      { if (!gateCache) loadGate(); }
-  if (id === 'log')       { if (!logCache)  loadLog(false); }
-  if (id === 'cp4')       { loadCP4Summary(); }
-}
-
-// =====================================================================
-// STAFF DROPDOWN POPULATION
-// =====================================================================
-function loadStaffOptions() {
-  apiFetch(API + '?action=getStaff', function(err, d) {
-    if (err || !d.ok) return;
-    var staff = d.staff || [];
-    ['cp4-staff', 'g-staff'].forEach(function(id) {
-      var sel = document.getElementById(id);
-      if (!sel) return;
-      var current = sel.value;
-      sel.innerHTML = '<option value="">&mdash; Select &mdash;</option>' +
-        staff.map(function(s) {
-          return '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>';
-        }).join('');
-      sel.value = current;
-    });
-  });
-}
-
-// =====================================================================
-// DASHBOARD
-// =====================================================================
-function loadDashboard(force) {
-  if (!force && dashCache) { renderDashboard(dashCache); return; }
-  document.getElementById('d-t-entries').textContent = '...';
-  apiFetch(API + '?action=dashboard', function(err, d) {
-    if (err || !d.ok) {
-      toast('Could not load dashboard', '#dc2626');
-      document.getElementById('live-label').textContent = 'Failed to load';
-      return;
-    }
-    dashCache = d;
-    renderDashboard(d);
+// ── DATA LOAD ─────────────────────────────────────────────
+function loadData(force) {
+  if (!force && cache) { renderDash(cache); return; }
+  document.getElementById('d-entries').textContent = '…';
+  apiFetch(API, function(err, d) {
+    if (err) { toast('Could not load data', '#dc2626'); return; }
+    cache = d;
+    renderDash(d);
     var t = new Date(d.lastUpdated);
-    document.getElementById('live-label').textContent = 'Updated ' + pad(t.getHours()) + ':' + pad(t.getMinutes());
-    loadConversion();
+    document.getElementById('live-label').textContent = 'Updated ' + pad(t.getHours())+':'+pad(t.getMinutes());
   });
 }
 
-function renderDashboard(d) {
-  document.getElementById('dash-date').textContent = todayDDMMYYYY();
-  var t = d.today || {};
-  var a = d.allTime || {};
-  var gt = d.gateToday || { mjsr: 0, gv: 0 };
-  var ga = d.gateAllTime || { mjsr: 0, gv: 0 };
+// ── RENDER DASHBOARD ──────────────────────────────────────
+function renderDash(d) {
+  // ── CONVERSION TILES ────────────────────────────────────
+  var wins = d.conversionWindows || [];
+  document.getElementById('conv-tiles').innerHTML = wins.length === 0
+    ? '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;">Refresh to load conversion data</div>'
+    : wins.map(function(w){
+        var conv  = w.convMJSR;
+        var noData = conv === null;
+        var col   = noData ? 'var(--muted)' : conv >= 75 ? '#16a34a' : conv >= 50 ? '#d97706' : '#dc2626';
+        var valStr = noData ? '—' : conv + '%';
+        var diff  = noData ? '' : (w.gateMJSR - w.paxMJSR);
+        var diffStr = noData ? '' : (diff >= 0 ? '+'+diff : String(diff));
+        var diffCol = diff >= 0 ? '#16a34a' : '#dc2626';
+        return '<div class="card" style="text-align:center;border-top:3px solid '+col+';">'+
+          '<div class="kpi-lbl" style="margin-bottom:6px;">'+w.label+'</div>'+
+          '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:32px;font-weight:700;color:'+col+';line-height:1;">'+valStr+'</div>'+
+          '<div style="font-size:11px;color:var(--muted);margin-top:5px;">'+
+            (noData ? 'No data' : w.gateMJSR+' gate &nbsp;/&nbsp; '+w.paxMJSR+' pax stated')+
+          '</div>'+
+          (noData ? '' : '<div style="font-size:12px;font-weight:600;color:'+diffCol+';margin-top:3px;">'+diffStr+' pax</div>')+
+        '</div>';
+      }).join('');
 
-  document.getElementById('d-t-entries').textContent = t.entries || 0;
-  document.getElementById('d-t-pax').textContent = t.passengers || 0;
-  document.getElementById('d-t-mjsr').textContent = t.enteredMJSR || 0;
-  document.getElementById('d-t-gv').textContent = t.wentGV || 0;
-  document.getElementById('d-t-gate-mjsr').textContent = gt.mjsr || 0;
-  document.getElementById('d-t-gate-gv').textContent = gt.gv || 0;
+  document.getElementById('d-entries').textContent = d.today.entries;
+  document.getElementById('d-unique').textContent  = d.allTime.uniquePlates;
+  document.getElementById('d-pax').textContent     = d.today.passengers;
+  document.getElementById('d-mjsr').textContent    = d.today.enteredMJSR;
 
-  document.getElementById('d-cp1').textContent = t.cp1Pax || 0;
-  document.getElementById('d-cp2').textContent = t.cp2Pax || 0;
-  document.getElementById('d-cp3').textContent = t.cp3Pax || 0;
-  document.getElementById('d-cp1-sub').textContent = (t.cp1 || 0) + ' vehicles';
-  document.getElementById('d-cp2-sub').textContent = (t.cp2 || 0) + ' vehicles';
-  document.getElementById('d-cp3-sub').textContent = (t.cp3 || 0) + ' vehicles';
+  var c1=d.checkpoints.cp1.entries, c2=d.checkpoints.cp2.entries, c3=d.checkpoints.cp3.entries;
+  var mx=Math.max(c1,c2,c3,1);
+  document.getElementById('cnt-cp1').textContent = c1;
+  document.getElementById('cnt-cp2').textContent = c2;
+  document.getElementById('cnt-cp3').textContent = c3;
+  document.getElementById('bar-cp1').style.width = (c1/mx*100)+'%';
+  document.getElementById('bar-cp2').style.width = (c2/mx*100)+'%';
+  document.getElementById('bar-cp3').style.width = (c3/mx*100)+'%';
 
-  document.getElementById('d-a-entries').textContent = a.entries || 0;
-  document.getElementById('d-a-unique').textContent = a.uniquePlates || 0;
-  document.getElementById('d-a-pax').textContent = a.cp3Pax || 0;
-  document.getElementById('d-a-gate-mjsr').textContent = ga.mjsr || 0;
+  // ── DROP-OFF TABLE ───────────────────────────────────────
+  renderDropoffTable(c1, c2, c3,
+    d.checkpoints.cp1.pax, d.checkpoints.cp2.pax, d.checkpoints.cp3.pax);
 
-  // All-time MJSR conversion: gate actual vs CP3 stated MJSR pax (consistent with Funnel)
-  var conv = d.allTimeConversion;
-  var convPax = d.allTimeCP3StatedMJSRPax || 0;
-  var convEl = document.getElementById('d-a-conv');
-  var convSub = document.getElementById('d-a-conv-sub');
-  if (conv === null || conv === undefined) {
-    convEl.textContent = '\u2014';
-    convEl.style.color = 'var(--muted)';
-    convSub.textContent = 'no CP3 MJSR data';
-  } else {
-    convEl.textContent = conv + '%';
-    convEl.style.color = conv >= 75 ? 'var(--green)' : conv >= 50 ? 'var(--orange)' : 'var(--red)';
-    convSub.textContent = (ga.mjsr || 0) + ' gate / ' + convPax + ' CP3 stated';
-  }
-
-  // Recent submissions
-  var recent = d.recent || [];
-  var tb = document.getElementById('dash-recent');
-  if (!recent.length) {
-    tb.innerHTML = '<tr><td colspan="7" class="empty">No submissions yet</td></tr>';
-  } else {
-    tb.innerHTML = recent.map(function(r) {
-      var cp = r.checkpoint || '';
-      var cpClass = cp.indexOf('CP1') !== -1 ? 'cp1' : cp.indexOf('CP2') !== -1 ? 'cp2' : cp.indexOf('CP3') !== -1 ? 'cp3' : '';
-      var cpShort = cp.replace(' - TMA Splinobo', '').replace(' - Jungle Forest Area', '').replace(' - MJSR / GV Road Split', '') || '-';
-      var entCol = r.didEnter && r.didEnter.indexOf('entered MJSR') !== -1 ? 'var(--green)' :
-                   r.didEnter && r.didEnter.indexOf('Green Valley') !== -1 ? 'var(--cp2)' : 'var(--muted)';
-      var entShort = (r.didEnter || '').replace('Yes - entered MJSR', 'MJSR').replace('No - went to Green Valley', 'GV').replace('No - turned around / left area', 'Turned').replace('No - passed through only', 'Passed') || '-';
-      var dest = (r.statedDest || '').replace('Malam Jabba Ski Resort (MJSR)', 'MJSR').replace('Unknown / Not stated', 'Unknown').replace('Both / Touring the area', 'Both').replace('Just passing through', 'Passing') || '-';
-      return '<tr>' +
-        '<td style="white-space:nowrap;">' + escapeHtml(r.timestamp) + '</td>' +
-        '<td>' + escapeHtml(r.staff) + '</td>' +
-        '<td>' + (cpClass ? '<span class="cp-tag ' + cpClass + '">' + cpShort + '</span>' : '-') + '</td>' +
-        '<td style="font-weight:700;color:var(--blue);">' + escapeHtml(r.vehicleReg) + '</td>' +
-        '<td style="text-align:center;font-weight:600;">' + r.passengers + '</td>' +
-        '<td>' + escapeHtml(dest) + '</td>' +
-        '<td style="color:' + entCol + ';font-weight:600;">' + escapeHtml(entShort) + '</td>' +
-        '</tr>';
-    }).join('');
-  }
-}
-
-// =====================================================================
-// CONVERSION FUNNEL
-// =====================================================================
-function loadConversion() {
-  apiFetch(API + '?action=getConversion', function(err, d) {
-    if (err || !d.ok) {
-      document.getElementById('conv-grid').innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--red);">Could not load conversion data</div>';
-      return;
-    }
-    renderConversion(d.windows);
-  });
-}
-
-function renderConversion(w) {
-  var windows = [
-    { key: 'today', label: 'Today', data: w.today },
-    { key: 'last7', label: 'Last 7 Days', data: w.last7 },
-    { key: 'last30', label: 'Last 30 Days', data: w.last30 }
-  ];
-  var html = windows.map(function(win) {
-    var d = win.data;
-    var rateA = d.rateA;
-    var rateB = d.rateB;
-    var rateAcol = rateA === null ? 'var(--muted)' : rateA >= 75 ? 'var(--green)' : rateA >= 50 ? 'var(--orange)' : 'var(--red)';
-    var rateBcol = rateB === null ? 'var(--muted)' : rateB >= 75 ? 'var(--green)' : rateB >= 50 ? 'var(--orange)' : 'var(--red)';
-    var rateAtxt = rateA === null ? '\u2014' : rateA + '%';
-    var rateBtxt = rateB === null ? '\u2014' : rateB + '%';
-    var rateAnote = d.cp3PaxStatedMJSR === 0
-      ? 'No CP3 MJSR data'
-      : d.gateMJSR === 0
-        ? 'No gate entry yet'
-        : d.gateMJSR + ' gate / ' + d.cp3PaxStatedMJSR + ' stated';
-    var rateBnote = d.cp4Total === 0
-      ? 'No CP4 surveys'
-      : d.cp4Yes + ' yes / ' + d.cp4Total + ' surveyed';
-    return '<div class="card" style="border-top:3px solid var(--gold);">' +
-      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">' +
-        '<div style="font-weight:700;font-size:13px;">' + win.label + '</div>' +
-        '<div style="font-size:10px;color:var(--muted);">' + d.fromDate + (d.fromDate === d.toDate ? '' : ' \u2192 ' + d.toDate) + '</div>' +
-      '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
-        '<div style="border-right:1px solid var(--border);padding-right:10px;">' +
-          '<div class="kpi-lbl" style="font-size:10px;">Gate vs CP3 Stated</div>' +
-          '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:700;color:' + rateAcol + ';line-height:1.1;">' + rateAtxt + '</div>' +
-          '<div style="font-size:10px;color:var(--muted);margin-top:4px;">' + rateAnote + '</div>' +
-        '</div>' +
-        '<div>' +
-          '<div class="kpi-lbl" style="font-size:10px;">CP4 Survey Yes</div>' +
-          '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:700;color:' + rateBcol + ';line-height:1.1;">' + rateBtxt + '</div>' +
-          '<div style="font-size:10px;color:var(--muted);margin-top:4px;">' + rateBnote + '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
+  var j=d.journeys;
+  document.getElementById('journey-body').innerHTML = [
+    ['CP1 only — did not continue', j.cp1Only],
+    ['CP1 → CP2 — continued up',    j.cp1AndCp2],
+    ['CP1 → CP3 — skipped CP2',     j.cp1AndCp3],
+    ['All 3 checkpoints',           j.allThree],
+    ['CP2 only',                    j.cp2Only],
+    ['CP2 → CP3',                   j.cp2AndCp3],
+    ['CP3 only',                    j.cp3Only]
+  ].map(function(r){
+    return '<tr><td>'+r[0]+'</td><td style="font-size:18px;font-weight:700">'+r[1]+'</td></tr>';
   }).join('');
-  document.getElementById('conv-grid').innerHTML = html;
-}
 
-// =====================================================================
-// CP4 EXIT SURVEY
-// =====================================================================
-function setCP4Entry(val) {
-  cp4Selected.entered = val;
-  // Reset sub-section selections
-  cp4Selected.noReason = '';
-  cp4Selected.priceRating = '';
-  cp4Selected.offeringRating = '';
-  // Yes/No buttons
-  var yes = document.getElementById('cp4-ent-yes');
-  var no = document.getElementById('cp4-ent-no');
-  yes.classList.toggle('on-green', val === 'Yes');
-  no.classList.toggle('on-red', val === 'No');
-  // Sections
-  document.getElementById('cp4-no-section').style.display = (val === 'No') ? 'block' : 'none';
-  document.getElementById('cp4-yes-section').style.display = (val === 'Yes') ? 'block' : 'none';
-  // Clear sub-choice highlights
-  document.querySelectorAll('.cp4-no-r, .cp4-yes-p, .cp4-yes-o').forEach(function(b) {
-    b.classList.remove('on');
-  });
-}
-function setCP4Reason(btn, val) {
-  cp4Selected.noReason = val;
-  document.querySelectorAll('.cp4-no-r').forEach(function(b) { b.classList.remove('on'); });
-  btn.classList.add('on');
-}
-function setCP4Price(btn, val) {
-  cp4Selected.priceRating = val;
-  document.querySelectorAll('.cp4-yes-p').forEach(function(b) { b.classList.remove('on'); });
-  btn.classList.add('on');
-}
-function setCP4Offering(btn, val) {
-  cp4Selected.offeringRating = val;
-  document.querySelectorAll('.cp4-yes-o').forEach(function(b) { b.classList.remove('on'); });
-  btn.classList.add('on');
-}
-
-function submitCP4() {
-  var staff = document.getElementById('cp4-staff').value;
-  var reg = document.getElementById('cp4-reg').value.trim().toUpperCase();
-  var date = document.getElementById('cp4-date').value;
-  var time = document.getElementById('cp4-time').value;
-  var vtype = document.getElementById('cp4-vtype').value;
-  var pax = document.getElementById('cp4-pax').value;
-  var entered = cp4Selected.entered;
-  var notes = document.getElementById('cp4-notes').value.trim();
-
-  if (!staff || !reg || !date || !time || !vtype || !pax || !entered) {
-    toast('Complete all required fields', '#dc2626');
-    return;
-  }
-
-  var btn = document.getElementById('cp4-submit-btn');
-  btn.textContent = 'SUBMITTING...';
-  btn.disabled = true;
-
-  var qs = '?action=submitCP4' +
-    '&staff=' + encodeURIComponent(staff) +
-    '&reg=' + encodeURIComponent(reg) +
-    '&date=' + encodeURIComponent(date) +
-    '&time=' + encodeURIComponent(time) +
-    '&vtype=' + encodeURIComponent(vtype) +
-    '&pax=' + encodeURIComponent(pax) +
-    '&entered=' + encodeURIComponent(entered) +
-    '&noReason=' + encodeURIComponent(cp4Selected.noReason) +
-    '&priceRating=' + encodeURIComponent(cp4Selected.priceRating) +
-    '&offeringRating=' + encodeURIComponent(cp4Selected.offeringRating) +
-    '&notes=' + encodeURIComponent(notes);
-
-  apiFetch(API + qs, function(err, d) {
-    btn.textContent = 'SUBMIT EXIT SURVEY';
-    btn.disabled = false;
-    if (err || !d.ok) {
-      toast('Could not save - check connection', '#dc2626');
-      return;
-    }
-    toast('Exit survey saved - ' + reg + ' [' + (entered === 'Yes' ? 'Entered' : 'Did not enter') + ']', '#16a34a');
-    // Reset form
-    document.getElementById('cp4-reg').value = '';
-    document.getElementById('cp4-pax').value = '';
-    document.getElementById('cp4-notes').value = '';
-    document.getElementById('cp4-vtype').value = '';
-    document.getElementById('cp4-time').value = nowHHMM();
-    cp4Selected = { entered: '', noReason: '', priceRating: '', offeringRating: '' };
-    document.getElementById('cp4-ent-yes').classList.remove('on-green');
-    document.getElementById('cp4-ent-no').classList.remove('on-red');
-    document.getElementById('cp4-no-section').style.display = 'none';
-    document.getElementById('cp4-yes-section').style.display = 'none';
-    document.querySelectorAll('.cp4-no-r, .cp4-yes-p, .cp4-yes-o').forEach(function(b) {
-      b.classList.remove('on');
-    });
-    loadCP4Summary();
-  });
-}
-
-function loadCP4Summary() {
-  apiFetch(API + '?action=getCP4Summary', function(err, d) {
-    if (err || !d.ok) return;
-    var grid = document.getElementById('cp4-sum-grid');
-    var entPct = d.total > 0 ? Math.round(d.enteredYes / d.total * 100) : 0;
-    var noPct = d.total > 0 ? Math.round(d.enteredNo / d.total * 100) : 0;
-    grid.innerHTML = [
-      { l: 'All Time Total', v: d.total, s: 'passengers surveyed', c: 'var(--blue)' },
-      { l: 'Today', v: d.todayTotal, s: 'passengers surveyed today', c: 'var(--gold)' },
-      { l: 'All Time Entered', v: d.enteredYes, s: entPct + '% of passengers surveyed', c: 'var(--green)' },
-      { l: 'All Time Did Not Enter', v: d.enteredNo, s: noPct + '% of passengers surveyed', c: 'var(--red)' }
-    ].map(function(k) {
-      return '<div class="card" style="text-align:center;border-top:3px solid ' + k.c + ';">' +
-        '<div class="kpi-lbl">' + k.l + '</div>' +
-        '<div class="kpi-val" style="color:' + k.c + '">' + k.v + '</div>' +
-        '<div class="kpi-sub">' + k.s + '</div></div>';
-    }).join('');
-
-    document.getElementById('cp4-no-table').innerHTML = renderObjRows(d.noReasons);
-    document.getElementById('cp4-price-table').innerHTML = renderObjRows(d.priceRatings);
-  });
-}
-
-function renderObjRows(obj) {
-  var keys = Object.keys(obj || {});
-  if (!keys.length) return '<tr><td colspan="2" style="text-align:center;color:var(--muted);">No data yet</td></tr>';
-  keys.sort(function(a, b) { return obj[b] - obj[a]; });
-  return keys.map(function(k) {
-    return '<tr><td>' + escapeHtml(k) + '</td><td style="font-weight:700;">' + obj[k] + '</td></tr>';
+  var vt=d.vtypes||{}, vtp=d.vtypesPax||{};
+  document.getElementById('vtype-body').innerHTML = Object.keys(vt).sort(function(a,b){return vt[b]-vt[a];}).map(function(k){
+    return '<tr><td>'+k.split(' (')[0]+'</td><td style="font-weight:600">'+vt[k]+'</td><td>'+( vtp[k]||0)+'</td></tr>';
   }).join('');
-}
 
-// =====================================================================
-// GATE ENTRY
-// =====================================================================
-function submitGate() {
-  var staff = document.getElementById('g-staff').value;
-  var date = document.getElementById('g-date').value;
-  var prop = document.getElementById('g-prop').value;
-  var vis = document.getElementById('g-vis').value;
-  var notes = document.getElementById('g-notes').value.trim();
+  var pr=d.provinces||{}, prT=Object.values(pr).reduce(function(s,v){return s+v;},0)||1;
+  document.getElementById('prov-body').innerHTML = Object.keys(pr).sort(function(a,b){return pr[b]-pr[a];}).map(function(k){
+    return '<tr><td>'+k+'</td><td style="font-weight:600">'+pr[k]+' <span style="color:var(--muted);font-size:11px;">('+pct(pr[k],prT)+')</span></td></tr>';
+  }).join('');
 
-  if (!staff || !date || !prop || vis === '') {
-    toast('Complete all required fields', '#dc2626');
-    return;
-  }
+  var cp = d.checkpoints;
+  var gate = d.gateAllTime||{mjsr:0,gv:0};
+  var gTotal = (gate.mjsr||0)+(gate.gv||0);
+  var dest = d.destinations||{};
+  var dM=dest['Malam Jabba Ski Resort (MJSR)']||0, dG=dest['Green Valley']||0;
+  var dB=dest['Both / Touring the area']||0, dP=dest['Just passing through']||0;
+  var dT=dM+dG+dB+dP||1;
+  var cpIncomplete = cp.cp1.entries===0 || cp.cp2.entries===0;
 
-  var btn = document.getElementById('gate-submit-btn');
-  btn.textContent = 'SUBMITTING...';
-  btn.disabled = true;
-
-  var qs = '?action=submitGate' +
-    '&staff=' + encodeURIComponent(staff) +
-    '&date=' + encodeURIComponent(date) +
-    '&property=' + encodeURIComponent(prop) +
-    '&visitors=' + encodeURIComponent(vis) +
-    '&notes=' + encodeURIComponent(notes);
-
-  apiFetch(API + qs, function(err, d) {
-    btn.textContent = 'SUBMIT GATE ENTRY';
-    btn.disabled = false;
-    if (err || !d.ok) {
-      toast('Could not save - check connection', '#dc2626');
-      return;
-    }
-    toast('Gate entry saved - ' + prop + ': ' + vis + ' visitors', '#16a34a');
-    document.getElementById('g-vis').value = '';
-    document.getElementById('g-notes').value = '';
-    document.getElementById('g-prop').value = '';
-    gateCache = null;
-    dashCache = null; // dashboard needs refresh too
-    loadGate();
-  });
-}
-
-function loadGate() {
-  apiFetch(API + '?action=getGate', function(err, d) {
-    if (err || !d.ok) { toast('Could not load gate entries', '#dc2626'); return; }
-    gateCache = d.entries || [];
-    var tb = document.getElementById('gate-tbody');
-    if (!gateCache.length) {
-      tb.innerHTML = '<tr><td colspan="6" class="empty">No gate entries yet</td></tr>';
-      return;
-    }
-    tb.innerHTML = gateCache.map(function(e) {
-      var col = e.property === 'MJSR' ? 'var(--blue)' : 'var(--cp2)';
-      return '<tr>' +
-        '<td>' + escapeHtml(e.date) + '</td>' +
-        '<td style="font-weight:700;color:' + col + ';">' + escapeHtml(e.property) + '</td>' +
-        '<td style="font-weight:700;font-family:Barlow Condensed,sans-serif;font-size:18px;color:' + col + ';">' + e.visitors + '</td>' +
-        '<td>' + escapeHtml(e.staff) + '</td>' +
-        '<td style="color:var(--muted);">' + escapeHtml(e.notes) + '</td>' +
-        '<td style="color:var(--muted);font-size:11px;white-space:nowrap;">' + escapeHtml(e.timestamp) + '</td>' +
-        '</tr>';
-    }).join('');
-  });
-}
-
-// =====================================================================
-// RECENT LOG
-// =====================================================================
-function loadLog(force) {
-  if (!force && logCache) { renderLog(); return; }
-  document.getElementById('log-tbody').innerHTML = '<tr><td colspan="10" class="empty">Loading&hellip;</td></tr>';
-  apiFetch(API + '?action=getLog&limit=200', function(err, d) {
-    if (err || !d.ok) { toast('Could not load log', '#dc2626'); return; }
-    logCache = d.entries || [];
-    renderLog();
-  });
-}
-
-function renderLog() {
-  if (!logCache) return;
-  var search = (document.getElementById('log-search').value || '').toLowerCase();
-  var cpFilter = document.getElementById('log-cp').value;
-  var filtered = logCache.filter(function(e) {
-    var matchS = !search ||
-      (e.vehicleReg && e.vehicleReg.toLowerCase().indexOf(search) > -1) ||
-      (e.staff && e.staff.toLowerCase().indexOf(search) > -1);
-    var matchCp = !cpFilter || (e.checkpoint && e.checkpoint.indexOf(cpFilter) > -1);
-    return matchS && matchCp;
-  });
-  document.getElementById('log-info').textContent = 'Showing ' + filtered.length + ' of ' + logCache.length + ' submissions';
-  var tb = document.getElementById('log-tbody');
-  if (!filtered.length) {
-    tb.innerHTML = '<tr><td colspan="10" class="empty">No matching entries</td></tr>';
-    return;
-  }
-  tb.innerHTML = filtered.map(function(r) {
-    var cp = r.checkpoint || '';
-    var cpClass = cp.indexOf('CP1') !== -1 ? 'cp1' : cp.indexOf('CP2') !== -1 ? 'cp2' : cp.indexOf('CP3') !== -1 ? 'cp3' : '';
-    var cpShort = cp.replace(' - TMA Splinobo', '').replace(' - Jungle Forest Area', '').replace(' - MJSR / GV Road Split', '') || '-';
-    var entShort = (r.didEnter || '').replace('Yes - entered MJSR', 'MJSR').replace('No - went to Green Valley', 'GV').replace('No - turned around / left area', 'Turned').replace('No - passed through only', 'Passed') || '-';
-    var dest = (r.statedDest || '').replace('Malam Jabba Ski Resort (MJSR)', 'MJSR').replace('Unknown / Not stated', 'Unknown').replace('Both / Touring the area', 'Both').replace('Just passing through', 'Passing') || '-';
-    return '<tr>' +
-      '<td style="white-space:nowrap;color:var(--muted);">' + escapeHtml(r.timestamp) + '</td>' +
-      '<td>' + escapeHtml(r.staff) + '</td>' +
-      '<td>' + (cpClass ? '<span class="cp-tag ' + cpClass + '">' + cpShort + '</span>' : '-') + '</td>' +
-      '<td>' + escapeHtml(r.date) + '</td>' +
-      '<td>' + escapeHtml(r.time) + '</td>' +
-      '<td style="font-weight:700;color:var(--blue);">' + escapeHtml(r.vehicleReg) + '</td>' +
-      '<td>' + escapeHtml((r.vehicleType || '').split(' (')[0]) + '</td>' +
-      '<td style="text-align:center;font-weight:600;">' + r.passengers + '</td>' +
-      '<td>' + escapeHtml(dest) + '</td>' +
-      '<td>' + escapeHtml(entShort) + '</td>' +
+  // ── STAGE FUNNEL TABLE ──────────────────────────────────
+  document.getElementById('funnel-body').innerHTML =
+    (cpIncomplete ? '<tr><td colspan="6" style="background:#fff3cd;color:#856404;font-size:12px;padding:8px 14px;">⚠ CP1 and/or CP2 have no entries yet — funnel will populate once all checkpoints are recording</td></tr>' : '')+
+    [
+      {stage:'CP1 · TMA Splinobo',  c:'var(--cp1)', v:cp.cp1.entries, p:cp.cp1.pax, gm:'—', gg:'—'},
+      {stage:'CP2 · Jungle Forest', c:'var(--cp2)', v:cp.cp2.entries, p:cp.cp2.pax, gm:'—', gg:'—'},
+      {stage:'CP3 · MJSR/GV Split', c:'var(--cp3)', v:cp.cp3.entries, p:cp.cp3.pax, gm:gate.mjsr||0, gg:gate.gv||0}
+    ].map(function(r){
+      var hasGate = typeof r.gm === 'number';
+      var conv = hasGate && r.p>0 ? Math.round((r.gm+r.gg)/r.p*100) : null;
+      var cc = conv!==null ? (conv>=75?'#16a34a':conv>=40?'#d97706':'#dc2626') : 'var(--muted)';
+      return '<tr>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.stage+'</td>'+
+        '<td style="font-size:18px;font-weight:700">'+r.v+'</td>'+
+        '<td style="font-size:18px;font-weight:700">'+r.p+'</td>'+
+        '<td>'+(hasGate?'<span style="font-weight:700;color:#1a73e8">'+r.gm+' MJSR</span> &nbsp;<span style="font-weight:700;color:#059669">'+r.gg+' GV</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
+        '<td style="font-size:22px;font-weight:700;color:'+cc+'">'+(conv!==null?conv+'%':'—')+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+(hasGate?'Gate entries ÷ CP3 passengers':'No gate comparison at this stage')+'</td>'+
       '</tr>';
+    }).join('');
+
+  // ── OVERALL CONVERSION KPIs ──────────────────────────────
+  var overallPct = cp.cp3.pax>0 ? Math.round(gTotal/cp.cp3.pax*100) : 0;
+  document.getElementById('overall-conv-grid').innerHTML = [
+    {l:'CP1 Vehicles',      v:cp.cp1.entries, s:'entries logged',     c:'var(--cp1)'},
+    {l:'CP1 Passengers',    v:cp.cp1.pax,     s:'total recorded',     c:'var(--cp1)'},
+    {l:'CP2 Vehicles',      v:cp.cp2.entries, s:'entries logged',     c:'var(--cp2)'},
+    {l:'CP2 Passengers',    v:cp.cp2.pax,     s:'total recorded',     c:'var(--cp2)'},
+    {l:'CP3 Vehicles',      v:cp.cp3.entries, s:'entries logged',     c:'var(--cp3)'},
+    {l:'CP3 Passengers',    v:cp.cp3.pax,     s:'total recorded',     c:'var(--cp3)'},
+    {l:'Gate MJSR',         v:gate.mjsr||0,   s:'actual entries',     c:'#1a73e8'},
+    {l:'Gate Green Valley', v:gate.gv||0,     s:'actual entries',     c:'#059669'},
+    {l:'Total Gate Entries',v:gTotal,         s:'MJSR + GV combined', c:'#1a73e8'},
+    {l:'CP3 → Gate Conv.',  v:overallPct+'%', s:'gate ÷ CP3 pax',    c:overallPct>110?'#dc2626':'#1a73e8'}
+  ].map(function(k){
+    return '<div class="card"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-sub">'+k.s+'</div></div>';
   }).join('');
-}
 
-// =====================================================================
-// VEHICLE JOURNEY
-// =====================================================================
-function toggleJourneyCustomRange() {
-  var range = document.getElementById('j-range').value;
-  document.getElementById('j-custom').style.display = (range === 'custom') ? 'flex' : 'none';
-}
-
-function loadJourney() {
-  var range = document.getElementById('j-range').value;
-  var qs = '?action=getJourney&range=' + range;
-  if (range === 'custom') {
-    var from = document.getElementById('j-from').value;
-    var to = document.getElementById('j-to').value;
-    if (!from || !to) { toast('Pick a from and to date', '#dc2626'); return; }
-    qs += '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
-  }
-  document.getElementById('j-content').innerHTML = '<p class="empty"><span class="loading"></span>Analysing plate journeys&hellip;</p>';
-  apiFetch(API + qs, function(err, d) {
-    if (err || !d.ok) {
-      document.getElementById('j-content').innerHTML = '<p class="empty" style="color:var(--red);">Could not load journey analysis: ' + escapeHtml(err || d.error || 'unknown') + '</p>';
-      return;
-    }
-    renderJourney(d);
-  });
-}
-
-function renderJourney(d) {
-  document.getElementById('j-period').textContent = 'Period: ' + d.fromDate + ' to ' + d.toDate;
-  var t = d.totals || {};
-  var r = d.rates || {};
-  var vehicles = d.vehicles || [];
-
-  // Summary tiles
-  var tilesHtml =
-    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:8px;">' +
-      '<div class="card" style="border-top:3px solid var(--gold);">' +
-        '<div class="kpi-lbl">Unique Vehicles</div>' +
-        '<div class="kpi-val" style="color:var(--gold);">' + (t.totalPlates || 0) + '</div>' +
-        '<div class="kpi-sub">distinct plates in period</div>' +
-      '</div>' +
-      '<div class="card" style="border-top:3px solid var(--blue);">' +
-        '<div class="kpi-lbl">Passed All 3 CPs</div>' +
-        '<div class="kpi-val" style="color:var(--blue);">' + (t.completedCP123 || 0) + '</div>' +
-        '<div class="kpi-sub">' + (r.pctCP123 || 0) + '% of vehicles</div>' +
-      '</div>' +
-      '<div class="card" style="border-top:3px solid var(--green);">' +
-        '<div class="kpi-lbl">Full Journey + CP4</div>' +
-        '<div class="kpi-val" style="color:var(--green);">' + (t.completedCP123_CP4 || 0) + '</div>' +
-        '<div class="kpi-sub">' + (r.pctCP123CP4 || 0) + '% of all vehicles</div>' +
-      '</div>' +
-      '<div class="card" style="border-top:3px solid var(--cp4);">' +
-        '<div class="kpi-lbl">CP4 Capture Rate</div>' +
-        '<div class="kpi-val" style="color:var(--cp4);">' + (r.pctVerifiedOfCompleted || 0) + '%</div>' +
-        '<div class="kpi-sub">of full journey vehicles</div>' +
-      '</div>' +
-    '</div>';
-
-  // Breakdown of partial journeys
-  var partialHtml =
-    '<div class="sec-title">Partial Journey Breakdown</div>' +
-    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:20px;">' +
-      tile('CP1 + CP2 only', t.cp1Cp2 || 0, 'var(--orange)') +
-      tile('CP1 + CP3 only', t.cp1Cp3 || 0, 'var(--orange)') +
-      tile('CP2 + CP3 only', t.cp2Cp3 || 0, 'var(--orange)') +
-      tile('CP1 only', t.onlyCP1 || 0, 'var(--cp1)') +
-      tile('CP2 only', t.onlyCP2 || 0, 'var(--cp2)') +
-      tile('CP3 only', t.onlyCP3 || 0, 'var(--cp3)') +
-      tile('CP4 only', t.onlyCP4 || 0, 'var(--cp4)') +
-    '</div>';
-
-  // Filter + search controls + table
-  var tableHtml =
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">' +
-      '<div class="sec-title" style="margin:0;">All Vehicles (' + vehicles.length + ')</div>' +
-      '<div style="display:flex;gap:8px;align-items:center;">' +
-        '<select id="j-filter" onchange="renderJourneyTable()" style="width:auto;">' +
-          '<option value="">All vehicles</option>' +
-          '<option value="full">Full Journey Verified (CP1+CP2+CP3+CP4)</option>' +
-          '<option value="cp123">All 3 CPs (no CP4)</option>' +
-          '<option value="partial">Partial only (1 or 2 CPs)</option>' +
-          '<option value="cp4only">CP4 only (no entry CPs)</option>' +
-        '</select>' +
-        '<input id="j-search" type="text" placeholder="Search plate..." oninput="renderJourneyTable()" style="width:auto;min-width:160px;">' +
-      '</div>' +
-    '</div>' +
-    '<div class="tbl-wrap"><table class="log-table">' +
-      '<thead><tr>' +
-        '<th>Plate</th>' +
-        '<th style="text-align:center;">CP1</th>' +
-        '<th style="text-align:center;">CP2</th>' +
-        '<th style="text-align:center;">CP3</th>' +
-        '<th style="text-align:center;">CP4</th>' +
-        '<th style="text-align:center;">Max Pax</th>' +
-        '<th>First Seen</th>' +
-        '<th>Last Seen</th>' +
-        '<th>Status</th>' +
-      '</tr></thead>' +
-      '<tbody id="j-tbody"></tbody>' +
-    '</table></div>';
-
-  document.getElementById('j-content').innerHTML = tilesHtml + partialHtml + tableHtml;
-
-  // Cache for filter/search
-  window._journeyCache = vehicles;
-  renderJourneyTable();
-}
-
-function tile(label, val, colour) {
-  return '<div class="card" style="text-align:center;">' +
-    '<div class="kpi-lbl" style="font-size:10px;">' + label + '</div>' +
-    '<div style="font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:700;color:' + colour + ';line-height:1;">' + val + '</div>' +
-  '</div>';
-}
-
-function renderJourneyTable() {
-  var vehicles = window._journeyCache || [];
-  var filter = document.getElementById('j-filter').value;
-  var search = (document.getElementById('j-search').value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  var filtered = vehicles.filter(function(v) {
-    if (search && v.plateKey.toLowerCase().indexOf(search) === -1) return false;
-    if (!filter) return true;
-    if (filter === 'full') return v.cp1 && v.cp2 && v.cp3 && v.cp4;
-    if (filter === 'cp123') return v.cp1 && v.cp2 && v.cp3 && !v.cp4;
-    if (filter === 'partial') {
-      var cnt = (v.cp1?1:0) + (v.cp2?1:0) + (v.cp3?1:0);
-      return cnt >= 1 && cnt < 3;
-    }
-    if (filter === 'cp4only') return v.cp4 && !v.cp1 && !v.cp2 && !v.cp3;
-    return true;
-  });
-
-  var tbody = document.getElementById('j-tbody');
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">No vehicles match the filter</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = filtered.slice(0, 500).map(function(v) {
-    var fullJourney = v.cp1 && v.cp2 && v.cp3 && v.cp4;
-    var statusCol = fullJourney ? 'var(--green)' :
-                    (v.cp1 && v.cp2 && v.cp3) ? 'var(--blue)' :
-                    'var(--muted)';
-    return '<tr>' +
-      '<td style="font-weight:700;color:var(--blue);">' + escapeHtml(v.plate) + '</td>' +
-      '<td style="text-align:center;">' + tick(v.cp1, 'var(--cp1)') + '</td>' +
-      '<td style="text-align:center;">' + tick(v.cp2, 'var(--cp2)') + '</td>' +
-      '<td style="text-align:center;">' + tick(v.cp3, 'var(--cp3)') + '</td>' +
-      '<td style="text-align:center;">' + tick(v.cp4, 'var(--cp4)') + '</td>' +
-      '<td style="text-align:center;font-weight:600;">' + (v.maxPax || 0) + '</td>' +
-      '<td style="color:var(--muted);font-size:11px;white-space:nowrap;">' + escapeHtml(v.firstSeen) + '</td>' +
-      '<td style="color:var(--muted);font-size:11px;white-space:nowrap;">' + escapeHtml(v.lastSeen) + '</td>' +
-      '<td style="color:' + statusCol + ';font-weight:600;font-size:11px;">' + escapeHtml(v.status) + '</td>' +
+  // ── PROPERTY BREAKDOWN TABLE ────────────────────────────
+  var paxStatedMJSR = d.allTime.paxStatedMJSR || 0;
+  var paxStatedGV   = d.allTime.paxStatedGV   || 0;
+  document.getElementById('conv-body').innerHTML =
+    (paxStatedMJSR===0 && paxStatedGV===0 ? '<tr><td colspan="5" style="background:#fff3cd;color:#856404;font-size:12px;padding:8px 14px;">⚠ No passenger data yet — will populate as entries are submitted</td></tr>' : '')+
+    [{n:'MJSR',        g:gate.mjsr||0, basePax:paxStatedMJSR, c:'#1a73e8'},
+     {n:'Green Valley',g:gate.gv||0,   basePax:paxStatedGV,   c:'#059669'}]
+    .map(function(r){
+      var conv    = r.basePax>0 ? pct(r.g, r.basePax) : '—';
+      var cc      = r.basePax>0 ? (parseInt(conv)>100?'#dc2626':r.c) : 'var(--muted)';
+      var diff    = r.basePax>0 ? (r.g - r.basePax) : null;
+      var diffStr = diff!==null ? (diff>=0?'+'+diff:String(diff)) : '—';
+      var diffCol = diff!==null ? (diff>=0?'#16a34a':'#dc2626') : 'var(--muted)';
+      return '<tr>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.n+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
+        '<td style="font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
       '</tr>';
-  }).join('');
-
-  if (filtered.length > 500) {
-    tbody.innerHTML += '<tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;">Showing first 500 of ' + filtered.length + '. Use filters/search to narrow.</td></tr>';
-  }
+    }).join('');
 }
 
-function tick(on, colour) {
-  return on
-    ? '<span style="color:' + colour + ';font-weight:700;font-size:16px;">&#x2713;</span>'
-    : '<span style="color:#d4d0c4;">&#x2717;</span>';
-}
-
-// =====================================================================
-// REPORTS
-// =====================================================================
-function toggleCustomRange() {
-  var range = document.getElementById('r-range').value;
-  document.getElementById('r-custom').style.display = (range === 'custom') ? 'flex' : 'none';
-}
-
+// ── REPORT ────────────────────────────────────────────────
 function loadReport() {
-  var range = document.getElementById('r-range').value;
-  var qs = '?action=getReport&range=' + range;
-  if (range === 'custom') {
-    var from = document.getElementById('r-from').value;
-    var to = document.getElementById('r-to').value;
-    if (!from || !to) { toast('Pick a from and to date', '#dc2626'); return; }
-    qs += '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
-  }
-  document.getElementById('r-content').innerHTML = '<p class="empty"><span class="loading"></span>Generating report&hellip;</p>';
-  apiFetch(API + qs, function(err, d) {
-    if (err || !d.ok) {
-      document.getElementById('r-content').innerHTML = '<p class="empty" style="color:var(--red);">Could not load report: ' + escapeHtml(err || d.error || 'unknown') + '</p>';
-      return;
-    }
+  var btn = document.getElementById('r-refresh-btn');
+  btn.textContent = '↻ Loading…';
+  btn.disabled = true;
+
+  apiFetch(API, function(err, d) {
+    btn.textContent = '↻ Refresh Report';
+    btn.disabled = false;
+    if (err) { toast('Could not load data', '#dc2626'); return; }
+    cache = d;
     renderReport(d);
   });
 }
 
 function renderReport(d) {
-  document.getElementById('r-period').textContent = 'Period: ' + d.fromDate + ' to ' + d.toDate;
-  var k = d.kpi || {};
-  var g = d.gate || { mjsr: 0, gv: 0 };
-  var s = d.sites || { mjsr: {}, gv: {} };
-  var mj = s.mjsr || {};
-  var gv = s.gv || {};
+  var range = document.getElementById('r-range').value;
+  var now   = new Date();
+  var label = range === 'today'
+    ? 'Today — ' + now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+    : 'All Time';
+  document.getElementById('r-period').textContent = 'Period: ' + label;
+  document.getElementById('rpt-header').style.display = 'block';
 
-  function convColour(pct) {
-    if (pct === null || pct === undefined) return 'var(--muted)';
-    if (pct >= 75) return 'var(--green)';
-    if (pct >= 50) return 'var(--orange)';
-    return 'var(--red)';
-  }
-  function convText(pct) {
-    return (pct === null || pct === undefined) ? '\u2014' : pct + '%';
-  }
+  var entries = range==='today' ? d.today.entries    : d.allTime.entries;
+  var pax_    = range==='today' ? d.today.passengers : d.allTime.passengers;
+  var mjsr_   = range==='today' ? d.today.enteredMJSR: d.allTime.enteredMJSR;
+  var gv_     = range==='today' ? d.today.wentGV     : d.allTime.wentGV;
+  var gate    = range==='today' ? (d.gateToday||{mjsr:0,gv:0}) : (d.gateAllTime||{mjsr:0,gv:0});
 
-  // Per-site conversion: MJSR vs GV side by side
-  var sitesHtml =
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:20px;">' +
-      // MJSR card
-      '<div class="card" style="border-top:4px solid var(--blue);">' +
-        '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">' +
-          '<div style="font-weight:700;font-size:15px;color:var(--blue);">Malam Jabba Ski Resort</div>' +
-          '<div style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:700;color:' + convColour(mj.conversion) + ';line-height:1;">' + convText(mj.conversion) + '</div>' +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">' +
-          '<div style="border-right:1px solid var(--border);padding-right:10px;">' +
-            '<div class="kpi-lbl" style="font-size:10px;">CP3 Stated</div>' +
-            '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:700;color:var(--text);line-height:1;">' + (mj.statedPax || 0) + '</div>' +
-            '<div style="font-size:10px;color:var(--muted);margin-top:4px;">' + (mj.statedVehicles || 0) + ' vehicles &middot; passengers</div>' +
-          '</div>' +
-          '<div>' +
-            '<div class="kpi-lbl" style="font-size:10px;">Gate Actual</div>' +
-            '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:700;color:var(--blue);line-height:1;">' + (mj.gateActual || 0) + '</div>' +
-            '<div style="font-size:10px;color:var(--muted);margin-top:4px;">recorded entries</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      // GV card
-      '<div class="card" style="border-top:4px solid var(--cp2);">' +
-        '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">' +
-          '<div style="font-weight:700;font-size:15px;color:var(--cp2);">Green Valley</div>' +
-          '<div style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:700;color:' + convColour(gv.conversion) + ';line-height:1;">' + convText(gv.conversion) + '</div>' +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">' +
-          '<div style="border-right:1px solid var(--border);padding-right:10px;">' +
-            '<div class="kpi-lbl" style="font-size:10px;">CP3 Stated</div>' +
-            '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:700;color:var(--text);line-height:1;">' + (gv.statedPax || 0) + '</div>' +
-            '<div style="font-size:10px;color:var(--muted);margin-top:4px;">' + (gv.statedVehicles || 0) + ' vehicles &middot; passengers</div>' +
-          '</div>' +
-          '<div>' +
-            '<div class="kpi-lbl" style="font-size:10px;">Gate Actual</div>' +
-            '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:700;color:var(--cp2);line-height:1;">' + (gv.gateActual || 0) + '</div>' +
-            '<div style="font-size:10px;color:var(--muted);margin-top:4px;">recorded entries</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
+  var kpis = [
+    {l:'Total Vehicles',   v:entries,               s:'entries logged'},
+    {l:'Unique Plates',    v:d.allTime.uniquePlates, s:'distinct vehicles'},
+    {l:'Total Passengers', v:pax_,                  s:'recorded'},
+    {l:'Stated MJSR',      v:mjsr_,                 s:entries>0?pct(mjsr_,entries)+' of total':'—', c:'#1a73e8'},
+    {l:'Green Valley',     v:gv_,                   s:entries>0?pct(gv_,entries)+' of total':'—',   c:'#059669'},
+    {l:'Gate MJSR',        v:gate.mjsr,             s:'actual entries'},
+    {l:'Gate GV',          v:gate.gv,               s:'actual entries'}
+  ];
 
-  // Overall stats row (compact)
-  var overallHtml =
-    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">' +
-      '<div class="card"><div class="kpi-lbl">Total Entries</div><div class="kpi-val" style="color:var(--blue)">' + (k.entries || 0) + '</div><div class="kpi-sub">CP1 + CP2 + CP3</div></div>' +
-      '<div class="card"><div class="kpi-lbl">Unique Vehicles</div><div class="kpi-val" style="color:var(--gold)">' + (k.uniquePlates || 0) + '</div><div class="kpi-sub">by plate</div></div>' +
-      '<div class="card"><div class="kpi-lbl">Total Passengers</div><div class="kpi-val">' + (k.passengers || 0) + '</div><div class="kpi-sub">across CPs</div></div>' +
-    '</div>';
+  var dest=d.destinations||{};
+  var dM=dest['Malam Jabba Ski Resort (MJSR)']||0, dG=dest['Green Valley']||0;
+  var dB=dest['Both / Touring the area']||0, dP=dest['Just passing through']||0;
+  var dT=dM+dG+dB+dP||1;
+  var gM=gate.mjsr, gG=gate.gv;
+  var fn=d.funnel||{};
+  var f1=fn.cp1ToCp2||{}, f2=fn.cp2ToCp3||{}, f3=fn.cp3ToGate||{}, fo=fn.overall||{};
+  var gTotal=(gM||0)+(gG||0);
 
-  var cpHtml = '<div class="grid">' +
-    '<div class="card"><div class="kpi-lbl" style="color:var(--cp1);">CP1</div><div class="kpi-val" style="color:var(--cp1);">' + (k.cp1Pax || 0) + '</div><div class="kpi-sub">' + (k.cp1 || 0) + ' vehicles</div></div>' +
-    '<div class="card"><div class="kpi-lbl" style="color:var(--cp2);">CP2</div><div class="kpi-val" style="color:var(--cp2);">' + (k.cp2Pax || 0) + '</div><div class="kpi-sub">' + (k.cp2 || 0) + ' vehicles</div></div>' +
-    '<div class="card"><div class="kpi-lbl" style="color:var(--cp3);">CP3</div><div class="kpi-val" style="color:var(--cp3);">' + (k.cp3Pax || 0) + '</div><div class="kpi-sub">' + (k.cp3 || 0) + ' vehicles</div></div>' +
-  '</div>';
+  var vt=d.vtypes||{}, vtp=d.vtypesPax||{};
+  var pr=d.provinces||{}, prT=Object.values(pr).reduce(function(s,v){return s+v;},0)||1;
+  var cp=d.checkpoints;
+  var cpIncomplete = cp.cp1.entries===0 || cp.cp2.entries===0;
 
-  // Vehicle types table
-  var vt = d.vtypes || {}, vtp = d.vtypesPax || {};
-  var vtKeys = Object.keys(vt).sort(function(a, b) { return vt[b] - vt[a]; });
-  var vtRows = vtKeys.length
-    ? vtKeys.map(function(t) { return '<tr><td>' + escapeHtml(t) + '</td><td style="text-align:center;font-weight:700;">' + vt[t] + '</td><td style="text-align:center;">' + (vtp[t] || 0) + '</td></tr>'; }).join('')
-    : '<tr><td colspan="3" class="empty">No data</td></tr>';
+  // Stage funnel rows
+  var funnelRows = [
+    {stage:'CP1 → CP2',c:'#d97706',vIn:f1.cp1Plates||0,pIn:f1.cp1Pax||0,cont:f1.reachedCp2||0,drop:f1.droppedOff||0,pct_:f1.continuedPct||0,note:'Plates from CP1 that continued to CP2'},
+    {stage:'CP2 → CP3',c:'#059669',vIn:f2.cp2Plates||0,pIn:f2.cp2Pax||0,cont:f2.reachedCp3||0,drop:f2.droppedOff||0,pct_:f2.continuedPct||0,note:'Plates from CP2 that continued to CP3'},
+    {stage:'CP3 → Gate',c:'#2563eb',vIn:f3.cp3Plates||0,pIn:f3.cp3Pax||0,cont:f3.gateTotal||0,drop:Math.max(0,(f3.cp3Pax||0)-(f3.gateTotal||0)),pct_:f3.conversionPct||0,note:'CP3 passengers vs total gate entries'}
+  ];
 
-  // Provinces
-  var pr = d.provinces || {};
-  var prKeys = Object.keys(pr).sort(function(a, b) { return pr[b] - pr[a]; });
-  var prRows = prKeys.length
-    ? prKeys.map(function(p) { return '<tr><td>' + escapeHtml(p) + '</td><td style="text-align:center;font-weight:700;">' + pr[p] + '</td></tr>'; }).join('')
-    : '<tr><td colspan="2" class="empty">No data</td></tr>';
-
-  // Daily breakdown
-  var daily = d.daily || [];
-  var dailyRows = daily.length
-    ? daily.map(function(x) {
-        return '<tr><td>' + escapeHtml(x.date) + '</td>' +
-          '<td style="text-align:center;font-weight:700;">' + x.entries + '</td>' +
-          '<td style="text-align:center;">' + x.passengers + '</td>' +
-          '<td style="text-align:center;color:var(--green);">' + x.mjsr + '</td>' +
-          '<td style="text-align:center;color:var(--cp2);">' + x.gv + '</td></tr>';
-      }).join('')
-    : '<tr><td colspan="5" class="empty">No data</td></tr>';
+  // Property conversion using CP3 pax as denominator
+  var cp3Pax=f3.cp3Pax||0;
+  var epM=cp3Pax>0?Math.round(cp3Pax*dM/dT):0;
+  var epG=cp3Pax>0?Math.round(cp3Pax*dG/dT):0;
 
   document.getElementById('r-content').innerHTML =
-    '<div class="sec-title" style="margin-top:0;">Per-Site Conversion <span style="font-weight:400;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;">&middot; CP3 Stated vs Gate Actual</span></div>' +
-    sitesHtml +
-    '<div class="sec-title">Overall Activity</div>' +
-    overallHtml +
-    '<div class="sec-title">By Checkpoint</div>' + cpHtml +
-    '<div class="sec-title">Daily Breakdown</div>' +
-    '<div class="tbl-wrap"><table><thead><tr><th>Date</th><th style="text-align:center;">Entries</th><th style="text-align:center;">Pax</th><th style="text-align:center;">MJSR (stated)</th><th style="text-align:center;">GV (stated)</th></tr></thead><tbody>' + dailyRows + '</tbody></table></div>' +
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:20px;">' +
-      '<div><div class="sec-title" style="margin-top:0;">Vehicle Types</div><div class="tbl-wrap"><table><thead><tr><th>Type</th><th style="text-align:center;">Count</th><th style="text-align:center;">Pax</th></tr></thead><tbody>' + vtRows + '</tbody></table></div></div>' +
-      '<div><div class="sec-title" style="margin-top:0;">Provinces</div><div class="tbl-wrap"><table><thead><tr><th>Province</th><th style="text-align:center;">Count</th></tr></thead><tbody>' + prRows + '</tbody></table></div></div>' +
+    '<div class="grid" style="margin-bottom:20px;">'+
+      kpis.map(function(k){
+        return '<div class="card"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+(k.c||'#1a73e8')+'">'+k.v+'</div><div class="kpi-sub">'+(k.s||'')+'</div></div>';
+      }).join('')+
+    '</div>'+
+
+    '<div class="sec-title">Stage-by-Stage Funnel Analysis</div>'+
+    (cpIncomplete?'<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:7px;padding:8px 14px;font-size:12px;color:#856404;margin-bottom:10px;">⚠ CP1 and/or CP2 have no entries yet — stage funnel will populate once all checkpoints are actively recording.</div>':'')+
+    '<div class="tbl-wrap"><table><thead><tr><th>Stage</th><th>Vehicles In</th><th>Passengers In</th><th>Continued / Gate In</th><th>Dropped Off</th><th>Retention %</th><th>Note</th></tr></thead><tbody>'+
+    funnelRows.map(function(r){
+      var pc=r.pct_>=75?'#16a34a':r.pct_>=40?'#d97706':'#dc2626';
+      return '<tr>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.stage+'</td>'+
+        '<td style="font-weight:700">'+r.vIn+'</td>'+
+        '<td style="font-weight:700">'+r.pIn+'</td>'+
+        '<td style="font-weight:700;color:'+pc+'">'+r.cont+'</td>'+
+        '<td style="font-weight:700;color:#dc2626">'+r.drop+'</td>'+
+        '<td style="font-size:20px;font-weight:700;color:'+pc+'">'+r.pct_+'%</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+r.note+'</td>'+
+      '</tr>';
+    }).join('')+
+    '</tbody></table></div>'+
+
+    '<div class="sec-title" style="margin-top:16px;">Overall Conversion</div>'+
+    '<div class="tbl-wrap" style="margin-bottom:16px;"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>'+
+    '<tr><td>Total Unique Vehicles (all CPs)</td><td style="font-weight:700">'+(fo.totalUniquePlates||0)+'</td></tr>'+
+    '<tr><td>Total Passengers (all CPs)</td><td style="font-weight:700">'+(fo.totalPax||0)+'</td></tr>'+
+    '<tr><td>Total Gate Entries (MJSR + GV)</td><td style="font-weight:700;color:#1a73e8">'+gTotal+'</td></tr>'+
+    '<tr><td>Overall Conversion (gate ÷ total pax)</td><td style="font-size:20px;font-weight:700;color:#1a73e8">'+(fo.conversionPct||0)+'%</td></tr>'+
+    '</tbody></table></div>'+
+
+    '<div class="sec-title">Property Breakdown — Passengers vs Gate Entries</div>'+
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Total passengers in vehicles that stated each destination vs actual gate entries per site.</p>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>Property</th><th>Passengers in Cars (stated dest.)</th><th>Gate Entries (people)</th><th>Conversion %</th><th>Difference</th></tr></thead><tbody>'+
+    [{n:'MJSR',g:gM,basePax:d.allTime.paxStatedMJSR||0,c:'#1a73e8'},{n:'Green Valley',g:gG,basePax:d.allTime.paxStatedGV||0,c:'#059669'}]
+    .map(function(r){
+      var conv    = r.basePax>0 ? pct(r.g,r.basePax) : '—';
+      var cc      = r.basePax>0 ? (parseInt(conv)>100?'#dc2626':r.c) : 'var(--muted)';
+      var diff    = r.basePax>0 ? (r.g-r.basePax) : null;
+      var diffStr = diff!==null?(diff>=0?'+'+diff:String(diff)):'—';
+      var diffCol = diff!==null?(diff>=0?'#16a34a':'#dc2626'):'var(--muted)';
+      return '<tr>'+
+        '<td style="font-weight:700;color:'+r.c+'">'+r.n+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:var(--muted)">'+(r.basePax>0?r.basePax:'—')+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+r.c+'">'+r.g+'</td>'+
+        '<td style="font-size:22px;font-weight:700;color:'+cc+'">'+conv+'</td>'+
+        '<td style="font-size:18px;font-weight:700;color:'+diffCol+'">'+diffStr+'</td>'+
+      '</tr>';
+    }).join('')+
+    '</tbody></table></div>'+
+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">'+
+      '<div><div class="sec-title">Province of Origin</div><div class="tbl-wrap"><table><thead><tr><th>Province</th><th>Vehicles</th><th>%</th></tr></thead><tbody>'+
+        Object.keys(pr).sort(function(a,b){return pr[b]-pr[a];}).map(function(k){ return '<tr><td>'+k+'</td><td style="font-weight:700">'+pr[k]+'</td><td>'+pct(pr[k],prT)+'</td></tr>'; }).join('')+
+      '</tbody></table></div></div>'+
+      '<div><div class="sec-title">Vehicle Types</div><div class="tbl-wrap"><table><thead><tr><th>Type</th><th>Count</th><th>Pax</th></tr></thead><tbody>'+
+        Object.keys(vt).sort(function(a,b){return vt[b]-vt[a];}).map(function(k){ return '<tr><td>'+k.split(' (')[0]+'</td><td style="font-weight:700">'+vt[k]+'</td><td>'+(vtp[k]||0)+'</td></tr>'; }).join('')+
+      '</tbody></table></div></div>'+
+    '</div>'+
+    '<div style="border-top:1px solid var(--border);padding-top:10px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;">'+
+      '<span>Generated: '+now.toLocaleString('en-GB')+'</span>'+
+      '<span>Samsons Group · MJSR Tourist Vehicle Count System</span>'+
     '</div>';
 }
 
-// =====================================================================
-// INITIAL LOAD
-// =====================================================================
-window.addEventListener('DOMContentLoaded', function() {
-  // Pre-fill date/time defaults
-  document.getElementById('cp4-date').value = todayISO();
-  document.getElementById('cp4-time').value = nowHHMM();
-  document.getElementById('g-date').value = todayISO();
-  loadStaffOptions();
-  loadDashboard(false);
-});
+// ── SUBMIT ENTRY ──────────────────────────────────────────
+function selCP(el, val) {
+  document.querySelectorAll('.cp-pill').forEach(function(p){ p.classList.remove('sel'); });
+  el.classList.add('sel');
+  document.getElementById('f-cp').value = val;
+  var isCP4 = val === 'CP4 - Exit Survey';
+  document.getElementById('cp123-fields').style.display = isCP4 ? 'none' : 'block';
+  document.getElementById('cp4-fields').style.display   = isCP4 ? 'block' : 'none';
+  if (isCP4) {
+    var n = new Date();
+    document.getElementById('cp4-date').value = n.toISOString().split('T')[0];
+    document.getElementById('cp4-time').value = pad(n.getHours())+':'+pad(n.getMinutes());
+  }
+  var cols = {
+    'CP1 - TMA Splinobo':'var(--cp1)',
+    'CP2 - Jungle Forest Area':'var(--cp2)',
+    'CP3 - MJSR / GV Road Split':'var(--cp3)',
+    'CP4 - Exit Survey':'var(--cp4)'
+  };
+  document.getElementById('shift-cp-label').style.color = cols[val] || 'var(--cp1)';
+  document.getElementById('shift-cp-label').textContent = val.replace(' - ',' · ');
+}
+
+function submitEntry() {
+  var staff   = document.getElementById('f-staff').value.trim();
+  var reg     = document.getElementById('f-reg').value.trim().toUpperCase();
+  var date    = document.getElementById('f-date').value;
+  var time    = document.getElementById('f-time').value;
+  var vtype   = document.getElementById('f-vtype').value;
+  var prov    = document.getElementById('f-prov').value;
+  var pax     = document.getElementById('f-pax').value;
+  var kids    = document.getElementById('f-children').value;
+  var dest    = document.getElementById('f-dest').value;
+  var entered = document.getElementById('f-entered').value;
+  var cp      = document.getElementById('f-cp').value;
+
+  if (!staff||!reg||!date||!time||!vtype||!prov||!pax||kids===''||!dest||!entered) {
+    toast('Complete all required fields','#dc2626'); return;
+  }
+
+  // Update session counters and shift display only
+  // Staff use the Google Form for actual data submission
+  var entry = {staff:staff,reg:reg,date:date,time:time,vtype:vtype,pax:parseInt(pax),dest:dest,entered:entered,cp:cp};
+  sessionE.unshift(entry);
+  sCount++; sPax+=parseInt(pax);
+  if (entered==='Yes - entered MJSR') sMJSR++;
+  document.getElementById('s-count').textContent = sCount;
+  document.getElementById('s-pax').textContent   = sPax;
+  document.getElementById('s-mjsr').textContent  = sMJSR;
+  renderShift();
+
+  // Reset form fields
+  ['f-reg','f-vtype','f-prov','f-pax','f-children','f-dest','f-entered','f-company','f-phone','f-notes'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  var n=new Date();
+  document.getElementById('f-time').value=pad(n.getHours())+':'+pad(n.getMinutes());
+  toast('✓ Logged — '+reg,'#16a34a');
+}
+
+function renderShift() {
+  var el = document.getElementById('shift-log');
+  if (!sessionE.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🚗</div><p>No entries yet.</p></div>'; return; }
+  el.innerHTML = sessionE.slice(0,20).map(function(e){
+    var col = e.entered==='Yes - entered MJSR'?'var(--green)':e.entered.indexOf('Green Valley')>-1?'var(--cp2)':'var(--muted)';
+    return '<div class="log-row"><div><div class="log-reg">'+e.reg+'</div><div class="log-meta">'+e.vtype.split(' (')[0]+' · '+e.pax+' pax · '+e.dest.replace('Malam Jabba Ski Resort (MJSR)','MJSR').replace('Unknown / Not stated','Unknown').replace('Both / Touring the area','Both')+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:600;color:'+col+'">'+e.entered.split(' - ')[0]+'</div><div class="log-time">'+e.time+'</div></div></div>';
+  }).join('');
+}
+
+// ── GATE ENTRY ────────────────────────────────────────────
+function submitGate() {
+  var staff = document.getElementById('g-staff').value.trim();
+  var date  = document.getElementById('g-date').value;
+  var prop  = document.getElementById('g-prop').value;
+  var vis   = document.getElementById('g-vis').value;
+  var notes = document.getElementById('g-notes').value.trim();
+  if (!staff||!date||!prop||vis==='') { toast('Complete all required fields','#dc2626'); return; }
+  var btn = document.getElementById('gate-btn');
+  btn.textContent='SUBMITTING…'; btn.disabled=true;
+  var url = API+'?action=gateEntry&staff='+encodeURIComponent(staff)+'&date='+encodeURIComponent(date)+'&property='+encodeURIComponent(prop)+'&visitors='+encodeURIComponent(vis)+'&notes='+encodeURIComponent(notes);
+  apiFetch(url, function(err,d){
+    btn.textContent='SUBMIT GATE ENTRY'; btn.disabled=false;
+    if (err||d.status!=='ok') { toast('Error saving entry','#dc2626'); return; }
+    gateCache = null; // invalidate cache
+    cache = null;     // invalidate main cache so dashboard refreshes
+    loadGate(true);
+    ['g-staff','g-vis','g-notes'].forEach(function(id){ document.getElementById(id).value=''; });
+    toast('✓ Gate entry saved — '+prop+': '+vis+' visitors','#16a34a');
+  });
+}
+
+function loadGate(force) {
+  if (!force && gateCache) { renderGate(gateCache); return; }
+  apiFetch(API+'?action=getGateEntries', function(err,d){
+    if (err) { toast('Could not load gate entries','#dc2626'); return; }
+    gateCache = d.entries || [];
+    renderGate(gateCache);
+  });
+}
+
+function renderGate(entries) {
+  var el = document.getElementById('gate-log');
+  if (!entries.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🎫</div><p>No entries yet.</p></div>'; return; }
+  el.innerHTML = entries.map(function(e,i){
+    var col = e.property==='MJSR'?'#1a73e8':'#059669';
+    return '<div class="log-row" id="gr-'+i+'">'+
+      '<div style="flex:1"><div style="font-size:16px;font-weight:700;color:'+col+'">'+e.property+'</div><div class="log-meta">'+e.date+(e.notes?' · '+e.notes:'')+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:12px;">'+
+        '<div style="text-align:right"><div style="font-size:22px;font-weight:700;color:'+col+'">'+e.visitors+'</div><div class="log-time">visitors</div></div>'+
+        '<button class="btn-sm" onclick="openEdit('+i+')">✏ Edit</button>'+
+      '</div></div>'+
+      '<div class="edit-box" id="ge-'+i+'">'+
+        '<div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;">Edit Entry</div>'+
+        '<div class="edit-grid">'+
+          '<div><label class="edit-label">Date</label><input type="date" id="ge-d-'+i+'" value="'+e.date+'"></div>'+
+          '<div><label class="edit-label">Property</label><select id="ge-p-'+i+'"><option value="MJSR"'+(e.property==='MJSR'?' selected':'')+'>MJSR</option><option value="GV"'+(e.property==='GV'?' selected':'')+'>GV</option></select></div>'+
+          '<div><label class="edit-label">Visitors</label><input type="number" id="ge-v-'+i+'" value="'+e.visitors+'" min="0"></div>'+
+        '</div>'+
+        '<div style="margin-bottom:10px;"><label class="edit-label">Notes</label><input type="text" id="ge-n-'+i+'" value="'+(e.notes||'')+'"></div>'+
+        '<div style="display:flex;gap:8px;">'+
+          '<button class="btn-sm blue" onclick="saveEdit('+i+','+e.rowIndex+')">SAVE</button>'+
+          '<button class="btn-sm" onclick="closeEdit('+i+')">CANCEL</button>'+
+        '</div>'+
+      '</div>';
+  }).join('');
+}
+
+function openEdit(i) {
+  document.querySelectorAll('.edit-box').forEach(function(b){ b.style.display='none'; });
+  document.getElementById('ge-'+i).style.display='block';
+}
+function closeEdit(i) { document.getElementById('ge-'+i).style.display='none'; }
+
+function saveEdit(i, rowIndex) {
+  var date=document.getElementById('ge-d-'+i).value;
+  var prop=document.getElementById('ge-p-'+i).value;
+  var vis =document.getElementById('ge-v-'+i).value;
+  var note=document.getElementById('ge-n-'+i).value;
+  var url = API+'?action=editGateEntry&rowIndex='+rowIndex+'&date='+encodeURIComponent(date)+'&property='+encodeURIComponent(prop)+'&visitors='+encodeURIComponent(vis)+'&notes='+encodeURIComponent(note);
+  apiFetch(url, function(err,d){
+    if (err||d.status!=='ok') { toast('Could not save edit','#dc2626'); return; }
+    gateCache[i].date=date; gateCache[i].property=prop; gateCache[i].visitors=parseInt(vis); gateCache[i].notes=note;
+    renderGate(gateCache);
+    cache=null; // invalidate main data cache
+    toast('✓ Updated','#16a34a');
+  });
+}
+
+// ── LOG ───────────────────────────────────────────────────
+function loadLog(force) {
+  if (!force && logCache) { filterLog(); return; }
+  document.getElementById('log-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:28px;color:var(--muted);">Loading…</td></tr>';
+  apiFetch(API+'?action=getLog', function(err,d){
+    if (err) { toast('Could not load log','#dc2626'); return; }
+    logCache = d.entries || [];
+    filterLog();
+  });
+}
+
+function filterLog() {
+  if (!logCache) return;
+  var s  = (document.getElementById('log-search').value||'').toLowerCase();
+  var cp = document.getElementById('log-cp').value;
+  logFiltered = logCache.filter(function(e){
+    return (!s||(e.reg&&e.reg.toLowerCase().indexOf(s)>-1)||(e.staff&&e.staff.toLowerCase().indexOf(s)>-1)||(e.cp&&e.cp.toLowerCase().indexOf(s)>-1))
+        && (!cp||(e.cp&&e.cp.indexOf(cp)>-1));
+  });
+  logPage_=1; renderLog();
+}
+
+function renderLog() {
+  var total=logFiltered.length, start=(logPage_-1)*logSize, end=Math.min(start+logSize,total);
+  var pages=Math.ceil(total/logSize)||1;
+  var rows=logFiltered.slice(start,end);
+  document.getElementById('log-info').textContent='Showing '+(total?start+1:0)+'–'+end+' of '+total;
+  document.getElementById('log-page').textContent='Page '+logPage_+' of '+pages;
+  document.getElementById('log-prev').disabled=logPage_<=1;
+  document.getElementById('log-next').disabled=logPage_>=pages;
+  var cpC={'CP1':'var(--cp1)','CP2':'var(--cp2)','CP3':'var(--cp3)'};
+  var cpCounts={CP1:0,CP2:0,CP3:0}, staffC={};
+  logFiltered.forEach(function(e){
+    if(e.cp){if(e.cp.indexOf('CP1')>-1)cpCounts.CP1++;else if(e.cp.indexOf('CP2')>-1)cpCounts.CP2++;else if(e.cp.indexOf('CP3')>-1)cpCounts.CP3++;}
+    if(e.staff)staffC[e.staff]=(staffC[e.staff]||0)+1;
+  });
+  document.getElementById('log-summary').innerHTML=
+    '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;">Total: <strong style="color:var(--blue)">'+total+'</strong></div>'+
+    ['CP1','CP2','CP3'].map(function(cp){var col=cp==='CP1'?'var(--cp1)':cp==='CP2'?'var(--cp2)':'var(--cp3)';return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;"><span style="font-weight:700;color:'+col+'">'+cp+'</span>: '+cpCounts[cp]+'</div>';}).join('');
+  if (!rows.length) { document.getElementById('log-body').innerHTML='<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--muted);">No entries match filter</td></tr>'; return; }
+  document.getElementById('log-body').innerHTML=rows.map(function(e,i){
+    var idx = start+i; // index into logFiltered
+    var cpShort=e.cp?e.cp.replace(' - TMA Splinobo','').replace(' - Jungle Forest Area','').replace(' - MJSR / GV Road Split',''):'—';
+    var cpCol=(e.cp&&e.cp.indexOf('CP1')>-1)?'var(--cp1)':(e.cp&&e.cp.indexOf('CP2')>-1)?'var(--cp2)':'var(--cp3)';
+    var entCol=e.entered==='Yes - entered MJSR'?'var(--green)':e.entered.indexOf('Green Valley')>-1?'var(--cp2)':'var(--muted)';
+    var entShort=e.entered?e.entered.replace('Yes - entered MJSR','✓ MJSR').replace('No - went to Green Valley','GV').replace('No - turned around / left area','Turned').replace('No - passed through only','Passed'):'—';
+    var editRow =
+      '<tr id="log-edit-row-'+idx+'" style="display:none;background:#f0f7ff;">'+
+        '<td colspan="11" style="padding:14px 16px;">'+
+          '<div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;">Edit Entry — '+e.reg+'</div>'+
+          '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px;">'+
+            '<div><label class="edit-label">Date</label><input type="date" id="le-date-'+idx+'" value="'+(e.date||'')+'"></div>'+
+            '<div><label class="edit-label">Registration</label><input type="text" id="le-reg-'+idx+'" value="'+e.reg+'" style="text-transform:uppercase"></div>'+
+            '<div><label class="edit-label">Checkpoint</label>'+
+              '<select id="le-cp-'+idx+'">'+
+                '<option value="CP1 - TMA Splinobo"'+(e.cp==='CP1 - TMA Splinobo'?' selected':'')+'>CP1 - TMA Splinobo</option>'+
+                '<option value="CP2 - Jungle Forest Area"'+(e.cp==='CP2 - Jungle Forest Area'?' selected':'')+'>CP2 - Jungle Forest Area</option>'+
+                '<option value="CP3 - MJSR / GV Road Split"'+(e.cp==='CP3 - MJSR / GV Road Split'?' selected':'')+'>CP3 - MJSR / GV Road Split</option>'+
+              '</select>'+
+            '</div>'+
+            '<div><label class="edit-label">Passengers</label><input type="number" id="le-pax-'+idx+'" value="'+e.pax+'" min="1"></div>'+
+            '<div><label class="edit-label">Destination</label>'+
+              '<select id="le-dest-'+idx+'">'+
+                '<option value="Malam Jabba Ski Resort (MJSR)"'+(e.dest.indexOf('MJSR')>-1?' selected':'')+'>MJSR</option>'+
+                '<option value="Green Valley"'+(e.dest==='Green Valley'?' selected':'')+'>Green Valley</option>'+
+                '<option value="Both / Touring the area"'+(e.dest.indexOf('Both')>-1?' selected':'')+'>Both / Touring</option>'+
+                '<option value="Just passing through"'+(e.dest.indexOf('passing')>-1?' selected':'')+'>Passing Through</option>'+
+                '<option value="Unknown / Not stated"'+(e.dest.indexOf('Unknown')>-1?' selected':'')+'>Unknown</option>'+
+              '</select>'+
+            '</div>'+
+            '<div><label class="edit-label">Entered MJSR?</label>'+
+              '<select id="le-entered-'+idx+'">'+
+                '<option value="Yes - entered MJSR"'+(e.entered==='Yes - entered MJSR'?' selected':'')+'>Yes - entered MJSR</option>'+
+                '<option value="No - went to Green Valley"'+(e.entered==='No - went to Green Valley'?' selected':'')+'>No - Green Valley</option>'+
+                '<option value="No - turned around / left area"'+(e.entered==='No - turned around / left area'?' selected':'')+'>No - Turned around</option>'+
+                '<option value="No - passed through only"'+(e.entered==='No - passed through only'?' selected':'')+'>No - Passed through</option>'+
+                '<option value="Unknown"'+(e.entered==='Unknown'?' selected':'')+'>Unknown</option>'+
+              '</select>'+
+            '</div>'+
+          '</div>'+
+          '<div style="display:flex;gap:8px;">'+
+            '<button class="btn-sm blue" onclick="saveLogEdit('+idx+',\''+e.rowIndex+'\')">SAVE CHANGES</button>'+
+            '<button class="btn-sm" onclick="closeLogEdit('+idx+')">CANCEL</button>'+
+          '</div>'+
+        '</td>'+
+      '</tr>';
+    return '<tr id="log-row-'+idx+'">'+
+      '<td style="color:var(--muted);font-size:11px">'+(idx+1)+'</td>'+
+      '<td style="font-size:12px;white-space:nowrap">'+e.timestamp+'</td>'+
+      '<td style="font-weight:600;font-size:13px">'+e.staff+'</td>'+
+      '<td><span style="font-weight:700;font-size:13px;color:'+cpCol+'">'+cpShort+'</span></td>'+
+      '<td style="font-weight:700;font-size:15px;color:var(--blue);letter-spacing:.04em">'+e.reg+'</td>'+
+      '<td style="font-size:12px">'+e.vtype.split(' (')[0]+'</td>'+
+      '<td style="text-align:center;font-weight:600">'+e.pax+'</td>'+
+      '<td style="font-size:12px">'+e.dest.replace('Malam Jabba Ski Resort (MJSR)','MJSR').replace('Unknown / Not stated','Unknown').replace('Both / Touring the area','Both')+'</td>'+
+      '<td style="font-size:12px;font-weight:600;color:'+entCol+'">'+entShort+'</td>'+
+      '<td style="font-size:12px">'+e.province.split(' (')[0]+'</td>'+
+      '<td><button class="btn-sm" onclick="openLogEdit('+idx+')" style="font-size:11px;padding:4px 10px;">✏</button></td>'+
+    '</tr>'+editRow;
+  }).join('');
+}
+function logPage(d){ logPage_=Math.max(1,Math.min(logPage_+d,Math.ceil(logFiltered.length/logSize)||1)); renderLog(); }
+
+function openLogEdit(idx) {
+  // Close any other open edit rows
+  document.querySelectorAll('[id^="log-edit-row-"]').forEach(function(r){ r.style.display='none'; });
+  document.getElementById('log-edit-row-'+idx).style.display='table-row';
+}
+function closeLogEdit(idx) {
+  document.getElementById('log-edit-row-'+idx).style.display='none';
+}
+function saveLogEdit(idx, rowIndex) {
+  var date    = document.getElementById('le-date-'+idx).value;
+  var reg     = document.getElementById('le-reg-'+idx).value.trim().toUpperCase();
+  var cp      = document.getElementById('le-cp-'+idx).value;
+  var pax     = document.getElementById('le-pax-'+idx).value;
+  var dest    = document.getElementById('le-dest-'+idx).value;
+  var entered = document.getElementById('le-entered-'+idx).value;
+  if (!date||!reg||!pax) { toast('Date, registration and passengers are required','#dc2626'); return; }
+  var url = API+'?action=editLogEntry'+
+    '&rowIndex='+encodeURIComponent(rowIndex)+
+    '&date='+encodeURIComponent(date)+
+    '&reg='+encodeURIComponent(reg)+
+    '&cp='+encodeURIComponent(cp)+
+    '&pax='+encodeURIComponent(pax)+
+    '&dest='+encodeURIComponent(dest)+
+    '&entered='+encodeURIComponent(entered);
+  apiFetch(url, function(err,d){
+    if (err||d.status!=='ok') { toast('Could not save — '+( d&&d.error||err),'#dc2626'); return; }
+    // Update local cache
+    logFiltered[idx].date    = date;
+    logFiltered[idx].reg     = reg;
+    logFiltered[idx].cp      = cp;
+    logFiltered[idx].pax     = parseInt(pax);
+    logFiltered[idx].dest    = dest;
+    logFiltered[idx].entered = entered;
+    cache = null; // invalidate dashboard cache
+    renderLog();
+    toast('✓ Entry updated','#16a34a');
+  });
+}
+
+// ── EXPORT CSV ────────────────────────────────────────────
+function exportCSV() {
+  if (!cache) { toast('Load the Report first','#dc2626'); return; }
+  var d=cache, rows=[], now=new Date().toLocaleDateString('en-GB');
+  rows.push(['MJSR Tourist Vehicle Count — Report','Generated:',now]);
+  rows.push([]);
+  rows.push(['Total Entries',d.allTime.entries],['Unique Plates',d.allTime.uniquePlates],['Total Passengers',d.allTime.passengers],['Entered MJSR',d.allTime.enteredMJSR],['Green Valley',d.allTime.wentGV],['Conversion Rate',d.allTime.conversionRate]);
+  rows.push([]);
+  rows.push(['CHECKPOINTS'],['','Entries','Plates','MJSR']);
+  rows.push(['CP1',d.checkpoints.cp1.entries,d.checkpoints.cp1.plates,d.checkpoints.cp1.mjsr]);
+  rows.push(['CP2',d.checkpoints.cp2.entries,d.checkpoints.cp2.plates,d.checkpoints.cp2.mjsr]);
+  rows.push(['CP3',d.checkpoints.cp3.entries,d.checkpoints.cp3.plates,d.checkpoints.cp3.mjsr]);
+  rows.push([]);
+  rows.push(['PROVINCES'],['Province','Count']);
+  Object.keys(d.provinces||{}).forEach(function(k){rows.push([k,d.provinces[k]]);});
+  rows.push([]);
+  rows.push(['VEHICLE TYPES'],['Type','Count','Passengers']);
+  Object.keys(d.vtypes||{}).forEach(function(k){rows.push([k,d.vtypes[k],(d.vtypesPax||{})[k]||0]);});
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='MJSR_Report_'+now.replace(/\//g,'-')+'.csv'; a.click();
+  toast('✓ CSV exported','#16a34a');
+}
+
+// ── DROP-OFF TABLE ────────────────────────────────────────
+function renderDropoffTable(c1, c2, c3, p1, p2, p3) {
+  var rows = [
+    { stage:'CP1 → CP2', vIn:c1, pIn:p1, vNext:c2, pNext:p2 },
+    { stage:'CP2 → CP3', vIn:c2, pIn:p2, vNext:c3, pNext:p3 },
+    { stage:'CP3 → Gate', vIn:c3, pIn:p3, vNext:null, pNext:null }
+  ];
+  document.getElementById('dropoff-body').innerHTML = rows.map(function(r) {
+    if (r.vNext === null) {
+      // CP3 row — show gate comparison instead
+      return '<tr>'+
+        '<td style="font-weight:700;color:var(--cp3)">'+r.stage+'</td>'+
+        '<td style="font-weight:700">'+r.vIn+'</td>'+
+        '<td style="font-weight:700">'+r.pIn+'</td>'+
+        '<td colspan="5" style="color:var(--muted);font-size:12px;">See Gate Conversion in Funnel Analysis below</td>'+
+      '</tr>';
+    }
+    var vDiff  = r.vNext - r.vIn;
+    var pDiff  = r.pNext - r.pIn;
+    var retPct = r.vIn > 0 ? Math.round(r.vNext / r.vIn * 100) : null;
+    // Colour: green if retained/gained, red if dropped
+    var diffCol  = vDiff >= 0 ? '#16a34a' : '#dc2626';
+    var retCol   = retPct === null ? 'var(--muted)' : retPct >= 75 ? '#16a34a' : retPct >= 50 ? '#d97706' : '#dc2626';
+    var vDiffStr = vDiff >= 0 ? '+'+vDiff+' (gain)' : vDiff+' (drop)';
+    var pDiffStr = pDiff >= 0 ? '+'+pDiff+' (gain)' : pDiff+' (drop)';
+    var stageCol = r.stage.indexOf('CP1')===0 ? 'var(--cp1)' : 'var(--cp2)';
+    return '<tr>'+
+      '<td style="font-weight:700;color:'+stageCol+'">'+r.stage+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;">'+r.vIn+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;">'+r.pIn+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;">'+r.vNext+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;">'+r.pNext+'</td>'+
+      '<td style="font-weight:700;color:'+diffCol+'">'+vDiffStr+'</td>'+
+      '<td style="font-weight:700;color:'+diffCol+'">'+pDiffStr+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;color:'+retCol+'">'+(retPct !== null ? retPct+'%' : '—')+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ── CP4 EXIT SURVEY ───────────────────────────────────────
+function initCP4() {
+  var n = new Date();
+  document.getElementById('cp4-date').value = n.toISOString().split('T')[0];
+  document.getElementById('cp4-time').value = pad(n.getHours())+':'+pad(n.getMinutes());
+}
+
+function setCP4Entry(val) {
+  document.getElementById('cp4-entered').value = val;
+  document.getElementById('cp4-ent-yes').style.background = val==='Yes' ? '#16a34a' : '#fff';
+  document.getElementById('cp4-ent-yes').style.color      = val==='Yes' ? '#fff'    : '';
+  document.getElementById('cp4-ent-yes').style.borderColor= val==='Yes' ? '#16a34a' : 'var(--border)';
+  document.getElementById('cp4-ent-no').style.background  = val==='No'  ? '#dc2626' : '#fff';
+  document.getElementById('cp4-ent-no').style.color       = val==='No'  ? '#fff'    : '';
+  document.getElementById('cp4-ent-no').style.borderColor = val==='No'  ? '#dc2626' : 'var(--border)';
+  document.getElementById('cp4-no-section').style.display  = val==='No'  ? 'block' : 'none';
+  document.getElementById('cp4-yes-section').style.display = val==='Yes' ? 'block' : 'none';
+  // Reset sub-selections
+  document.getElementById('cp4-no-reason').value      = '';
+  document.getElementById('cp4-price-rating').value   = '';
+  document.getElementById('cp4-offering-rating').value= '';
+  document.querySelectorAll('.cp4-r-btn,.cp4-p-btn,.cp4-o-btn').forEach(function(b){
+    b.style.background='#fff'; b.style.color=''; b.style.borderColor='var(--border)';
+  });
+}
+
+function setCP4Reason(btn, val) {
+  document.getElementById('cp4-no-reason').value = val;
+  document.querySelectorAll('.cp4-r-btn').forEach(function(b){
+    b.style.background='#fff'; b.style.color=''; b.style.borderColor='var(--border)';
+  });
+  btn.style.background='#dc2626'; btn.style.color='#fff'; btn.style.borderColor='#dc2626';
+}
+
+function setCP4Price(btn, val) {
+  document.getElementById('cp4-price-rating').value = val;
+  document.querySelectorAll('.cp4-p-btn').forEach(function(b){
+    b.style.background='#fff'; b.style.color=''; b.style.borderColor='var(--border)';
+  });
+  btn.style.background='#1a73e8'; btn.style.color='#fff'; btn.style.borderColor='#1a73e8';
+}
+
+function setCP4Offering(btn, val) {
+  document.getElementById('cp4-offering-rating').value = val;
+  document.querySelectorAll('.cp4-o-btn').forEach(function(b){
+    b.style.background='#fff'; b.style.color=''; b.style.borderColor='var(--border)';
+  });
+  btn.style.background='#059669'; btn.style.color='#fff'; btn.style.borderColor='#059669';
+}
+
+function submitCP4() {
+  var staff   = document.getElementById('cp4-staff').value.trim();
+  var reg     = document.getElementById('cp4-reg').value.trim().toUpperCase();
+  var date    = document.getElementById('cp4-date').value;
+  var time    = document.getElementById('cp4-time').value;
+  var vtype   = document.getElementById('cp4-vtype').value;
+  var pax     = document.getElementById('cp4-pax').value;
+  var entered = document.getElementById('cp4-entered').value;
+  if (!staff||!reg||!date||!time||!vtype||!pax||!entered) {
+    toast('Complete all required fields and select Yes/No for entry','#dc2626'); return;
+  }
+  var noReason = document.getElementById('cp4-no-reason').value;
+  var priceR   = document.getElementById('cp4-price-rating').value;
+  var offerR   = document.getElementById('cp4-offering-rating').value;
+  var notes    = document.getElementById('cp4-notes').value.trim();
+  var btn = document.getElementById('cp4-submit-btn');
+  btn.textContent='SUBMITTING…'; btn.disabled=true;
+  var url = API+'?action=saveCP4'+
+    '&staff='+encodeURIComponent(staff)+
+    '&reg='+encodeURIComponent(reg)+
+    '&date='+encodeURIComponent(date)+
+    '&time='+encodeURIComponent(time)+
+    '&vtype='+encodeURIComponent(vtype)+
+    '&pax='+encodeURIComponent(pax)+
+    '&entered='+encodeURIComponent(entered)+
+    '&noReason='+encodeURIComponent(noReason)+
+    '&priceRating='+encodeURIComponent(priceR)+
+    '&offeringRating='+encodeURIComponent(offerR)+
+    '&notes='+encodeURIComponent(notes);
+  apiFetch(url, function(err,d){
+    btn.textContent='SUBMIT EXIT SURVEY'; btn.disabled=false;
+    if (err||d.status!=='ok') { toast('Could not save — check connection','#dc2626'); return; }
+    // Reset form
+    ['cp4-reg','cp4-pax','cp4-notes'].forEach(function(id){ document.getElementById(id).value=''; });
+    document.getElementById('cp4-entered').value='';
+    document.getElementById('cp4-no-reason').value='';
+    document.getElementById('cp4-price-rating').value='';
+    document.getElementById('cp4-offering-rating').value='';
+    document.getElementById('cp4-no-section').style.display='none';
+    document.getElementById('cp4-yes-section').style.display='none';
+    document.querySelectorAll('.cp4-ans-btn,.cp4-r-btn,.cp4-p-btn,.cp4-o-btn').forEach(function(b){
+      b.style.background='#fff'; b.style.color=''; b.style.borderColor='var(--border)';
+    });
+    var n=new Date(); document.getElementById('cp4-time').value=pad(n.getHours())+':'+pad(n.getMinutes());
+    toast('✓ Exit survey saved — '+reg+(entered==='No'?' [Did not enter]':' [Entered resort]'),'#16a34a');
+    loadCP4Summary();
+  });
+}
+
+function loadCP4Summary() {
+  apiFetch(API+'?action=getCP4Summary', function(err,d){
+    if (err) { toast('Could not load CP4 summary','#dc2626'); return; }
+    renderCP4Summary(d);
+  });
+}
+
+function renderCP4Summary(s) {
+  var total = s.total||0;
+  var entPct = total>0 ? Math.round(s.enteredYes/total*100) : 0;
+  var noPct  = total>0 ? Math.round(s.enteredNo/total*100)  : 0;
+  document.getElementById('cp4-summary-grid').innerHTML = [
+    {l:'Total Surveys',    v:total,          s:'all time',              c:'#1a73e8'},
+    {l:'Today',            v:s.todayTotal||0, s:'surveys today',        c:'#1a73e8'},
+    {l:'Entered Resort',   v:s.enteredYes||0, s:entPct+'% of surveyed', c:'#16a34a'},
+    {l:'Did Not Enter',    v:s.enteredNo||0,  s:noPct+'% of surveyed',  c:'#dc2626'}
+  ].map(function(k){
+    return '<div class="card" style="text-align:center;border-top:3px solid '+k.c+';">'+
+      '<div class="kpi-lbl">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div></div>';
+  }).join('');
+
+  function tableRows(obj) {
+    var t = Object.values(obj).reduce(function(a,b){return a+b;},0)||1;
+    return Object.keys(obj).sort(function(a,b){return obj[b]-obj[a];}).map(function(k){
+      return '<tr><td>'+k+'</td><td style="font-weight:700">'+obj[k]+'</td><td>'+pct(obj[k],t)+'</td></tr>';
+    }).join('') || '<tr><td colspan="3" style="color:var(--muted);text-align:center;">No data yet</td></tr>';
+  }
+  document.getElementById('cp4-reasons-body').innerHTML  = tableRows(s.noReasons||{});
+  document.getElementById('cp4-price-body').innerHTML    = tableRows(s.priceRatings||{});
+  document.getElementById('cp4-offering-body').innerHTML = tableRows(s.offeringRatings||{});
+}
+
+// ── AUDIT ─────────────────────────────────────────────────
+var AUDIT_PIN = '1234';
+var auditUnlocked = false;
+var auditData = null;
+var plateCurrent = 'all';
+var auditWindow  = '7d';
+
+function checkAuditPin() {
+  var pin = document.getElementById('audit-pin').value;
+  if (pin === AUDIT_PIN) {
+    auditUnlocked = true;
+    document.getElementById('audit-lock').style.display    = 'none';
+    document.getElementById('audit-content').style.display = 'block';
+    loadAuditWindow('7d');
+  } else {
+    document.getElementById('audit-pin-err').style.display = 'block';
+    document.getElementById('audit-pin').value = '';
+  }
+}
+
+function loadAuditWindow(win) {
+  auditWindow = win;
+  document.getElementById('audit-date').value = '';
+  // Highlight active button
+  ['today','7d','14d','30d','90d','all'].forEach(function(w) {
+    var btn = document.getElementById('aw-'+w);
+    if (!btn) return;
+    btn.style.borderColor = w===win ? 'var(--blue)' : 'var(--border)';
+    btn.style.color       = w===win ? 'var(--blue)' : 'var(--muted)';
+    btn.style.fontWeight  = w===win ? '700' : '400';
+  });
+  loadAudit('window='+win);
+}
+
+function loadAuditDate() {
+  var d = document.getElementById('audit-date').value;
+  if (!d) return;
+  ['today','7d','14d','30d','90d','all'].forEach(function(w) {
+    var btn = document.getElementById('aw-'+w);
+    if (btn) { btn.style.borderColor='var(--border)'; btn.style.color='var(--muted)'; btn.style.fontWeight='400'; }
+  });
+  loadAudit('date='+d);
+}
+
+function loadAudit(params) {
+  var url = API + '?action=getAudit' + (params ? '&'+params : '&window='+auditWindow);
+  ['audit-staff-body','audit-daily-body','audit-plate-body'].forEach(function(id){
+    var tbody = document.getElementById(id);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
+  });
+  apiFetch(url, function(err, d) {
+    if (err) { toast('Could not load audit data', '#dc2626'); return; }
+    auditData = d;
+    document.getElementById('audit-period').textContent = 'Period: ' + d.fromDate + ' to ' + d.toDate;
+    renderAuditSummary(d.summary);
+    renderAuditStaff(d.staffCounts);
+    renderAuditDaily(d.dailyCounts);
+    renderJourneyDropoff(d.journeyDropoff);
+    renderAuditPlates('all');
+  });
+}
+
+function renderAuditSummary(s) {
+  document.getElementById('audit-summary').innerHTML = [
+    {l:'CP3 Plates (baseline)', v:s.cp3Plates,       s:'ground truth',              c:'var(--cp3)'},
+    {l:'CP2 Plates',            v:s.cp2Plates,        s:'recorded at CP2',           c:'var(--cp2)'},
+    {l:'CP1 Plates',            v:s.cp1Plates,        s:'recorded at CP1',           c:'var(--cp1)'},
+    {l:'Seen All 3 CPs',        v:s.seenAll3,         s:'fully tracked',             c:'#16a34a'},
+    {l:'CP1 Miss Rate',         v:s.cp1MissRate+'%',  s:s.cp3NotInCP1+' CP3 plates not in CP1',   c:s.cp1MissRate>30?'#dc2626':s.cp1MissRate>10?'#d97706':'#16a34a'},
+    {l:'CP2 Miss Rate',         v:s.cp2MissRate+'%',  s:s.cp3NotInCP2+' CP3 plates not in CP2',   c:s.cp2MissRate>30?'#dc2626':s.cp2MissRate>10?'#d97706':'#16a34a'},
+    {l:'Both CPs Missed',       v:s.bothMissRate+'%', s:s.cp3NotInEither+' plates missed by both', c:s.bothMissRate>20?'#dc2626':s.bothMissRate>5?'#d97706':'#16a34a'}
+  ].map(function(k){
+    return '<div class="card" style="text-align:center;border-top:3px solid '+k.c+';">'+
+      '<div class="kpi-lbl">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div></div>';
+  }).join('');
+
+  // Render CP3 baseline daily miss table
+  var cba = auditData.cp3BaselineAnalysis || {};
+  renderCP3BaselineDaily(cba.dailyMiss || []);
+  renderCP3MissedDetail(cba.cp3MissedCP1Detail || []);
+}
+
+function renderCP3BaselineDaily(daily) {
+  var el = document.getElementById('audit-baseline-body');
+  if (!el) return;
+  if (!daily || !daily.length) {
+    el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted);">No CP3 data in this period</td></tr>';
+    return;
+  }
+  el.innerHTML = daily.map(function(d2) {
+    var cp1MissPct = d2.cp3 > 0 ? Math.round(d2.missedCP1 / d2.cp3 * 100) : 0;
+    var cp2MissPct = d2.cp3 > 0 ? Math.round(d2.missedCP2 / d2.cp3 * 100) : 0;
+    var rowBg = cp1MissPct > 50 ? 'background:#fff5f5;' : cp1MissPct > 25 ? 'background:#fffbeb;' : '';
+    var cp1Col = cp1MissPct > 50 ? '#dc2626' : cp1MissPct > 25 ? '#d97706' : '#16a34a';
+    var cp2Col = cp2MissPct > 50 ? '#dc2626' : cp2MissPct > 25 ? '#d97706' : '#16a34a';
+    var flag   = cp1MissPct > 50 ? '<span style="color:#dc2626;font-weight:700;">🚨 CP1 critical miss</span>' :
+                 cp1MissPct > 25 ? '<span style="color:#d97706;font-weight:700;">⚠ CP1 high miss</span>' :
+                 cp1MissPct > 10 ? '<span style="color:#d97706;">△ CP1 moderate</span>' :
+                                   '<span style="color:#16a34a;">✓ Within range</span>';
+    return '<tr style="'+rowBg+'">'+
+      '<td style="font-weight:600">'+d2.date+'</td>'+
+      '<td style="font-weight:700;color:var(--cp3)">'+d2.cp3+'</td>'+
+      '<td style="font-weight:700;color:'+cp1Col+'">'+d2.missedCP1+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:'+cp1Col+'">'+cp1MissPct+'%</td>'+
+      '<td style="font-weight:700;color:'+cp2Col+'">'+d2.missedCP2+'</td>'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:'+cp2Col+'">'+cp2MissPct+'%</td>'+
+      '<td style="font-weight:600">'+d2.missedBoth+'</td>'+
+      '<td>'+flag+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function renderCP3MissedDetail(plates) {
+  var el = document.getElementById('audit-cp1miss-body');
+  if (!el) return;
+  if (!plates || !plates.length) {
+    el.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--muted);">No missed plates — CP1 recorded all CP3 plates ✓</td></tr>';
+    return;
+  }
+  el.innerHTML = plates.map(function(p2) {
+    var cp2Str = p2.cp2
+      ? '<span style="color:#16a34a;font-weight:700;">✓ Yes</span>'
+      : '<span style="color:#d97706;font-weight:700;">✗ Also missed CP2</span>';
+    return '<tr style="background:#fff5f5;">'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:700;color:#dc2626;letter-spacing:.04em">'+p2.reg+'</td>'+
+      '<td style="font-weight:700">'+p2.pax+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.dates+'</td>'+
+      '<td>'+cp2Str+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp2Staff+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp3Staff+'</td>'+
+    '</tr>';
+  }).join('');
+}
+function renderJourneyDropoff(jd) {
+  if (!jd) return;
+  var s = jd.summary || {};
+  var total   = (s.allThree||0)+(s.cp1ToCp2Only||0)+(s.cp1Only||0)+(s.cp2AndCp3||0)+(s.cp2Only||0)+(s.cp3Only||0);
+  var tracked = (s.allThree||0)+(s.cp1ToCp2Only||0)+(s.cp1Only||0);
+  document.getElementById('journey-tiles').innerHTML = [
+    {l:'Full Journey (All 3)',  v:s.allThree||0,      s:total>0?pct(s.allThree||0,total)+' of plates':'—',   c:'#16a34a'},
+    {l:'Dropped at CP2 Area',   v:s.cp1ToCp2Only||0,  s:'had CP1+CP2, never reached CP3',                    c:'#d97706'},
+    {l:'Turned Around at CP1',  v:s.cp1Only||0,        s:'CP1 only, never continued',                        c:'#dc2626'},
+    {l:'CP1 Drop-Off Rate',     v:tracked>0?pct(s.cp1Only||0,tracked):'—',  s:'of CP1-tracked plates',      c:(s.cp1Only||0)>tracked*0.3?'#dc2626':'#d97706'},
+    {l:'CP2 Area Drop-Off',     v:tracked>0?pct(s.cp1ToCp2Only||0,Math.max(tracked-(s.cp1Only||0),1)):'—', s:'of plates past CP1', c:'#d97706'},
+    {l:'No CP1 Data',           v:(s.cp2AndCp3||0)+(s.cp2Only||0)+(s.cp3Only||0), s:'CP1 not recorded', c:'var(--muted)'}
+  ].map(function(k){
+    return '<div class="card" style="text-align:center;border-top:3px solid '+k.c+';">'+
+      '<div class="kpi-lbl">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div></div>';
+  }).join('');
+
+  var daily = jd.dailyDropoff || [];
+  document.getElementById('journey-daily-body').innerHTML = !daily.length
+    ? '<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--muted);">No data</td></tr>'
+    : daily.map(function(d2) {
+        var tracked2 = d2.allThree+d2.droppedCP2+d2.droppedCP1;
+        var dropRate = tracked2>0 ? pct(d2.droppedCP1+d2.droppedCP2,tracked2) : '—';
+        var dc = parseInt(dropRate)>40?'#dc2626':parseInt(dropRate)>20?'#d97706':'#16a34a';
+        return '<tr><td style="font-weight:600">'+d2.date+'</td>'+
+          '<td style="font-weight:700;color:#16a34a">'+d2.allThree+'</td>'+
+          '<td style="font-weight:700;color:#d97706">'+d2.droppedCP2+'</td>'+
+          '<td style="font-weight:700;color:#dc2626">'+d2.droppedCP1+'</td>'+
+          '<td style="color:var(--muted)">'+d2.noCP1+'</td>'+
+          '<td style="font-weight:700;color:'+dc+'">'+dropRate+'</td></tr>';
+      }).join('');
+
+  function dropTable(list, cols, color, emptyMsg) {
+    if (!list || !list.length) return '<tr><td colspan="'+cols+'" style="text-align:center;padding:12px;color:var(--muted);">'+emptyMsg+'</td></tr>';
+    return list.map(function(p2) {
+      var cells = '<td style="font-weight:700;color:'+color+'">'+p2.reg+'</td>'+
+        '<td style="font-weight:600">'+p2.pax+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+p2.dates+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+(p2.cp1Staff||'')+'</td>';
+      if (cols === 5) cells += '<td style="font-size:11px;color:var(--muted)">'+(p2.cp2Staff||'')+'</td>';
+      return '<tr>'+cells+'</tr>';
+    }).join('');
+  }
+  document.getElementById('journey-cp2drop-body').innerHTML = dropTable(jd.droppedAtCP2,'5','#d97706','No vehicles dropped in jungle area');
+  document.getElementById('journey-cp1drop-body').innerHTML = dropTable(jd.droppedAtCP1,'4','#dc2626','No vehicles turned around at CP1');
+}
+
+function renderAuditStaff(staffCounts) {
+  if (!staffCounts || !staffCounts.length) {
+    document.getElementById('audit-staff-body').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">No data in this period</td></tr>';
+    return;
+  }
+  document.getElementById('audit-staff-body').innerHTML = staffCounts.map(function(s) {
+    var cpCol   = s.cp==='cp1'?'var(--cp1)':s.cp==='cp2'?'var(--cp2)':'var(--cp3)';
+    var cpLabel = s.cp.toUpperCase();
+    var sameCPSameDay = staffCounts.filter(function(x){ return x.cp===s.cp && x.date===s.date; });
+    var maxOnDay = Math.max.apply(null, sameCPSameDay.map(function(x){ return x.count; }));
+    var isLow   = sameCPSameDay.length > 1 && s.count < maxOnDay * 0.5;
+    var rowBg   = isLow ? 'background:#fff5f5;' : '';
+    var flag    = isLow ? '<span style="color:#dc2626;font-weight:700;">⚠ Low vs colleagues</span>' : '<span style="color:#16a34a;">✓ Normal</span>';
+    return '<tr style="'+rowBg+'">'+
+      '<td style="font-weight:600">'+s.date+'</td>'+
+      '<td style="font-weight:700;color:'+cpCol+'">'+cpLabel+'</td>'+
+      '<td style="font-weight:600">'+s.staff+'</td>'+
+      '<td style="font-size:20px;font-weight:700;color:'+cpCol+'">'+s.count+'</td>'+
+      '<td>'+flag+'</td>'+
+    '</tr>';
+  }).join('');
+}
+function renderAuditDaily(dailyCounts) {
+  if (!dailyCounts || !dailyCounts.length) {
+    document.getElementById('audit-daily-body').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No data</td></tr>';
+    return;
+  }
+  document.getElementById('audit-daily-body').innerHTML = dailyCounts.map(function(d2) {
+    var vals = [d2.cp1, d2.cp2, d2.cp3];
+    var maxV = Math.max.apply(null, vals);
+    var minV = Math.min.apply(null, vals);
+    var gap  = maxV - minV;
+    var gapPct = maxV > 0 ? Math.round(gap / maxV * 100) : 0;
+    var flagStr = gapPct > 50 ? '<span style="color:#dc2626;font-weight:700;">⚠ Large gap ('+gapPct+'%)</span>' :
+                  gapPct > 25 ? '<span style="color:#d97706;font-weight:600;">△ Moderate gap ('+gapPct+'%)</span>' :
+                                '<span style="color:#16a34a;">✓ Consistent</span>';
+    var rowBg = gapPct > 50 ? 'background:#fff5f5;' : '';
+    return '<tr style="'+rowBg+'">'+
+      '<td style="font-weight:600">'+d2.date+'</td>'+
+      '<td style="font-weight:700;color:var(--cp1)">'+d2.cp1+'</td>'+
+      '<td style="font-weight:700;color:var(--cp2)">'+d2.cp2+'</td>'+
+      '<td style="font-weight:700;color:var(--cp3)">'+d2.cp3+'</td>'+
+      '<td style="font-weight:600">'+gap+' entries</td>'+
+      '<td>'+flagStr+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function filterPlates(mode) {
+  plateCurrent = mode;
+  ['all','missed1','missed2','all3'].forEach(function(m){
+    var btn = document.getElementById('filter-'+m);
+    if(btn){ btn.style.borderColor = m===mode?'var(--blue)':'var(--border)'; btn.style.color = m===mode?'var(--blue)':'var(--muted)'; }
+  });
+  renderAuditPlates(mode);
+}
+
+function renderAuditPlates(mode) {
+  if (!auditData || !auditData.plateMatrix) return;
+  var plates = auditData.plateMatrix;
+  if (mode === 'missed1') plates = plates.filter(function(p2){ return p2.missedCP1; });
+  else if (mode === 'missed2') plates = plates.filter(function(p2){ return p2.missedCP2; });
+  else if (mode === 'all3')    plates = plates.filter(function(p2){ return p2.cp1 && p2.cp2 && p2.cp3; });
+  document.getElementById('audit-plate-info').textContent = 'Showing ' + plates.length + ' plates';
+  if (!plates.length) {
+    document.getElementById('audit-plate-body').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);">No plates match this filter</td></tr>';
+    return;
+  }
+  function tick(v)  { return v ? '<span style="color:#16a34a;font-weight:700;font-size:16px;">✓</span>' : '<span style="color:#dc2626;font-weight:700;font-size:16px;">✗</span>'; }
+  document.getElementById('audit-plate-body').innerHTML = plates.slice(0,200).map(function(p2) {
+    var isMissed = p2.missedCP1 || p2.missedCP2;
+    var rowBg    = p2.missedCP1 ? 'background:#fff5f5;' : p2.missedCP2 ? 'background:#fffbeb;' : '';
+    var flagStr  = p2.missedCP1 ? '<span style="color:#dc2626;font-weight:700;">⚠ Not seen at CP1</span>' :
+                   p2.missedCP2 ? '<span style="color:#d97706;font-weight:700;">△ Not seen at CP2</span>' :
+                                  '<span style="color:#16a34a;">✓ All CPs</span>';
+    return '<tr style="'+rowBg+'">'+
+      '<td style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:700;color:#1a73e8;letter-spacing:.04em">'+p2.reg+'</td>'+
+      '<td style="font-weight:600">'+p2.pax+'</td>'+
+      '<td style="text-align:center">'+tick(p2.cp1)+'</td>'+
+      '<td style="text-align:center">'+tick(p2.cp2)+'</td>'+
+      '<td style="text-align:center">'+tick(p2.cp3)+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp1Staff+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp2Staff+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+p2.cp3Staff+'</td>'+
+      '<td>'+flagStr+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ── GV INSIGHTS ───────────────────────────────────────────
+function initGV() {
+  var n = new Date();
+  document.getElementById('gv-date').value = n.toISOString().split('T')[0];
+  document.getElementById('gv-time').value = pad(n.getHours())+':'+pad(n.getMinutes());
+}
+
+function submitGV() {
+  var staff    = document.getElementById('gv-staff').value.trim();
+  var date     = document.getElementById('gv-date').value;
+  var time     = document.getElementById('gv-time').value;
+  var province = document.getElementById('gv-province').value;
+  var distance = document.getElementById('gv-distance').value;
+  var groupType= document.getElementById('gv-grouptype').value;
+  var groupSize= document.getElementById('gv-groupsize').value;
+  var whyGV    = document.getElementById('gv-whygv').value;
+  var knowsMJSR= document.getElementById('gv-knowsmjsr').value;
+  var pricing  = document.getElementById('gv-mjsrpricing').value;
+  var wouldVisit=document.getElementById('gv-wouldvisit').value;
+  var heardFrom= document.getElementById('gv-heardfrom').value;
+  var visitedMJSR=document.getElementById('gv-visitedmjsr').value;
+
+  if (!staff||!date||!time||!province||!distance||!groupType||!groupSize||
+      !whyGV||!knowsMJSR||!pricing||!wouldVisit||!heardFrom||!visitedMJSR) {
+    toast('Complete all required fields','#dc2626'); return;
+  }
+
+  var btn = document.getElementById('gv-submit-btn');
+  btn.textContent='SUBMITTING…'; btn.disabled=true;
+
+  var url = API+'?action=saveGVSurvey'+
+    '&staff='+encodeURIComponent(staff)+
+    '&date='+encodeURIComponent(date)+
+    '&time='+encodeURIComponent(time)+
+    '&province='+encodeURIComponent(province)+
+    '&travelDistance='+encodeURIComponent(distance)+
+    '&groupType='+encodeURIComponent(groupType)+
+    '&groupSize='+encodeURIComponent(groupSize)+
+    '&phone='+encodeURIComponent(document.getElementById('gv-phone').value.trim())+
+    '&whyGV='+encodeURIComponent(whyGV)+
+    '&knowsMJSR='+encodeURIComponent(knowsMJSR)+
+    '&mjsrPricing='+encodeURIComponent(pricing)+
+    '&wouldVisit='+encodeURIComponent(wouldVisit)+
+    '&heardFrom='+encodeURIComponent(heardFrom)+
+    '&visitedMJSR='+encodeURIComponent(visitedMJSR)+
+    '&improveSuggestion='+encodeURIComponent(document.getElementById('gv-improve').value.trim())+
+    '&notes='+encodeURIComponent(document.getElementById('gv-notes').value.trim());
+
+  apiFetch(url, function(err,d){
+    btn.textContent='SUBMIT GV INSIGHT SURVEY'; btn.disabled=false;
+    if (err||d.status!=='ok') { toast('Could not save — check connection','#dc2626'); return; }
+    // Reset form
+    ['gv-province','gv-distance','gv-grouptype','gv-groupsize','gv-phone',
+     'gv-whygv','gv-knowsmjsr','gv-mjsrpricing','gv-wouldvisit',
+     'gv-heardfrom','gv-visitedmjsr','gv-improve','gv-notes'].forEach(function(id){
+      document.getElementById(id).value='';
+    });
+    var n=new Date();
+    document.getElementById('gv-time').value=pad(n.getHours())+':'+pad(n.getMinutes());
+    loadGVSummary();
+    toast('✓ GV Survey saved','#059669');
+  });
+}
+
+function loadGVSummary() {
+  apiFetch(API+'?action=getGVSummary', function(err,d){
+    if (err) { toast('Could not load GV summary','#dc2626'); return; }
+    renderGVSummary(d);
+  });
+}
+
+function renderGVSummary(s) {
+  var total = s.total||0;
+  document.getElementById('gv-summary-tiles').innerHTML = [
+    {l:'Total Surveys',   v:total,          s:'all time',         c:'#059669'},
+    {l:'Today',           v:s.todayTotal||0, s:'surveys today',   c:'#059669'},
+    {l:'Know MJSR',       v:(s.knowsMJSR||{})['Yes — fully aware']||0, s:'fully aware of MJSR', c:'#1a73e8'},
+    {l:'Would Visit MJSR',v:(s.wouldVisit||{})['Yes — definitely']||0, s:'definitely yes',       c:'#16a34a'},
+    {l:'Price Too High',  v:(s.whyGV||{})['MJSR entry prices too high']||0, s:'cited as reason', c:'#dc2626'},
+    {l:'Return Visitors', v:(s.knowsMJSR||{})['Yes — fully aware']||0, s:'aware of resort',     c:'#d97706'}
+  ].map(function(k){
+    return '<div class="card" style="text-align:center;border-top:3px solid '+k.c+';">'+
+      '<div class="kpi-lbl">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div></div>';
+  }).join('');
+
+  function tableRows(obj) {
+    var t=Object.values(obj).reduce(function(a,b){return a+b;},0)||1;
+    return Object.keys(obj).sort(function(a,b){return obj[b]-obj[a];}).map(function(k){
+      return '<tr><td style="font-size:12px">'+k+'</td><td style="font-weight:700">'+obj[k]+'</td><td>'+pct(obj[k],t)+'</td></tr>';
+    }).join('') || '<tr><td colspan="3" style="color:var(--muted);text-align:center;">No data yet</td></tr>';
+  }
+
+  document.getElementById('gv-whygv-body').innerHTML      = tableRows(s.whyGV||{});
+  document.getElementById('gv-pricing-body').innerHTML    = tableRows(s.mjsrPricing||{});
+  document.getElementById('gv-wouldvisit-body').innerHTML = tableRows(s.wouldVisit||{});
+  document.getElementById('gv-grouptype-body').innerHTML  = tableRows(s.groupTypes||{});
+
+  var recent = s.recentEntries||[];
+  document.getElementById('gv-recent-body').innerHTML = !recent.length
+    ? '<tr><td colspan="9" style="text-align:center;padding:16px;color:var(--muted);">No surveys yet</td></tr>'
+    : recent.map(function(e){
+        return '<tr>'+
+          '<td style="font-size:12px;white-space:nowrap">'+e.date+'</td>'+
+          '<td style="font-size:12px">'+e.staff+'</td>'+
+          '<td style="font-size:12px">'+e.province+'</td>'+
+          '<td style="font-size:12px">'+e.groupType+'</td>'+
+          '<td style="font-weight:700;text-align:center">'+e.groupSize+'</td>'+
+          '<td style="font-size:11px;color:#dc2626">'+e.whyGV+'</td>'+
+          '<td style="font-size:11px">'+e.knowsMJSR+'</td>'+
+          '<td style="font-size:11px">'+e.mjsrPricing+'</td>'+
+          '<td style="font-size:11px;color:#16a34a">'+e.wouldVisit+'</td>'+
+        '</tr>';
+      }).join('');
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function pct(v,t){ return t>0 ? Math.round(v/t*100)+'%' : '0%'; }
+function toast(msg,col){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.style.background=col||'#16a34a'; t.style.display='block';
+  setTimeout(function(){t.style.display='none';},3000);
+}
 </script>
 </body>
 </html>
